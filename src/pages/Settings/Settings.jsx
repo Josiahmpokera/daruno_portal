@@ -13,6 +13,7 @@ import {
   SelectItem,
 } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
+import StaffManagement from '../../components/Settings/StaffManagement'
 
 function Settings() {
   const [activeTab, setActiveTab] = useState('general')
@@ -32,13 +33,10 @@ function Settings() {
             aria-label="Settings Options"
             selectedKey={activeTab}
             onSelectionChange={setActiveTab}
-            color="primary"
-            variant="underlined"
+            color="danger"
             classNames={{
-              tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-              cursor: 'w-full bg-[#d41f1f]',
-              tab: 'max-w-fit px-0 h-12',
-              tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+              cursor: "bg-[#d41f1f]",
+              tabContent: "group-data-[selected=true]:text-white"
             }}
           >
             <Tab key="general" title="General & Institute">
@@ -146,6 +144,10 @@ function Settings() {
                     </CardBody>
                 </Card>
               </div>
+            </Tab>
+
+            <Tab key="staff" title="Staff Management">
+              <StaffManagement />
             </Tab>
 
             <Tab key="users" title="User & Access">

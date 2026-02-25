@@ -4,6 +4,8 @@ import Login from './pages/Login/Login.jsx'
 import Settings from './pages/Settings/Settings.jsx'
 import Finance from './pages/Finance/Finance.jsx'
 import Academic from './pages/Academic/Academic.jsx'
+import Students from './pages/Students/Students.jsx'
+import Classes from './pages/Classes/Classes.jsx'
 import RegisterSchool from './pages/RegisterSchool/RegisterSchool.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 
@@ -16,6 +18,8 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/finance" element={<Finance />} />
       <Route path="/academic" element={<Academic />} />
+      <Route path="/students" element={<Students />} />
+      <Route path="/classes" element={<Classes />} />
       <Route path="/settings" element={<Settings />} />
     </Routes>
   )
