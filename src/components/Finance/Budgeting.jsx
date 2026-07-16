@@ -29,9 +29,9 @@ function Budgeting() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="budgets" title="Budget Allocation">
@@ -41,7 +41,7 @@ function Budgeting() {
                 <h3 className="text-lg font-semibold">Budget Allocation</h3>
                 <p className="text-sm text-slate-500">Annual or term-wise budgets for departments</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Create Budget
               </Button>
             </CardHeader>
@@ -52,14 +52,14 @@ function Budgeting() {
                          <span className="font-medium">Science Department</span>
                          <span className="text-slate-500">$5,000 / $10,000</span>
                      </div>
-                     <Progress value={50} color="primary" className="h-2" classNames={{ indicator: "bg-[#d41f1f]" }} />
+                     <Progress value={50} color="primary" className="h-2" classNames={{ indicator: "bg-[#0B3D2E]" }} />
                  </div>
                  <div className="p-4 border rounded-lg">
                      <div className="flex justify-between mb-2">
                          <span className="font-medium">Sports & Activities</span>
                          <span className="text-slate-500">$8,200 / $15,000</span>
                      </div>
-                     <Progress value={54} color="primary" className="h-2" classNames={{ indicator: "bg-[#d41f1f]" }} />
+                     <Progress value={54} color="primary" className="h-2" classNames={{ indicator: "bg-[#0B3D2E]" }} />
                  </div>
               </div>
               <Table aria-label="Budgets Table" shadow="none">

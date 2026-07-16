@@ -1,41 +1,74 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Tabs,
   Tab,
   Card,
   CardHeader,
   CardBody,
-  Input,
-  Button,
-  Textarea,
   Divider,
-  Select,
-  SelectItem,
 } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
+import PageHeader from '../../components/Layout/PageHeader.jsx'
 import StaffManagement from '../../components/Settings/StaffManagement'
+import {
+  FormField,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormButton,
+} from '../../components/Form'
+
+const VALID_TABS = [
+  'general',
+  'staff',
+  'users',
+  'academic',
+  'financial',
+  'communication',
+  'system',
+]
+
+const TAB_ALIASES = {
+  roles: 'users',
+  permissions: 'users',
+  notifications: 'communication',
+}
 
 function Settings() {
-  const [activeTab, setActiveTab] = useState('general')
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const activeTab = useMemo(() => {
+    const raw = searchParams.get('tab') || 'general'
+    const tab = TAB_ALIASES[raw] || raw
+    return VALID_TABS.includes(tab) ? tab : 'general'
+  }, [searchParams])
+
+  const onTabChange = (key) => {
+    navigate(`/settings?tab=${key}`, { replace: true })
+  }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-          <p className="text-sm text-slate-500">
-            Manage your school configuration and preferences
-          </p>
-        </div>
+        <PageHeader
+          title="Settings"
+          breadcrumbs={[
+            { label: 'System', href: '/settings' },
+            { label: 'Settings' },
+          ]}
+          description="Manage your school configuration and preferences"
+        />
 
         <div className="flex w-full flex-col">
           <Tabs
             aria-label="Settings Options"
             selectedKey={activeTab}
-            onSelectionChange={setActiveTab}
-            color="danger"
+            onSelectionChange={onTabChange}
+            color="primary"
             classNames={{
-              cursor: "bg-[#d41f1f]",
+              cursor: "bg-[#0B3D2E]",
               tabContent: "group-data-[selected=true]:text-white"
             }}
           >
@@ -52,53 +85,28 @@ function Settings() {
                   </CardHeader>
                   <Divider />
                   <CardBody className="flex flex-col gap-4 p-6">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <Input
-                        label="School Name"
-                        placeholder="e.g. Daruno International School"
-                        variant="bordered"
-                        labelPlacement="outside"
-                      />
-                      <Input
-                        label="School Code"
-                        placeholder="e.g. SCH-001"
-                        variant="bordered"
-                        labelPlacement="outside"
-                      />
-                      <Input
-                        label="Email Address"
-                        placeholder="admin@school.com"
-                        type="email"
-                        variant="bordered"
-                        labelPlacement="outside"
-                      />
-                      <Input
-                        label="Phone Number"
-                        placeholder="+1 234 567 890"
-                        variant="bordered"
-                        labelPlacement="outside"
-                      />
-                      <div className="md:col-span-2">
-                        <Textarea
-                          label="Address"
-                          placeholder="Enter full address"
-                          variant="bordered"
-                          labelPlacement="outside"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                         <Input
-                            label="Website URL"
-                            placeholder="https://www.school.com"
-                            variant="bordered"
-                            labelPlacement="outside"
-                         />
-                      </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <FormField label="School Name">
+                        <FormInput placeholder="e.g. Shengena International School" />
+                      </FormField>
+                      <FormField label="School Code">
+                        <FormInput placeholder="e.g. SCH-001" />
+                      </FormField>
+                      <FormField label="Email Address">
+                        <FormInput type="email" placeholder="admin@school.com" />
+                      </FormField>
+                      <FormField label="Phone Number">
+                        <FormInput placeholder="+1 234 567 890" />
+                      </FormField>
+                      <FormField label="Address" className="md:col-span-2">
+                        <FormTextarea placeholder="Enter full address" />
+                      </FormField>
+                      <FormField label="Website URL" className="md:col-span-2">
+                        <FormInput placeholder="https://www.school.com" />
+                      </FormField>
                     </div>
-                    <div className="flex justify-end mt-4">
-                        <Button className="bg-[#d41f1f] text-white font-medium">
-                            Save Changes
-                        </Button>
+                    <div className="mt-2 flex justify-end">
+                      <FormButton>Save Changes</FormButton>
                     </div>
                   </CardBody>
                 </Card>
@@ -114,32 +122,36 @@ function Settings() {
                     </CardHeader>
                     <Divider />
                     <CardBody className="flex flex-col gap-4 p-6">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Select
-                                label="Primary Language"
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <FormField label="Primary Language">
+                              <FormSelect
+                                label="Language"
                                 placeholder="Select language"
-                                variant="bordered"
-                                labelPlacement="outside"
-                            >
-                                <SelectItem key="en">English</SelectItem>
-                                <SelectItem key="es">Spanish</SelectItem>
-                                <SelectItem key="fr">French</SelectItem>
-                            </Select>
-                            <Select
+                                value=""
+                                onChange={() => {}}
+                                options={[
+                                  { value: 'en', label: 'English' },
+                                  { value: 'es', label: 'Spanish' },
+                                  { value: 'fr', label: 'French' },
+                                ]}
+                              />
+                            </FormField>
+                            <FormField label="Timezone">
+                              <FormSelect
                                 label="Timezone"
                                 placeholder="Select timezone"
-                                variant="bordered"
-                                labelPlacement="outside"
-                            >
-                                <SelectItem key="utc">UTC</SelectItem>
-                                <SelectItem key="est">EST</SelectItem>
-                                <SelectItem key="pst">PST</SelectItem>
-                            </Select>
+                                value=""
+                                onChange={() => {}}
+                                options={[
+                                  { value: 'utc', label: 'UTC' },
+                                  { value: 'est', label: 'EST' },
+                                  { value: 'pst', label: 'PST' },
+                                ]}
+                              />
+                            </FormField>
                         </div>
-                         <div className="flex justify-end mt-4">
-                            <Button className="bg-[#d41f1f] text-white font-medium">
-                                Save Settings
-                            </Button>
+                        <div className="mt-2 flex justify-end">
+                          <FormButton>Save Settings</FormButton>
                         </div>
                     </CardBody>
                 </Card>

@@ -66,13 +66,13 @@ function ExaminationGrading() {
         aria-label="Exam Modules"
         selectedKey={activeTab}
         onSelectionChange={setActiveTab}
-        color="danger"
+        color="primary"
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="assessments" title="Assessments">
@@ -82,7 +82,7 @@ function ExaminationGrading() {
                 <h3 className="text-lg font-semibold">Assessments</h3>
                 <p className="text-sm text-slate-500">Manage homework, quizzes, and exams</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]" onPress={() => handleOpenModal('assessment')}>
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('assessment')}>
                 Create Assessment
               </Button>
             </CardHeader>
@@ -155,7 +155,7 @@ function ExaminationGrading() {
                     <div className="flex justify-between text-sm"><span>Mid-Term</span><span>20%</span></div>
                     <Progress value={20} color="warning" className="h-2" />
                     <div className="flex justify-between text-sm"><span>Final Exam</span><span>40%</span></div>
-                    <Progress value={40} color="danger" className="h-2" />
+                    <Progress value={40} color="primary" className="h-2" />
                   </div>
                   <Button size="sm" variant="bordered" className="w-full mt-2" onPress={() => handleOpenModal('weight')}>Edit Weights</Button>
                 </div>
@@ -175,7 +175,7 @@ function ExaminationGrading() {
                 <Select placeholder="Select Class" className="w-40" size="sm" defaultSelectedKeys={['g5a']}>
                   <SelectItem key="g5a">Grade 5 A</SelectItem>
                 </Select>
-                <Button color="primary" startContent={<Award className="h-4 w-4" />} className="bg-[#d41f1f]">
+                <Button color="primary" startContent={<Award className="h-4 w-4" />} className="bg-[#0B3D2E]">
                   Process Promotion
                 </Button>
               </div>
@@ -211,7 +211,7 @@ function ExaminationGrading() {
                           <Button isIconOnly size="sm" variant="light" color="success">
                             <CheckCircle className="h-4 w-4" />
                           </Button>
-                          <Button isIconOnly size="sm" variant="light" color="danger">
+                          <Button isIconOnly size="sm" variant="light" color="primary">
                             <XCircle className="h-4 w-4" />
                           </Button>
                         </div>
@@ -231,7 +231,7 @@ function ExaminationGrading() {
                 <h3 className="text-lg font-semibold">Report Cards</h3>
                 <p className="text-sm text-slate-500">Generate and print report cards</p>
               </div>
-              <Button color="primary" startContent={<Printer className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Printer className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Generate Reports
               </Button>
             </CardHeader>
@@ -298,10 +298,10 @@ function ExaminationGrading() {
                 )}
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#d41f1f]" onPress={onClose}>
+                <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
                   {modalType === 'assessment' ? 'Save Assessment' : 'Save Weights'}
                 </Button>
               </ModalFooter>

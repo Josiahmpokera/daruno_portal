@@ -28,9 +28,9 @@ function FinancialReporting() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="statements" title="Financial Statements">
@@ -40,23 +40,23 @@ function FinancialReporting() {
                 <h3 className="text-lg font-semibold">Financial Statements</h3>
                 <p className="text-sm text-slate-500">Balance Sheets, Profit & Loss, Trial Balances</p>
               </div>
-              <Button color="primary" startContent={<Download className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Download className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Download Report
               </Button>
             </CardHeader>
             <CardBody>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 border rounded-lg hover:border-[#d41f1f] cursor-pointer transition-colors">
+                  <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Balance Sheet</h4>
                       <p className="text-sm text-slate-500">Assets, liabilities, and equity.</p>
                   </div>
-                  <div className="p-6 border rounded-lg hover:border-[#d41f1f] cursor-pointer transition-colors">
+                  <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Profit & Loss</h4>
                       <p className="text-sm text-slate-500">Revenues, costs, and expenses.</p>
                   </div>
-                   <div className="p-6 border rounded-lg hover:border-[#d41f1f] cursor-pointer transition-colors">
+                   <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Trial Balance</h4>
                       <p className="text-sm text-slate-500">Closing balances of ledgers.</p>

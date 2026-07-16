@@ -1,9 +1,8 @@
-import { useState } from 'react'
-import {
-  Tabs,
-  Tab,
-} from '@heroui/react'
+import { useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Tabs, Tab } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
+import PageHeader from '../../components/Layout/PageHeader.jsx'
 import ClassSubjectManagement from '../../components/Academic/ClassSubjectManagement'
 import TimetableScheduling from '../../components/Academic/TimetableScheduling'
 import AttendanceManagement from '../../components/Academic/AttendanceManagement'
@@ -11,28 +10,49 @@ import ExaminationGrading from '../../components/Academic/ExaminationGrading'
 import CurriculumLessonPlanning from '../../components/Academic/CurriculumLessonPlanning'
 import BehavioralSkillsAssessment from '../../components/Academic/BehavioralSkillsAssessment'
 
+const VALID_TABS = [
+  'class-subject',
+  'timetable',
+  'attendance',
+  'exams',
+  'curriculum',
+  'behavioral',
+]
+
 function Academic() {
-  const [activeTab, setActiveTab] = useState('class-subject')
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const activeTab = useMemo(() => {
+    const tab = searchParams.get('tab') || 'class-subject'
+    return VALID_TABS.includes(tab) ? tab : 'class-subject'
+  }, [searchParams])
+
+  const onTabChange = (key) => {
+    navigate(`/academic?tab=${key}`, { replace: true })
+  }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-slate-900">Academic</h1>
-          <p className="text-sm text-slate-500">
-            Manage classes, subjects, timetables, attendance, exams, and curriculum
-          </p>
-        </div>
+        <PageHeader
+          title="Academic"
+          breadcrumbs={[
+            { label: 'Academic', href: '/academic' },
+            { label: 'Academic' },
+          ]}
+          description="Manage classes, subjects, timetables, attendance, exams, and curriculum"
+        />
 
         <div className="flex w-full flex-col">
           <Tabs
             aria-label="Academic Modules"
             selectedKey={activeTab}
-            onSelectionChange={setActiveTab}
-            color="danger"
+            onSelectionChange={onTabChange}
+            color="primary"
             classNames={{
-              cursor: "bg-[#d41f1f]",
-              tabContent: "group-data-[selected=true]:text-white"
+              cursor: 'bg-[#0B3D2E]',
+              tabContent: 'group-data-[selected=true]:text-white',
             }}
           >
             <Tab key="class-subject" title="Class & Subject Management">

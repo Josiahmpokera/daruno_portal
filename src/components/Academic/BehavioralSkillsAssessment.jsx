@@ -28,13 +28,13 @@ function BehavioralSkillsAssessment() {
         aria-label="Behavioral Modules"
         selectedKey={activeTab}
         onSelectionChange={setActiveTab}
-        color="danger"
+        color="primary"
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="behavioral-logs" title="Behavioral Logs">
@@ -44,7 +44,7 @@ function BehavioralSkillsAssessment() {
                 <h3 className="text-lg font-semibold">Behavioral Logs</h3>
                 <p className="text-sm text-slate-500">Track conduct and discipline</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Add Log
               </Button>
             </CardHeader>
@@ -77,7 +77,7 @@ function BehavioralSkillsAssessment() {
                   <SelectItem key="std1">Standard I</SelectItem>
                   <SelectItem key="std2">Standard II</SelectItem>
                 </Select>
-                <Button color="primary" startContent={<Activity className="h-4 w-4" />} className="bg-[#d41f1f]">
+                <Button color="primary" startContent={<Activity className="h-4 w-4" />} className="bg-[#0B3D2E]">
                   Update Progress
                 </Button>
               </div>

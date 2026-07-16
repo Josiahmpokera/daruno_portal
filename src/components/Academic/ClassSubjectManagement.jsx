@@ -60,13 +60,13 @@ function ClassSubjectManagement() {
         aria-label="Class & Subject Modules"
         selectedKey={activeTab}
         onSelectionChange={setActiveTab}
-        color="danger"
+        color="primary"
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="academic-setup" title="Academic Setup">
@@ -78,7 +78,7 @@ function ClassSubjectManagement() {
                   <h3 className="text-lg font-semibold">Academic Years</h3>
                   <p className="text-sm text-slate-500">Manage academic sessions</p>
                 </div>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]" onPress={() => handleOpenModal('year')}>
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('year')}>
                   Add Year
                 </Button>
               </CardHeader>
@@ -121,7 +121,7 @@ function ClassSubjectManagement() {
                   <h3 className="text-lg font-semibold">Terms & Quarters</h3>
                   <p className="text-sm text-slate-500">Define terms for the active academic year</p>
                 </div>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]" onPress={() => handleOpenModal('term')}>
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('term')}>
                   Add Term
                 </Button>
               </CardHeader>
@@ -162,7 +162,7 @@ function ClassSubjectManagement() {
                 <h3 className="text-lg font-semibold">Class Allocation</h3>
                 <p className="text-sm text-slate-500">Manage classes and student allocation</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]" onPress={() => handleOpenModal('class')}>
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('class')}>
                 Add Class
               </Button>
             </CardHeader>
@@ -206,7 +206,7 @@ function ClassSubjectManagement() {
                 <h3 className="text-lg font-semibold">Subject Mapping</h3>
                 <p className="text-sm text-slate-500">Assign subjects to classes</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Map Subject
               </Button>
             </CardHeader>
@@ -234,7 +234,7 @@ function ClassSubjectManagement() {
                 <h3 className="text-lg font-semibold">Teacher Assignment</h3>
                 <p className="text-sm text-slate-500">Link teachers to subjects and classes</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Assign Teacher
               </Button>
             </CardHeader>
@@ -299,10 +299,10 @@ function ClassSubjectManagement() {
                 )}
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#d41f1f]" onPress={onClose}>
+                <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
                   Save
                 </Button>
               </ModalFooter>

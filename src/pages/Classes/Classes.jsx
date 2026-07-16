@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
+import PageHeader from '../../components/Layout/PageHeader.jsx'
+import ModulePlaceholder from '../../components/Layout/ModulePlaceholder'
 import {
   Tabs,
   Tab,
@@ -60,11 +63,48 @@ const initialClasses = [
   { id: 3, name: 'Grade 5 A', level: 'Primary', academic_year: '2024/2025', teacher: 'Ms. Emily White', students: 30, subjects: 10, status: 'active' },
 ]
 
+const sectionMeta = {
+  '/classes': {
+    title: 'Classes Management',
+    description:
+      'Manage academic classes, student enrollments, and subject allocations.',
+  },
+  '/classes/sections': {
+    title: 'Sections',
+    description: 'Organize class sections within each grade level.',
+  },
+  '/classes/teachers': {
+    title: 'Class Teachers',
+    description: 'Assign and review class teacher ownership.',
+  },
+  '/classes/years': {
+    title: 'Academic Years',
+    description: 'Define and activate school academic years.',
+  },
+  '/classes/levels': {
+    title: 'Levels',
+    description: 'Primary, secondary, and other educational levels.',
+  },
+}
+
 function Classes() {
+  const location = useLocation()
   const [selectedYear, setSelectedYear] = useState('2024/2025')
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [modalType, setModalType] = useState('') // 'create', 'enroll', 'transfer', 'subjects'
   const [selectedClass, setSelectedClass] = useState(null)
+
+  const meta = useMemo(
+    () =>
+      sectionMeta[location.pathname] || {
+        title: 'Classes Management',
+        description:
+          'Manage academic classes, student enrollments, and subject allocations.',
+      },
+    [location.pathname],
+  )
+
+  const isMain = location.pathname === '/classes'
 
   const handleOpenModal = (type, classItem = null) => {
     setModalType(type)
@@ -72,45 +112,78 @@ function Classes() {
     onOpen()
   }
 
+  if (!isMain) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col gap-4">
+          <PageHeader
+            title={meta.title}
+            breadcrumbs={[
+              { label: 'Academic', href: '/academic' },
+              { label: meta.title },
+            ]}
+            description={meta.description}
+          />
+          <ModulePlaceholder
+            title={meta.title}
+            description={meta.description}
+            wrapLayout={false}
+            showHeader={false}
+          />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        {/* Header Section */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Classes Management</h1>
-            <p className="text-slate-500">Manage academic classes, student enrollments, and subject allocations.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Select 
-              className="w-40" 
-              defaultSelectedKeys={['2024/2025']} 
-              size="sm" 
-              variant="bordered"
-              startContent={<Calendar className="h-4 w-4 text-slate-500" />}
-            >
-              {academicYears.map((year) => (
-                <SelectItem key={year.name} value={year.name}>
-                  {year.name}
-                </SelectItem>
-              ))}
-            </Select>
-            <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#d41f1f]" onPress={() => handleOpenModal('create')}>
-              Create Class
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title={meta.title}
+          breadcrumbs={[
+            { label: 'Academic', href: '/academic' },
+            { label: meta.title },
+          ]}
+          description={meta.description}
+          actions={
+            <div className="flex items-center gap-3">
+              <Select
+                className="w-40"
+                defaultSelectedKeys={['2024/2025']}
+                size="sm"
+                variant="bordered"
+                startContent={<Calendar className="h-4 w-4 text-slate-500" />}
+              >
+                {academicYears.map((year) => (
+                  <SelectItem key={year.name} value={year.name}>
+                    {year.name}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Button
+                size="sm"
+                radius="md"
+                color="primary"
+                startContent={<Plus className="h-4 w-4" />}
+                className="bg-[#0B3D2E]"
+                onPress={() => handleOpenModal('create')}
+              >
+                Create class
+              </Button>
+            </div>
+          }
+        />
 
         {/* Main Content Tabs */}
         <Tabs 
           aria-label="Class Options" 
-          color="danger" 
+          color="primary" 
           variant="underlined"
           classNames={{
             tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-            cursor: 'w-full bg-[#d41f1f]',
+            cursor: 'w-full bg-[#0B3D2E]',
             tab: 'max-w-fit px-0 h-12',
-            tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+            tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
           }}
         >
           <Tab key="directory" title="Class Directory">
@@ -187,7 +260,7 @@ function Classes() {
                               <DropdownItem key="enroll" onPress={() => handleOpenModal('enroll', item)}>Enroll Students</DropdownItem>
                               <DropdownItem key="subjects" onPress={() => handleOpenModal('subjects', item)}>Manage Subjects</DropdownItem>
                               <DropdownItem key="attendance">View Attendance</DropdownItem>
-                              <DropdownItem key="deactivate" className="text-danger" color="danger">Deactivate Class</DropdownItem>
+                              <DropdownItem key="deactivate" className="text-danger" color="primary">Deactivate Class</DropdownItem>
                             </DropdownMenu>
                           </Dropdown>
                         </TableCell>
@@ -263,7 +336,7 @@ function Classes() {
                 <CardBody>
                   <div className="text-center py-8 text-slate-500">
                     <p>Select an academic year to begin promotion processing.</p>
-                    <Button color="primary" className="mt-4 bg-[#d41f1f]">
+                    <Button color="primary" className="mt-4 bg-[#0B3D2E]">
                       Start Promotion Wizard
                     </Button>
                   </div>
@@ -326,7 +399,7 @@ function Classes() {
                            <SelectItem key="t1">Mrs. Sarah Jones</SelectItem>
                            <SelectItem key="t2">Mr. David Smith</SelectItem>
                          </Select>
-                         <Button isIconOnly color="primary" className="bg-[#d41f1f]" size="sm">
+                         <Button isIconOnly color="primary" className="bg-[#0B3D2E]" size="sm">
                            <Plus className="h-4 w-4" />
                          </Button>
                       </div>
@@ -343,14 +416,14 @@ function Classes() {
                               <TableCell>Mathematics</TableCell>
                               <TableCell>Mrs. Sarah Jones</TableCell>
                               <TableCell>
-                                <Button size="sm" variant="light" color="danger">Remove</Button>
+                                <Button size="sm" variant="light" color="primary">Remove</Button>
                               </TableCell>
                             </TableRow>
                             <TableRow key="2">
                               <TableCell>English</TableCell>
                               <TableCell>Ms. Emily White</TableCell>
                               <TableCell>
-                                <Button size="sm" variant="light" color="danger">Remove</Button>
+                                <Button size="sm" variant="light" color="primary">Remove</Button>
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -391,10 +464,10 @@ function Classes() {
                   )}
                 </ModalBody>
                 <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
+                  <Button color="primary" variant="light" onPress={onClose}>
                     Cancel
                   </Button>
-                  <Button color="primary" className="bg-[#d41f1f]" onPress={onClose}>
+                  <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
                     {modalType === 'create' && 'Create Class'}
                     {modalType === 'enroll' && 'Confirm Enrollment'}
                     {modalType === 'transfer' && 'Process Transfer'}

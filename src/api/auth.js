@@ -1,72 +1,160 @@
+/**
+ * Auth API + session lifecycle for Shengena.
+ *
+ * Rules (industrial isolation):
+ * 1. Only one active identity in the browser at a time.
+ * 2. Login always wipes previous storage before writing the new session.
+ * 3. On app boot the UI revalidates identity via GET /auth/me (server is source of truth).
+ * 4. Logout clears storage + caller must clear React Query cache.
+ */
+
+import {
+  AUTH_STORAGE_KEY,
+  getAccessToken,
+  normalizeSession,
+  readRawSession,
+  wipeSessionStorage,
+  writeSession,
+  isPlatformSession,
+  isSchoolSession,
+  AUDIENCE,
+} from '../auth/sessionStorage.js'
+
 const BASE_URL = import.meta.env.VITE_BASE_URL || ''
 
-const AUTH_STORAGE_KEY = 'daruno_auth'
+export { AUTH_STORAGE_KEY, isPlatformSession, isSchoolSession, AUDIENCE }
+export {
+  getAccessToken,
+  readRawSession as getStoredAuth,
+  wipeSessionStorage as clearAuth,
+} from '../auth/sessionStorage.js'
 
 const normalizeBaseUrl = (value) => {
   if (!value) return ''
-  return value.endsWith('/') ? value.slice(0, -1) : value
+  return String(value).replace(/\/+$/, '')
 }
 
 const API_BASE = normalizeBaseUrl(BASE_URL)
 
-const buildUrl = (path) => `${API_BASE}${path}`
+const buildUrl = (path) => {
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${API_BASE}${p}`
+}
 
-export const getStoredAuth = () => {
-  if (typeof window === 'undefined') return null
-  const raw = window.localStorage.getItem(AUTH_STORAGE_KEY)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw)
-  } catch {
+/**
+ * Persist a login/register/refresh payload. Replaces any prior identity.
+ */
+export const saveAuth = (authPayload) => {
+  const normalized = normalizeSession(authPayload)
+  if (!normalized?.access_token) {
+    console.warn('[auth] saveAuth called without access_token', authPayload)
     return null
   }
-}
-
-export const saveAuth = (authPayload) => {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authPayload))
-}
-
-export const clearAuth = () => {
-  if (typeof window === 'undefined') return
-  window.localStorage.removeItem(AUTH_STORAGE_KEY)
-}
-
-const getAccessToken = () => {
-  const stored = getStoredAuth()
-  return stored?.access_token || null
-}
-
-const authHeaders = () => {
-  const token = getAccessToken()
-  if (!token) return {}
-  return {
-    Authorization: `Bearer ${token}`,
+  if (!normalized.user) {
+    console.warn('[auth] saveAuth called without user identity', authPayload)
   }
+  // Hard replace — never merge with a previous super-admin / school session
+  wipeSessionStorage()
+  return writeSession(normalized)
+}
+
+/**
+ * Merge server /me user into the current token session and persist.
+ */
+export const applyMeToSession = (mePayload) => {
+  const current = readRawSession()
+  if (!current?.access_token) return null
+
+  const meUser =
+    mePayload?.user ||
+    mePayload?.data?.user ||
+    (mePayload?.id && mePayload?.email ? mePayload : null)
+
+  if (!meUser?.id) {
+    console.warn('[auth] /me response missing user', mePayload)
+    return current
+  }
+
+  // Identity mismatch: token sub vs /me user must match if we have prior user id
+  if (
+    current.user?.id != null &&
+    meUser.id != null &&
+    String(current.user.id) !== String(meUser.id)
+  ) {
+    console.error(
+      '[auth] identity mismatch between stored user and /me — clearing session',
+      { stored: current.user.id, me: meUser.id },
+    )
+    wipeSessionStorage()
+    return null
+  }
+
+  const merged = normalizeSession({
+    access_token: current.access_token,
+    token_type: current.token_type,
+    expires_in: current.expires_in,
+    expires_at: current.expires_at,
+    user: meUser,
+    school: meUser.school || current.school,
+  })
+
+  return writeSession(merged)
+}
+
+const authHeaders = (tokenOverride) => {
+  const token = tokenOverride || getAccessToken()
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  }
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+  return headers
 }
 
 const request = async (path, options = {}) => {
   const headers = {
-    'Content-Type': 'application/json',
+    ...authHeaders(options.token),
     ...(options.headers || {}),
   }
 
-  const response = await fetch(buildUrl(path), {
-    ...options,
-    headers,
-  })
+  let response
+  try {
+    response = await fetch(buildUrl(path), {
+      ...options,
+      headers,
+    })
+  } catch {
+    const error = new Error(
+      'Cannot reach API. Is the backend running on VITE_BASE_URL?',
+    )
+    error.status = 0
+    throw error
+  }
 
   const contentType = response.headers.get('content-type') || ''
   const isJson = contentType.includes('application/json')
   const body = isJson ? await response.json() : await response.text()
 
   if (!response.ok) {
-    const error = new Error(
-      isJson && body && body.message ? body.message : 'Request failed',
-    )
+    const message =
+      (isJson && body && (body.message || body.error)) ||
+      (response.status === 401 ? 'Invalid credentials' : 'Request failed')
+    const error = new Error(message)
     error.status = response.status
     error.body = body
     throw error
+  }
+
+  if (isJson && body && typeof body === 'object' && 'success' in body) {
+    if (!body.success) {
+      const error = new Error(body.error || 'Request failed')
+      error.status = response.status
+      error.body = body
+      throw error
+    }
+    return body.data ?? body
   }
 
   return body
@@ -88,27 +176,70 @@ export const login = async (payload) => {
   return data
 }
 
-export const fetchMe = async () => {
+/**
+ * Server source of truth for the current identity.
+ * Pass token explicitly during hydrate so we never race with storage.
+ */
+export const fetchMe = async (token) => {
   const data = await request('/api/v1/auth/me', {
     method: 'GET',
-    headers: authHeaders(),
+    token: token || undefined,
   })
   return data
 }
 
 export const logout = async () => {
-  const data = await request('/api/v1/auth/logout', {
-    method: 'POST',
-    headers: authHeaders(),
-  })
-  return data
+  try {
+    await request('/api/v1/auth/logout', {
+      method: 'POST',
+    })
+  } catch {
+    // Always wipe client session even if the API call fails
+  } finally {
+    wipeSessionStorage()
+  }
 }
 
 export const refreshToken = async () => {
   const data = await request('/api/v1/auth/refresh', {
     method: 'POST',
-    headers: authHeaders(),
   })
+  // Full replace from refresh response (includes user)
+  if (data?.access_token || data?.token) {
+    return saveAuth(data)
+  }
   return data
 }
 
+/**
+ * Boot-time hydrate: token from storage → /me → authoritative session.
+ * Returns { session, status } where status is authenticated | unauthenticated | error
+ */
+export async function hydrateSessionFromServer() {
+  const stored = readRawSession()
+  if (!stored?.access_token) {
+    wipeSessionStorage()
+    return { session: null, status: 'unauthenticated' }
+  }
+
+  try {
+    const me = await fetchMe(stored.access_token)
+    const session = applyMeToSession(me)
+    if (!session?.user) {
+      wipeSessionStorage()
+      return { session: null, status: 'unauthenticated' }
+    }
+    return { session, status: 'authenticated' }
+  } catch (err) {
+    if (err?.status === 401 || err?.status === 403) {
+      wipeSessionStorage()
+      return { session: null, status: 'unauthenticated' }
+    }
+    // Network blip: keep stored session but mark as degraded
+    if (stored.user) {
+      return { session: stored, status: 'authenticated', offline: true }
+    }
+    wipeSessionStorage()
+    return { session: null, status: 'error', error: err }
+  }
+}

@@ -1,9 +1,8 @@
-import { useState } from 'react'
-import {
-  Tabs,
-  Tab,
-} from '@heroui/react'
+import { useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Tabs, Tab } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
+import PageHeader from '../../components/Layout/PageHeader.jsx'
 import FeeManagement from '../../components/Finance/FeeManagement'
 import Accounting from '../../components/Finance/Accounting'
 import Payroll from '../../components/Finance/Payroll'
@@ -11,28 +10,49 @@ import Budgeting from '../../components/Finance/Budgeting'
 import AssetManagement from '../../components/Finance/AssetManagement'
 import FinancialReporting from '../../components/Finance/FinancialReporting'
 
+const VALID_TABS = [
+  'fees',
+  'accounting',
+  'payroll',
+  'budgeting',
+  'assets',
+  'reporting',
+]
+
 function Finance() {
-  const [activeTab, setActiveTab] = useState('fees')
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const activeTab = useMemo(() => {
+    const tab = searchParams.get('tab') || 'fees'
+    return VALID_TABS.includes(tab) ? tab : 'fees'
+  }, [searchParams])
+
+  const onTabChange = (key) => {
+    navigate(`/finance?tab=${key}`, { replace: true })
+  }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-slate-900">Finance</h1>
-          <p className="text-sm text-slate-500">
-            Manage fees, accounting, payroll, budgeting, and assets
-          </p>
-        </div>
+        <PageHeader
+          title="Finance"
+          breadcrumbs={[
+            { label: 'Money', href: '/finance' },
+            { label: 'Finance' },
+          ]}
+          description="Manage fees, accounting, payroll, budgeting, and assets"
+        />
 
         <div className="flex w-full flex-col">
           <Tabs
             aria-label="Finance Modules"
             selectedKey={activeTab}
-            onSelectionChange={setActiveTab}
-            color="danger"
+            onSelectionChange={onTabChange}
+            color="primary"
             classNames={{
-              cursor: "bg-[#d41f1f]",
-              tabContent: "group-data-[selected=true]:text-white"
+              cursor: 'bg-[#0B3D2E]',
+              tabContent: 'group-data-[selected=true]:text-white',
             }}
           >
             <Tab key="fees" title="Fee Management & Invoicing">

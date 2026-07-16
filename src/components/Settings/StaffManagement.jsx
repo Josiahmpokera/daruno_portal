@@ -224,7 +224,7 @@ export default function StaffManagement() {
         <h2 className="text-xl font-semibold">Staff Management</h2>
         <Button 
           color="primary" 
-          className="bg-[#d41f1f] text-white"
+          className="bg-[#0B3D2E] text-white"
           startContent={<Plus className="h-4 w-4" />}
           onPress={selectedTab === 'teachers' ? onTeacherModalOpen : onStaffModalOpen}
         >
@@ -238,13 +238,13 @@ export default function StaffManagement() {
             aria-label="Staff Options"
             selectedKey={selectedTab}
             onSelectionChange={setSelectedTab}
-            color="danger"
+            color="primary"
             variant="underlined"
             classNames={{
               tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider px-6',
-              cursor: 'w-full bg-[#d41f1f]',
+              cursor: 'w-full bg-[#0B3D2E]',
               tab: 'max-w-fit px-0 h-12',
-              tabContent: 'group-data-[selected=true]:text-[#d41f1f] font-medium',
+              tabContent: 'group-data-[selected=true]:text-[#0B3D2E] font-medium',
             }}
           >
             <Tab key="teachers" title="Teachers">
@@ -253,7 +253,7 @@ export default function StaffManagement() {
                   <Input
                     placeholder="Search teachers..."
                     startContent={<Search className="h-4 w-4 text-slate-400" />}
-                    className="w-full sm:max-w-[300px]"
+                    className="w-full sm:max-w-[300px] shadow-none"
                     variant="bordered"
                     size="sm"
                   />
@@ -270,7 +270,7 @@ export default function StaffManagement() {
                   <Input
                     placeholder="Search staff..."
                     startContent={<Search className="h-4 w-4 text-slate-400" />}
-                    className="w-full sm:max-w-[300px]"
+                    className="w-full sm:max-w-[300px] shadow-none"
                     variant="bordered"
                     size="sm"
                   />
@@ -455,14 +455,14 @@ export default function StaffManagement() {
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   form="teacher-form" 
                   color="primary" 
-                  className="bg-[#d41f1f]"
+                  className="bg-[#0B3D2E]"
                 >
                   Save Teacher
                 </Button>
@@ -521,10 +521,10 @@ export default function StaffManagement() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#d41f1f]" onPress={() => handleStaffSubmit(onClose)}>
+                <Button color="primary" className="bg-[#0B3D2E]" onPress={() => handleStaffSubmit(onClose)}>
                   Save Staff
                 </Button>
               </ModalFooter>

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Button, Card, CardHeader, CardBody, Input } from '@heroui/react'
-import logoDaruno from '../../assets/logo/daruno_red.png'
-import { login, saveAuth } from '../../api/auth.js'
+import { useMutation } from '@tanstack/react-query'
+import { Button, Input } from '@heroui/react'
+import ShengenaLogo from '../../components/Brand/ShengenaLogo.jsx'
+import { useAuth } from '../../auth'
+import { toastSuccess, toastError } from '../../components/Toast'
 
 function Login() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { login } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,17 +16,26 @@ function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async ({ email: loginEmail, password: loginPassword }) => {
-      const payload = {
+      return login({
         email: loginEmail,
         password: loginPassword,
-      }
-      const data = await login(payload)
-      return data
+      })
     },
-    onSuccess: (data) => {
-      saveAuth(data)
-      queryClient.setQueryData(['auth', 'session'], data)
-      navigate('/')
+    onSuccess: (session) => {
+      const role = session?.user?.role?.name
+      const isPlatform =
+        session?.audience === 'platform' || role === 'super_admin'
+      const name = session?.user?.name || session?.user?.email || 'User'
+      toastSuccess(
+        'Welcome back',
+        isPlatform
+          ? `${name} — platform console`
+          : `${name}${session?.school?.name ? ` · ${session.school.name}` : ''}`,
+      )
+      navigate(isPlatform ? '/platform' : '/dashboard', { replace: true })
+    },
+    onError: (err) => {
+      toastError('Sign-in failed', err?.message || 'Check your email and password.')
     },
   })
 
@@ -42,66 +52,104 @@ function Login() {
     loginMutation.mutate({ email, password })
   }
 
+  const year = new Date().getFullYear()
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="flex w-full max-w-5xl items-stretch rounded-xl bg-white shadow-md overflow-hidden">
-        <div className="hidden w-1/2 bg-gradient-to-br from-zinc-900 to-[#d41f1f] p-8 text-white md:flex flex-col justify-between">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-hidden">
+      {/* Page background texture (outside card) */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 bg-slate-100" />
+        {/* Soft brand glow */}
+        <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-[#0B3D2E]/[0.07] blur-3xl" />
+        <div className="absolute -bottom-28 -right-20 h-96 w-96 rounded-full bg-zinc-900/[0.06] blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 h-64 w-64 rounded-full bg-[#0B3D2E]/[0.04] blur-3xl" />
+        {/* Dot grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.45]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.45) 1px, transparent 0)',
+            backgroundSize: '22px 22px',
+          }}
+        />
+        {/* Fine diagonal hatch */}
+        <div
+          className="absolute inset-0 opacity-[0.2]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(-12deg, transparent, transparent 11px, rgb(100 116 139 / 0.08) 11px, rgb(100 116 139 / 0.08) 12px)',
+          }}
+        />
+      </div>
+
+      <div className="relative flex w-full max-w-3xl items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
+        {/* Compact brand panel */}
+        <div className="hidden w-[220px] shrink-0 bg-gradient-to-br from-zinc-900 to-[#0B3D2E] p-6 text-white md:flex flex-col justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Daruno Portal</h2>
-            <p className="mt-1 text-sm text-white/90">Sign in to continue</p>
+            <h2 className="text-lg font-semibold leading-snug">Shengena Portal</h2>
+            <p className="mt-1.5 text-xs text-white/90 leading-relaxed">
+              Sign in to continue
+            </p>
           </div>
-          <p className="text-xs text-white/70">
+          <p className="text-[11px] text-white/70 leading-relaxed">
             Secure access for school admins, teachers, and staff.
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 p-8">
-          <Card className="border-none shadow-none">
-            <CardHeader className="flex flex-col gap-1">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="rounded-full p-1 hover:bg-slate-100"
-                  onClick={() => navigate('/')}
-                >
-                  <img src={logoDaruno} alt="Daruno logo" className="h-10 w-auto" />
-                </button>
-                <div>
-                  <h1 className="text-xl font-semibold">
-                    {step === 'identifier' ? 'Sign in' : 'Enter password'}
-                  </h1>
-                  <p className="text-xs text-slate-500">
-                    {step === 'identifier' ? 'to your Daruno account' : email}
-                  </p>
-                </div>
+        {/* Form takes remaining space — single column, shared left edge */}
+        <div className="min-w-0 flex-1 flex items-center">
+          <div className="w-full max-w-md mx-auto px-8 py-10 sm:px-10">
+            <div className="flex flex-col items-start gap-6">
+              <button
+                type="button"
+                className="-ml-1.5 inline-flex shrink-0 items-center transition-opacity hover:opacity-80"
+                onClick={() => navigate('/')}
+                aria-label="Go to home"
+              >
+                <ShengenaLogo
+                  variant="full"
+                  iconClassName="h-9 w-9 object-contain"
+                  wordClassName="h-7 w-auto object-contain object-left"
+                />
+              </button>
+
+              <div className="w-full space-y-1">
+                <h1 className="text-xl font-semibold leading-tight text-slate-900">
+                  {step === 'identifier' ? 'Sign in' : 'Enter password'}
+                </h1>
+                <p className="text-sm leading-snug text-slate-500 break-all">
+                  {step === 'identifier' ? 'to your Shengena account' : email}
+                </p>
               </div>
-            </CardHeader>
-            <CardBody>
-              <form className="space-y-4" onSubmit={onSubmit}>
+
+              <form className="w-full space-y-5" onSubmit={onSubmit}>
                 {step === 'identifier' && (
                   <>
-                    <div className="space-y-1">
-                      <Input
-                        radius="none"
-                        variant="underlined"
-                        size="lg"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email, phone, or Skype"
-                        classNames={{
-                          inputWrapper: "after:bg-[#d41f1f]",
-                        }}
-                        className="w-full"
-                        isRequired
-                      />
-                    </div>
+                    <Input
+                      radius="none"
+                      variant="underlined"
+                      size="lg"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email, phone, or Skype"
+                      classNames={{
+                        base: 'w-full',
+                        mainWrapper: 'w-full',
+                        inputWrapper: 'px-0 after:bg-[#0B3D2E]',
+                        input: 'text-left',
+                      }}
+                      isRequired
+                    />
 
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
                       <span>No account?</span>
                       <button
                         type="button"
-                        className="text-[#d41f1f] hover:underline font-semibold"
+                        className="font-semibold text-[#0B3D2E] hover:underline"
                         onClick={() => navigate('/register-school')}
                       >
                         Create one!
@@ -112,24 +160,24 @@ function Login() {
 
                 {step === 'password' && (
                   <>
-                    <div className="space-y-1">
-                      <Input
-                        radius="none"
-                        variant="underlined"
-                        size="lg"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        classNames={{
-                          inputWrapper: "after:bg-[#d41f1f]",
-                        }}
-                        className="w-full"
-                        isRequired
-                        autoFocus
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
+                    <Input
+                      radius="none"
+                      variant="underlined"
+                      size="lg"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      classNames={{
+                        base: 'w-full',
+                        mainWrapper: 'w-full',
+                        inputWrapper: 'px-0 after:bg-[#0B3D2E]',
+                        input: 'text-left',
+                      }}
+                      isRequired
+                      autoFocus
+                    />
+                    <div className="flex w-full items-center justify-between text-xs">
                       <button
                         type="button"
                         className="text-slate-500 hover:text-slate-700"
@@ -137,28 +185,48 @@ function Login() {
                       >
                         ← Back
                       </button>
-                      <button type="button" className="text-[#d41f1f] hover:underline">
+                      <button type="button" className="text-[#0B3D2E] hover:underline">
                         Forgot password?
                       </button>
                     </div>
                   </>
                 )}
 
-                <div className="pt-4 flex justify-end">
+                {loginMutation.isError ? (
+                  <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                    {loginMutation.error?.message || 'Sign-in failed. Check your email and password.'}
+                  </p>
+                ) : null}
+
+                <div className="flex w-full justify-end pt-1">
                   <Button
                     type="submit"
                     color="primary"
-                    className="bg-[#d41f1f] px-8 font-semibold text-white"
+                    className="bg-[#0B3D2E] px-8 font-semibold text-white"
                     isLoading={loginMutation.isPending}
                   >
                     {step === 'identifier' ? 'Next' : 'Sign in'}
                   </Button>
                 </div>
               </form>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
+
+      <footer className="relative mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs text-slate-500">
+        <span>© {year} Shengena. All rights reserved.</span>
+        <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
+          ·
+        </span>
+        <button
+          type="button"
+          className="text-slate-500 hover:text-[#0B3D2E] hover:underline transition-colors"
+          onClick={() => navigate('/privacy-policy')}
+        >
+          Privacy Policy
+        </button>
+      </footer>
     </div>
   )
 }

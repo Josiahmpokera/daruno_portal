@@ -29,13 +29,13 @@ function AttendanceManagement() {
         aria-label="Attendance Modules"
         selectedKey={activeTab}
         onSelectionChange={setActiveTab}
-        color="danger"
+        color="primary"
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="student-attendance" title="Student Attendance">
@@ -51,7 +51,7 @@ function AttendanceManagement() {
                   <SelectItem key="std1">Standard I</SelectItem>
                   <SelectItem key="std2">Standard II</SelectItem>
                 </Select>
-                <Button color="primary" className="bg-[#d41f1f]">
+                <Button color="primary" className="bg-[#0B3D2E]">
                   Mark Attendance
                 </Button>
               </div>
@@ -79,7 +79,7 @@ function AttendanceManagement() {
                 <h3 className="text-lg font-semibold">Automated Alerts</h3>
                 <p className="text-sm text-slate-500">SMS or push notifications for absence</p>
               </div>
-              <Button color="primary" startContent={<Bell className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Bell className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Configure Alerts
               </Button>
             </CardHeader>
@@ -90,14 +90,14 @@ function AttendanceManagement() {
                       <h4 className="font-medium">Absentee SMS Alert</h4>
                       <p className="text-sm text-slate-500">Send SMS to parents when student is marked absent</p>
                     </div>
-                    <Switch defaultSelected color="danger" />
+                    <Switch defaultSelected color="primary" />
                   </div>
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">Late Arrival Notification</h4>
                       <p className="text-sm text-slate-500">Notify parents if student arrives late</p>
                     </div>
-                    <Switch color="danger" />
+                    <Switch color="primary" />
                   </div>
                </div>
             </CardBody>

@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import logo from '../../assets/logo/daruno_red.png'
 import {
   Button,
   Link,
@@ -8,26 +7,18 @@ import {
   NavbarContent,
   NavbarItem,
 } from '@heroui/react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { logout as apiLogout, clearAuth } from '../../api/auth.js'
+import ShengenaLogo from '../../components/Brand/ShengenaLogo.jsx'
+import { useMutation } from '@tanstack/react-query'
+import { useAuth } from '../../auth'
 
 function Home() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-
-  const { data: session } = useQuery({
-    queryKey: ['auth', 'session'],
-    queryFn: async () => null,
-    initialData: null,
-    enabled: false,
-  })
+  const { session, isAuthenticated, isPlatform, logout } = useAuth()
 
   const logoutMutation = useMutation({
-    mutationFn: () => apiLogout().catch(() => undefined),
+    mutationFn: () => logout(),
     onSettled: () => {
-      clearAuth()
-      queryClient.setQueryData(['auth', 'session'], null)
-      navigate('/login')
+      navigate('/login', { replace: true })
     },
   })
 
@@ -40,28 +31,32 @@ function Home() {
         isBordered={false}
       >
         <NavbarBrand className="gap-3">
-          <img src={logo} alt="Daruno logo" className="h-8 w-auto" />
+          <ShengenaLogo
+            variant="full"
+            iconClassName="h-8 w-8 object-contain"
+            wordClassName="h-7 w-auto object-contain"
+          />
         </NavbarBrand>
         
         {/* Added Menu Items as requested */}
         <NavbarContent className="hidden gap-6 sm:flex" justify="center">
           <NavbarItem>
-            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#d41f1f]">
+            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#0B3D2E]">
               Pricing
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#d41f1f]">
+            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#0B3D2E]">
               Contact us
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#d41f1f]">
+            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#0B3D2E]">
               Support
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#d41f1f]">
+            <Link color="foreground" href="#" className="text-sm font-medium hover:text-[#0B3D2E]">
               Features
             </Link>
           </NavbarItem>
@@ -78,10 +73,25 @@ function Home() {
               Help
             </Button>
           </NavbarItem>
-          {session?.user ? (
+          {isAuthenticated && session?.user ? (
             <>
               <NavbarItem>
-                <div className="text-sm font-medium text-zinc-600">{session.user.email}</div>
+                <div className="text-sm font-medium text-zinc-600">
+                  {session.user.name || session.user.email}
+                </div>
+              </NavbarItem>
+              <NavbarItem>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  radius="full"
+                  className="font-medium"
+                  onPress={() =>
+                    navigate(isPlatform ? '/platform' : '/dashboard')
+                  }
+                >
+                  Open portal
+                </Button>
               </NavbarItem>
               <NavbarItem>
                 <Button
@@ -89,7 +99,7 @@ function Home() {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  className="bg-[#d41f1f] px-6 font-semibold"
+                  className="bg-[#0B3D2E] px-6 font-semibold"
                   onPress={() => logoutMutation.mutate()}
                 >
                   Sign Out
@@ -102,7 +112,7 @@ function Home() {
                 <Button
                   size="sm"
                   variant="light"
-                  className="font-medium text-zinc-900 hover:text-[#d41f1f]"
+                  className="font-medium text-zinc-900 hover:text-[#0B3D2E]"
                   onPress={() => navigate('/login')}
                 >
                   Sign In
@@ -114,7 +124,7 @@ function Home() {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  className="bg-[#d41f1f] px-6 font-semibold shadow-sm"
+                  className="bg-[#0B3D2E] px-6 font-semibold shadow-sm"
                   onPress={() => navigate('/register-school')}
                 >
                   Register School
@@ -132,7 +142,7 @@ function Home() {
             Creativity for all.
           </h1>
           <p className="mb-10 max-w-3xl text-xl font-light leading-relaxed text-zinc-500 md:text-2xl">
-            Daruno Portal gives you everything you need to manage your school, students, and
+            Shengena Portal gives you everything you need to manage your school, students, and
             curriculum in one beautiful place.
           </p>
           <div className="flex w-full flex-col justify-center gap-4 sm:flex-row">
@@ -140,7 +150,7 @@ function Home() {
               color="primary"
               size="md"
               radius="full"
-              className="h-10 bg-[#d41f1f] px-8 text-base font-bold text-white shadow-md transition-transform hover:opacity-90 active:scale-95"
+              className="h-10 bg-[#0B3D2E] px-8 text-base font-bold text-white shadow-md transition-transform hover:opacity-90 active:scale-95"
               onPress={() => navigate('/dashboard')}
             >
               Go to Dashboard
@@ -163,7 +173,7 @@ function Home() {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {/* Card 1 */}
               <div className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-[#d41f1f]">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-[#0B3D2E]">
                   <span className="text-xl font-bold">Aa</span>
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-zinc-900">Modern Design</h3>
@@ -173,7 +183,7 @@ function Home() {
                 <Link
                   href="https://heroui.com"
                   isExternal
-                  className="text-sm font-semibold text-[#d41f1f] hover:underline"
+                  className="text-sm font-semibold text-[#0B3D2E] hover:underline"
                 >
                   View Guidelines
                 </Link>
@@ -181,7 +191,7 @@ function Home() {
 
               {/* Card 2 */}
               <div className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-[#d41f1f]">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-[#0B3D2E]">
                   <span className="text-xl font-bold">Px</span>
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-zinc-900">Powerful Tools</h3>
@@ -191,7 +201,7 @@ function Home() {
                 <Link
                   href="#"
                   onPress={() => navigate('/dashboard')}
-                  className="text-sm font-semibold text-[#d41f1f] hover:underline"
+                  className="text-sm font-semibold text-[#0B3D2E] hover:underline"
                 >
                   Browse Features
                 </Link>
@@ -199,7 +209,7 @@ function Home() {
 
               {/* Card 3 */}
               <div className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-[#d41f1f]">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-[#0B3D2E]">
                   <span className="text-xl font-bold">Th</span>
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-zinc-900">Customizable</h3>
@@ -209,7 +219,7 @@ function Home() {
                 <Link
                   href="#"
                   onPress={() => navigate('/settings')}
-                  className="text-sm font-semibold text-[#d41f1f] hover:underline"
+                  className="text-sm font-semibold text-[#0B3D2E] hover:underline"
                 >
                   Adjust Theme
                 </Link>

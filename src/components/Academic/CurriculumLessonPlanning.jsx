@@ -27,13 +27,13 @@ function CurriculumLessonPlanning() {
         aria-label="Curriculum Modules"
         selectedKey={activeTab}
         onSelectionChange={setActiveTab}
-        color="danger"
+        color="primary"
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#d41f1f]',
+          cursor: 'w-full bg-[#0B3D2E]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#d41f1f]',
+          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
         }}
       >
         <Tab key="lesson-plans" title="Lesson Plans">
@@ -43,7 +43,7 @@ function CurriculumLessonPlanning() {
                 <h3 className="text-lg font-semibold">Lesson Plans</h3>
                 <p className="text-sm text-slate-500">Upload and manage weekly teaching plans</p>
               </div>
-              <Button color="primary" startContent={<Upload className="h-4 w-4" />} className="bg-[#d41f1f]">
+              <Button color="primary" startContent={<Upload className="h-4 w-4" />} className="bg-[#0B3D2E]">
                 Upload Plan
               </Button>
             </CardHeader>
@@ -84,7 +84,7 @@ function CurriculumLessonPlanning() {
                       <span className="font-medium">Mathematics - Standard I</span>
                       <span className="text-slate-500">45%</span>
                     </div>
-                    <Progress value={45} color="danger" className="h-2" />
+                    <Progress value={45} color="primary" className="h-2" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between">
