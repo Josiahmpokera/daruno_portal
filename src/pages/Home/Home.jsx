@@ -33,7 +33,7 @@ function Home() {
         <NavbarBrand className="gap-3">
           <ShengenaLogo
             variant="full"
-            iconClassName="h-8 w-8 object-contain"
+            iconClassName="h-8 w-32 object-contain"
             wordClassName="h-7 w-auto object-contain"
           />
         </NavbarBrand>

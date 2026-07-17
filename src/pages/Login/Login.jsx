@@ -109,11 +109,11 @@ function Login() {
                 onClick={() => navigate('/')}
                 aria-label="Go to home"
               >
-                <ShengenaLogo
-                  variant="full"
-                  iconClassName="h-9 w-9 object-contain"
-                  wordClassName="h-7 w-auto object-contain object-left"
-                />
+              <ShengenaLogo
+              variant="full"
+              iconClassName=" w-32 object-contain"  // increased from h-9 to h-16
+              wordClassName=" w-auto object-contain object-left"  // increased from h-7 to h-12
+            />
               </button>
 
               <div className="w-full space-y-1">
