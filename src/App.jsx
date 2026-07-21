@@ -5,17 +5,34 @@ import RegisterSchool from './pages/RegisterSchool/RegisterSchool.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import ModulePage from './pages/Module/ModulePage.jsx'
 import Students from './pages/Students/Students.jsx'
+import PeopleOverview from './pages/Students/PeopleOverview.jsx'
+import StudentIdentityWorkspace from './pages/Students/StudentIdentityWorkspace.jsx'
 import StudentRegistration from './pages/Students/StudentRegistration.jsx'
 import AdmissionNumbers from './pages/Students/AdmissionNumbers.jsx'
 import StudentIdGate from './pages/Students/StudentIdGate.jsx'
+import StudentRecordsWorkspace from './pages/Students/StudentRecordsWorkspace.jsx'
+import StudentLifecycleWorkspace from './pages/Students/StudentLifecycleWorkspace.jsx'
+import Applications from './pages/Students/Applications.jsx'
+import ParentsWorkspace from './pages/Students/ParentsWorkspace.jsx'
+import TeachersWorkspace from './pages/Teachers/TeachersWorkspace.jsx'
+import JoinApplication from './pages/Apply/JoinApplication.jsx'
 import AcademicSetup from './pages/Academic/AcademicSetup.jsx'
 import FeeWorkspace from './pages/Finance/FeeWorkspace.jsx'
+import FinanceOperationsWorkspace from './pages/Finance/FinanceOperationsWorkspace.jsx'
+import AccountingWorkspace from './pages/Finance/AccountingWorkspace.jsx'
+import InventoryWorkspace from './pages/Ops/InventoryWorkspace.jsx'
+import LibraryWorkspace from './pages/Ops/LibraryWorkspace.jsx'
+import TransportWorkspace from './pages/Ops/TransportWorkspace.jsx'
+import HostelWorkspace from './pages/Ops/HostelWorkspace.jsx'
+import LearningWorkspace from './pages/Learning/LearningWorkspace.jsx'
+import HomeworkWorkspace from './pages/Learning/HomeworkWorkspace.jsx'
 import DailyAttendance from './pages/Attendance/DailyAttendance.jsx'
 import ExamWorkspace from './pages/Examinations/ExamWorkspace.jsx'
 import ReportCardsWorkspace from './pages/ReportCards/ReportCardsWorkspace.jsx'
 import PlatformConsole from './pages/Platform/PlatformConsole.jsx'
 import SchoolProfile from './pages/SchoolProfile/SchoolProfile.jsx'
 import Staff from './pages/Staff/Staff.jsx'
+import SystemWorkspace from './pages/System/SystemWorkspace.jsx'
 import { modules } from './config/modules.js'
 import {
   RedirectIfAuthenticated,
@@ -25,13 +42,26 @@ import {
 
 const RICH_ROOTS = new Set([
   'students',
+  'parents',
+  'teachers',
   'staff',
   'academic',
   'finance',
+  'accounting',
+  'inventory',
+  'library',
+  'transport',
+  'hostel',
+  'learning',
+  'homework',
   'attendance',
   'examinations',
   'report-cards',
   'school-profile',
+  'reports',
+  'users',
+  'compliance',
+  'admin',
 ])
 
 function SchoolRoute({ children }) {
@@ -62,6 +92,10 @@ function App() {
           </RedirectIfAuthenticated>
         }
       />
+
+      {/* Public join / admission application (no auth) */}
+      <Route path="/apply" element={<JoinApplication />} />
+      <Route path="/apply/:schoolCode" element={<JoinApplication />} />
 
       <Route
         path="/dashboard"
@@ -95,6 +129,22 @@ function App() {
         path="/students"
         element={
           <SchoolRoute>
+            <PeopleOverview />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/list"
+        element={
+          <SchoolRoute>
+            <Students />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/profiles"
+        element={
+          <SchoolRoute>
             <Students />
           </SchoolRoute>
         }
@@ -116,10 +166,130 @@ function App() {
         }
       />
       <Route
+        path="/students/admissions"
+        element={
+          <SchoolRoute>
+            <Applications />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/parents"
+        element={
+          <SchoolRoute>
+            <StudentRecordsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/medical"
+        element={
+          <SchoolRoute>
+            <StudentRecordsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/previous-school"
+        element={
+          <SchoolRoute>
+            <StudentRecordsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/documents"
+        element={
+          <SchoolRoute>
+            <StudentRecordsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/status"
+        element={
+          <SchoolRoute>
+            <StudentRecordsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/transfers"
+        element={
+          <SchoolRoute>
+            <StudentLifecycleWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/graduation"
+        element={
+          <SchoolRoute>
+            <StudentLifecycleWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/alumni"
+        element={
+          <SchoolRoute>
+            <StudentLifecycleWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/qr"
+        element={
+          <SchoolRoute>
+            <StudentIdentityWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/students/id-cards"
+        element={
+          <SchoolRoute>
+            <StudentIdentityWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
         path="/students/:id"
         element={
           <SchoolRoute>
             <StudentIdGate />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/parents"
+        element={
+          <SchoolRoute>
+            <ParentsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/parents/*"
+        element={
+          <SchoolRoute>
+            <ParentsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/teachers"
+        element={
+          <SchoolRoute>
+            <TeachersWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/teachers/*"
+        element={
+          <SchoolRoute>
+            <TeachersWorkspace />
           </SchoolRoute>
         }
       />
@@ -236,6 +406,230 @@ function App() {
         }
       />
       <Route
+        path="/finance/structures"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/billing"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/methods"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/student-fees"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/student-fees/:id"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/invoices"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/payments"
+        element={
+          <SchoolRoute>
+            <FeeWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/receipts"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/refunds"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/discounts"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/fines"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/outstanding"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/statements"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/finance/reports"
+        element={
+          <SchoolRoute>
+            <FinanceOperationsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/accounting"
+        element={
+          <SchoolRoute>
+            <AccountingWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/accounting/*"
+        element={
+          <SchoolRoute>
+            <AccountingWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          <SchoolRoute>
+            <InventoryWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/inventory/*"
+        element={
+          <SchoolRoute>
+            <InventoryWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/library"
+        element={
+          <SchoolRoute>
+            <LibraryWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/library/*"
+        element={
+          <SchoolRoute>
+            <LibraryWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/transport"
+        element={
+          <SchoolRoute>
+            <TransportWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/transport/*"
+        element={
+          <SchoolRoute>
+            <TransportWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/hostel"
+        element={
+          <SchoolRoute>
+            <HostelWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/hostel/*"
+        element={
+          <SchoolRoute>
+            <HostelWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/learning"
+        element={
+          <SchoolRoute>
+            <LearningWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/learning/*"
+        element={
+          <SchoolRoute>
+            <LearningWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/homework"
+        element={
+          <SchoolRoute>
+            <HomeworkWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/homework/*"
+        element={
+          <SchoolRoute>
+            <HomeworkWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
         path="/attendance"
         element={
           <SchoolRoute>
@@ -333,6 +727,70 @@ function App() {
         }
       />
 
+      <Route
+        path="/reports"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/reports/*"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/users/*"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/compliance"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/compliance/*"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/admin/*"
+        element={
+          <SchoolRoute>
+            <SystemWorkspace />
+          </SchoolRoute>
+        }
+      />
 
       {modules
         .filter((m) => !RICH_ROOTS.has(m.key))

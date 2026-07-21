@@ -33,6 +33,16 @@ body {
   min-height: 100vh;
 }
 
+/* Tanzania schools list — indeterminate progress bar */
+@keyframes tz-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}
+
 /*
  * App-standard form controls (Student Registration style)
  * Border-only, h-9, rounded-md, no shadow — safety net for HeroUI leftovers.

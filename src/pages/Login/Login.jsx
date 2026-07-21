@@ -135,7 +135,7 @@ function Login() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Email, phone, or Skype"
+                      placeholder="Enter your email address"
                       classNames={{
                         base: 'w-full',
                         mainWrapper: 'w-full',

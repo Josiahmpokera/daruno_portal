@@ -86,6 +86,7 @@ const iconMap = {
   community: MessageSquare,
   system: Settings2,
   platform: Package,
+  reports: BarChart3,
   settings: Settings2,
 }
 
@@ -538,10 +539,14 @@ function DashboardLayout({ children }) {
     navigate(item.path)
   }
 
-  // Super admin: keep module panel open for Platform / Settings routes
+  // Super admin: keep module panel open for Platform / Reports / Settings routes
   useEffect(() => {
     if (!isSuperAdmin) return
-    if (activeKey === 'platform' || activeKey === 'settings') {
+    if (
+      activeKey === 'platform' ||
+      activeKey === 'reports' ||
+      activeKey === 'settings'
+    ) {
       openPanelInstant()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

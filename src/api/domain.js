@@ -3,11 +3,19 @@ import { api, buildUrl, getAuthHeaders } from './client.js'
 // ── Super Admin Platform ──────────────────────────────────────────
 export const platformDashboard = () => api.get('/api/v1/platform/dashboard')
 export const platformSchools = (params = {}) => {
-  const q = new URLSearchParams(params).toString()
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
   return api.get(`/api/v1/platform/schools${q ? `?${q}` : ''}`)
 }
 export const platformCreateSchool = (payload) =>
   api.post('/api/v1/platform/schools', payload)
+export const platformBulkImportSchools = (payload) =>
+  api.post('/api/v1/platform/schools/bulk-import', payload)
 export const platformUpdateSchool = (id, payload) =>
   api.patch(`/api/v1/platform/schools/${id}`, payload)
 export const platformPlans = () => api.get('/api/v1/platform/plans')
@@ -17,8 +25,62 @@ export const platformUpdatePlan = (id, payload) =>
   api.patch(`/api/v1/platform/plans/${id}`, payload)
 export const platformDeletePlan = (id) =>
   api.delete(`/api/v1/platform/plans/${id}`)
+
+/** Public marketing pricing — active plans only (no auth). */
+export const publicPricingPlans = () => api.get('/api/v1/pricing/plans')
+
+// ── Super Admin Platform Reports ─────────────────────────────────
+const reportQuery = (params = {}) =>
+  new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+
+export const platformReportCatalog = () =>
+  api.get('/api/v1/platform/reports/catalog')
+export const platformReportOverview = () =>
+  api.get('/api/v1/platform/reports/overview')
+export const platformReportSchools = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/schools${q ? `?${q}` : ''}`)
+}
+export const platformReportSubscriptions = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/subscriptions${q ? `?${q}` : ''}`)
+}
+export const platformReportRevenue = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/revenue${q ? `?${q}` : ''}`)
+}
+export const platformReportUsers = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/users${q ? `?${q}` : ''}`)
+}
+export const platformReportGrowth = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/growth${q ? `?${q}` : ''}`)
+}
+export const platformReportTanzaniaRegistry = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(
+    `/api/v1/platform/reports/tanzania-registry${q ? `?${q}` : ''}`,
+  )
+}
+export const platformReportAudit = (params = {}) => {
+  const q = reportQuery(params)
+  return api.get(`/api/v1/platform/reports/audit${q ? `?${q}` : ''}`)
+}
 export const platformSubscriptions = (params = {}) => {
-  const q = new URLSearchParams(params).toString()
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
   return api.get(`/api/v1/platform/subscriptions${q ? `?${q}` : ''}`)
 }
 export const platformUpdateSubscription = (id, payload) =>
@@ -43,6 +105,8 @@ export const platformNotifications = () =>
 export const platformCreateNotification = (payload) =>
   api.post('/api/v1/platform/notifications', payload)
 export const platformSettings = () => api.get('/api/v1/platform/settings')
+export const platformUpdateSettings = (payload) =>
+  api.patch('/api/v1/platform/settings', payload)
 export const platformAuditLogs = (params = {}) => {
   const q = new URLSearchParams(params).toString()
   return api.get(`/api/v1/platform/audit-logs${q ? `?${q}` : ''}`)
@@ -88,6 +152,130 @@ export const bulkUpdateStudents = async (ids, payload) => {
   }
   return results
 }
+
+/** Server-side bulk status update */
+export const bulkUpdateStudentStatus = (payload) =>
+  api.post('/api/v1/students/bulk-status', payload)
+export const studentStatusSummary = () =>
+  api.get('/api/v1/students/status-summary')
+
+// ── Student identity (ID cards / QR / barcode) ────────────────────
+export const listIdCardTemplates = () =>
+  api.get('/api/v1/students/identity/templates')
+export const getIdCardSettings = () =>
+  api.get('/api/v1/students/identity/settings')
+export const updateIdCardSettings = (payload) =>
+  api.patch('/api/v1/students/identity/settings', payload)
+export const listIdentityRoster = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/identity/roster${q ? `?${q}` : ''}`)
+}
+export const listStudentIdCards = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/identity/cards${q ? `?${q}` : ''}`)
+}
+export const issueStudentIdCards = (payload) =>
+  api.post('/api/v1/students/identity/cards/issue', payload)
+export const getStudentIdCard = (id) =>
+  api.get(`/api/v1/students/identity/cards/${id}`)
+export const updateStudentIdCard = (id, payload) =>
+  api.patch(`/api/v1/students/identity/cards/${id}`, payload)
+export const markIdCardsPrinted = (cardIds) =>
+  api.post('/api/v1/students/identity/cards/mark-printed', { card_ids: cardIds })
+
+// ── Guardians / parents ───────────────────────────────────────────
+export const listGuardians = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/guardians${q ? `?${q}` : ''}`)
+}
+export const createGuardian = (payload) => api.post('/api/v1/guardians', payload)
+export const updateGuardian = (id, payload) =>
+  api.patch(`/api/v1/guardians/${id}`, payload)
+export const deleteGuardian = (id) => api.delete(`/api/v1/guardians/${id}`)
+
+// ── Medical ───────────────────────────────────────────────────────
+export const listMedicalRecords = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/medical${q ? `?${q}` : ''}`)
+}
+export const getMedicalRecord = (studentId) =>
+  api.get(`/api/v1/students/${studentId}/medical`)
+export const saveMedicalRecord = (studentId, payload) =>
+  api.put(`/api/v1/students/${studentId}/medical`, payload)
+
+// ── Previous school ───────────────────────────────────────────────
+export const listPreviousSchools = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/previous-school${q ? `?${q}` : ''}`)
+}
+export const updatePreviousSchool = (studentId, payload) =>
+  api.patch(`/api/v1/students/${studentId}/previous-school`, payload)
+
+// ── Student documents ─────────────────────────────────────────────
+export const listStudentDocuments = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/documents${q ? `?${q}` : ''}`)
+}
+export const createStudentDocument = (payload) =>
+  api.post('/api/v1/students/documents', payload)
+export const updateStudentDocument = (id, payload) =>
+  api.patch(`/api/v1/students/documents/${id}`, payload)
+export const deleteStudentDocument = (id) =>
+  api.delete(`/api/v1/students/documents/${id}`)
+
+// ── Lifecycle: transfers, graduation, alumni ──────────────────────
+export const listTransfers = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/transfers${q ? `?${q}` : ''}`)
+}
+export const createTransfer = (payload) =>
+  api.post('/api/v1/students/transfers', payload)
+export const updateTransfer = (id, payload) =>
+  api.patch(`/api/v1/students/transfers/${id}`, payload)
+export const deleteTransfer = (id) =>
+  api.delete(`/api/v1/students/transfers/${id}`)
+
+export const listGraduations = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/graduations${q ? `?${q}` : ''}`)
+}
+export const createGraduation = (payload) =>
+  api.post('/api/v1/students/graduations', payload)
+export const updateGraduation = (id, payload) =>
+  api.patch(`/api/v1/students/graduations/${id}`, payload)
+export const deleteGraduation = (id) =>
+  api.delete(`/api/v1/students/graduations/${id}`)
+
+export const listAlumni = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/students/alumni${q ? `?${q}` : ''}`)
+}
+export const updateAlumni = (studentId, payload) =>
+  api.patch(`/api/v1/students/alumni/${studentId}`, payload)
+
+// ── Admissions / join applications ────────────────────────────────
+export const listAdmissions = (params = {}) => {
+  const q = toQuery(params)
+  return api.get(`/api/v1/admissions${q ? `?${q}` : ''}`)
+}
+export const getAdmission = (id) => api.get(`/api/v1/admissions/${id}`)
+export const createAdmission = (payload) =>
+  api.post('/api/v1/admissions', payload)
+export const updateAdmission = (id, payload) =>
+  api.patch(`/api/v1/admissions/${id}`, payload)
+export const approveAdmission = (id, payload = {}) =>
+  api.post(`/api/v1/admissions/${id}/approve`, payload)
+export const rejectAdmission = (id, payload = {}) =>
+  api.post(`/api/v1/admissions/${id}/reject`, payload)
+
+/** Public join form (no auth) */
+export const publicSchoolInfo = (code) =>
+  api.get(`/api/v1/public/schools/${encodeURIComponent(code)}`)
+export const publicSubmitApplication = (code, payload) =>
+  api.post(
+    `/api/v1/public/schools/${encodeURIComponent(code)}/applications`,
+    payload,
+  )
 
 // ── Staff (non-teaching) ──────────────────────────────────────────
 export const listStaff = (params = {}) => {
@@ -219,6 +407,423 @@ export const listPayments = (params = {}) => {
   return api.get(`/api/v1/finance/payments${q ? `?${q}` : ''}`)
 }
 export const createPayment = (payload) => api.post('/api/v1/finance/payments', payload)
+
+export const listPaymentMethods = (params = {}) => {
+  const q = new URLSearchParams(params).toString()
+  return api.get(`/api/v1/finance/methods${q ? `?${q}` : ''}`)
+}
+export const createPaymentMethod = (payload) =>
+  api.post('/api/v1/finance/methods', payload)
+export const updatePaymentMethod = (id, payload) =>
+  api.patch(`/api/v1/finance/methods/${id}`, payload)
+export const deletePaymentMethod = (id) =>
+  api.delete(`/api/v1/finance/methods/${id}`)
+
+export const listStudentFees = (params = {}) => {
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+  return api.get(`/api/v1/finance/student-fees${q ? `?${q}` : ''}`)
+}
+export const getStudentFees = (id) =>
+  api.get(`/api/v1/finance/student-fees/${id}`)
+
+const financeQ = (params = {}) =>
+  new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+
+// Receipts, refunds, adjustments, outstanding, reports
+export const listReceipts = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/receipts${q ? `?${q}` : ''}`)
+}
+export const listRefunds = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/refunds${q ? `?${q}` : ''}`)
+}
+export const createRefund = (payload) =>
+  api.post('/api/v1/finance/refunds', payload)
+export const listAdjustments = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/adjustments${q ? `?${q}` : ''}`)
+}
+export const createAdjustment = (payload) =>
+  api.post('/api/v1/finance/adjustments', payload)
+export const voidAdjustment = (id) =>
+  api.post(`/api/v1/finance/adjustments/${id}/void`)
+export const listOutstandingFees = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/outstanding${q ? `?${q}` : ''}`)
+}
+export const listFeeStatements = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/statements${q ? `?${q}` : ''}`)
+}
+export const getFinancialReports = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/finance/reports${q ? `?${q}` : ''}`)
+}
+
+// ── Accounting ────────────────────────────────────────────────────
+export const listChartOfAccounts = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/coa${q ? `?${q}` : ''}`)
+}
+export const createChartOfAccount = (payload) =>
+  api.post('/api/v1/accounting/coa', payload)
+export const updateChartOfAccount = (id, payload) =>
+  api.patch(`/api/v1/accounting/coa/${id}`, payload)
+
+export const listBankAccounts = () => api.get('/api/v1/accounting/banks')
+export const createBankAccount = (payload) =>
+  api.post('/api/v1/accounting/banks', payload)
+export const updateBankAccount = (id, payload) =>
+  api.patch(`/api/v1/accounting/banks/${id}`, payload)
+
+export const listBudgets = () => api.get('/api/v1/accounting/budgets')
+export const createBudget = (payload) =>
+  api.post('/api/v1/accounting/budgets', payload)
+export const updateBudget = (id, payload) =>
+  api.patch(`/api/v1/accounting/budgets/${id}`, payload)
+
+export const listCashMovements = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/cash${q ? `?${q}` : ''}`)
+}
+export const createCashMovement = (payload) =>
+  api.post('/api/v1/accounting/cash', payload)
+
+export const listJournalEntries = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/journals${q ? `?${q}` : ''}`)
+}
+export const createJournalEntry = (payload) =>
+  api.post('/api/v1/accounting/journals', payload)
+
+export const getGeneralLedger = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/ledger${q ? `?${q}` : ''}`)
+}
+export const getTrialBalance = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/trial-balance${q ? `?${q}` : ''}`)
+}
+export const getProfitAndLoss = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/pnl${q ? `?${q}` : ''}`)
+}
+export const getBalanceSheet = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/accounting/balance-sheet${q ? `?${q}` : ''}`)
+}
+
+// ── Ops: Inventory ────────────────────────────────────────────────
+export const listInvCategories = () => api.get('/api/v1/inventory/categories')
+export const createInvCategory = (payload) =>
+  api.post('/api/v1/inventory/categories', payload)
+export const updateInvCategory = (id, payload) =>
+  api.patch(`/api/v1/inventory/categories/${id}`, payload)
+export const listInvSuppliers = () => api.get('/api/v1/inventory/suppliers')
+export const createInvSupplier = (payload) =>
+  api.post('/api/v1/inventory/suppliers', payload)
+export const updateInvSupplier = (id, payload) =>
+  api.patch(`/api/v1/inventory/suppliers/${id}`, payload)
+export const listInvAssets = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/inventory/assets${q ? `?${q}` : ''}`)
+}
+export const createInvAsset = (payload) =>
+  api.post('/api/v1/inventory/assets', payload)
+export const updateInvAsset = (id, payload) =>
+  api.patch(`/api/v1/inventory/assets/${id}`, payload)
+export const listStockItems = () => api.get('/api/v1/inventory/stock-items')
+export const createStockItem = (payload) =>
+  api.post('/api/v1/inventory/stock-items', payload)
+export const updateStockItem = (id, payload) =>
+  api.patch(`/api/v1/inventory/stock-items/${id}`, payload)
+export const listStockMovements = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/inventory/movements${q ? `?${q}` : ''}`)
+}
+export const createStockMovement = (payload) =>
+  api.post('/api/v1/inventory/movements', payload)
+export const listPurchaseOrders = () =>
+  api.get('/api/v1/inventory/purchase-orders')
+export const createPurchaseOrder = (payload) =>
+  api.post('/api/v1/inventory/purchase-orders', payload)
+export const updatePurchaseOrder = (id, payload) =>
+  api.patch(`/api/v1/inventory/purchase-orders/${id}`, payload)
+export const listInvAlerts = () => api.get('/api/v1/inventory/alerts')
+export const getInvReports = () => api.get('/api/v1/inventory/reports')
+
+// ── Ops: Library ──────────────────────────────────────────────────
+export const listLibCategories = () => api.get('/api/v1/library/categories')
+export const createLibCategory = (payload) =>
+  api.post('/api/v1/library/categories', payload)
+export const updateLibCategory = (id, payload) =>
+  api.patch(`/api/v1/library/categories/${id}`, payload)
+export const listLibBooks = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/library/books${q ? `?${q}` : ''}`)
+}
+export const createLibBook = (payload) =>
+  api.post('/api/v1/library/books', payload)
+export const updateLibBook = (id, payload) =>
+  api.patch(`/api/v1/library/books/${id}`, payload)
+export const listLibLoans = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/library/loans${q ? `?${q}` : ''}`)
+}
+export const createLibLoan = (payload) =>
+  api.post('/api/v1/library/loans', payload)
+export const returnLibLoan = (id, payload = {}) =>
+  api.post(`/api/v1/library/loans/${id}/return`, payload)
+export const listLibReservations = () =>
+  api.get('/api/v1/library/reservations')
+export const createLibReservation = (payload) =>
+  api.post('/api/v1/library/reservations', payload)
+export const updateLibReservation = (id, payload) =>
+  api.patch(`/api/v1/library/reservations/${id}`, payload)
+export const listLibOverdue = () => api.get('/api/v1/library/overdue')
+export const listLibFines = () => api.get('/api/v1/library/fines')
+export const getLibReports = () => api.get('/api/v1/library/reports')
+
+// ── Ops: Transport ────────────────────────────────────────────────
+export const getTransportOverview = () =>
+  api.get('/api/v1/transport/overview')
+export const listVehicles = () => api.get('/api/v1/transport/vehicles')
+export const createVehicle = (payload) =>
+  api.post('/api/v1/transport/vehicles', payload)
+export const updateVehicle = (id, payload) =>
+  api.patch(`/api/v1/transport/vehicles/${id}`, payload)
+export const listDrivers = () => api.get('/api/v1/transport/drivers')
+export const createDriver = (payload) =>
+  api.post('/api/v1/transport/drivers', payload)
+export const updateDriver = (id, payload) =>
+  api.patch(`/api/v1/transport/drivers/${id}`, payload)
+export const listTransportRoutes = () => api.get('/api/v1/transport/routes')
+export const createTransportRoute = (payload) =>
+  api.post('/api/v1/transport/routes', payload)
+export const updateTransportRoute = (id, payload) =>
+  api.patch(`/api/v1/transport/routes/${id}`, payload)
+export const listTransportStops = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/transport/stops${q ? `?${q}` : ''}`)
+}
+export const createTransportStop = (payload) =>
+  api.post('/api/v1/transport/stops', payload)
+export const updateTransportStop = (id, payload) =>
+  api.patch(`/api/v1/transport/stops/${id}`, payload)
+export const listTransportAllocations = () =>
+  api.get('/api/v1/transport/allocations')
+export const createTransportAllocation = (payload) =>
+  api.post('/api/v1/transport/allocations', payload)
+export const deleteTransportAllocation = (id) =>
+  api.delete(`/api/v1/transport/allocations/${id}`)
+export const listVehicleMaintenance = () =>
+  api.get('/api/v1/transport/maintenance')
+export const createVehicleMaintenance = (payload) =>
+  api.post('/api/v1/transport/maintenance', payload)
+export const listTransportFees = () => api.get('/api/v1/transport/fees')
+export const createTransportFee = (payload) =>
+  api.post('/api/v1/transport/fees', payload)
+export const updateTransportFee = (id, payload) =>
+  api.patch(`/api/v1/transport/fees/${id}`, payload)
+
+// ── Ops: Hostel ───────────────────────────────────────────────────
+export const getHostelOverview = () => api.get('/api/v1/hostel/overview')
+export const listHostels = () => api.get('/api/v1/hostel/hostels')
+export const createHostel = (payload) =>
+  api.post('/api/v1/hostel/hostels', payload)
+export const updateHostel = (id, payload) =>
+  api.patch(`/api/v1/hostel/hostels/${id}`, payload)
+export const listHostelRooms = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/hostel/rooms${q ? `?${q}` : ''}`)
+}
+export const createHostelRoom = (payload) =>
+  api.post('/api/v1/hostel/rooms', payload)
+export const updateHostelRoom = (id, payload) =>
+  api.patch(`/api/v1/hostel/rooms/${id}`, payload)
+export const listHostelBeds = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/hostel/beds${q ? `?${q}` : ''}`)
+}
+export const createHostelBed = (payload) =>
+  api.post('/api/v1/hostel/beds', payload)
+export const listHostelAllocations = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/hostel/allocations${q ? `?${q}` : ''}`)
+}
+export const hostelCheckIn = (payload) =>
+  api.post('/api/v1/hostel/check-in', payload)
+export const hostelCheckOut = (id) =>
+  api.post(`/api/v1/hostel/allocations/${id}/check-out`)
+export const listHostelFees = () => api.get('/api/v1/hostel/fees')
+export const createHostelFee = (payload) =>
+  api.post('/api/v1/hostel/fees', payload)
+export const getHostelOccupancy = () => api.get('/api/v1/hostel/occupancy')
+
+// ── Learning (TAMISEMI digital resources + classroom) ─────────────
+export const getLearningOverview = () => api.get('/api/v1/learning/overview')
+export const getLearningReports = () => api.get('/api/v1/learning/reports')
+export const listLearningResources = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/learning/resources${q ? `?${q}` : ''}`)
+}
+export const createLearningResource = (payload) =>
+  api.post('/api/v1/learning/resources', payload)
+export const updateLearningResource = (id, payload) =>
+  api.patch(`/api/v1/learning/resources/${id}`, payload)
+export const archiveLearningResource = (id) =>
+  api.delete(`/api/v1/learning/resources/${id}`)
+export const trackLearningResource = (id, action = 'view') =>
+  api.post(`/api/v1/learning/resources/${id}/track`, { action })
+
+export const listCourses = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/learning/courses${q ? `?${q}` : ''}`)
+}
+export const getCourse = (id) => api.get(`/api/v1/learning/courses/${id}`)
+export const createCourse = (payload) =>
+  api.post('/api/v1/learning/courses', payload)
+export const updateCourse = (id, payload) =>
+  api.patch(`/api/v1/learning/courses/${id}`, payload)
+export const createLesson = (payload) =>
+  api.post('/api/v1/learning/lessons', payload)
+export const updateLesson = (id, payload) =>
+  api.patch(`/api/v1/learning/lessons/${id}`, payload)
+export const deleteLesson = (id) =>
+  api.delete(`/api/v1/learning/lessons/${id}`)
+
+export const listAssignments = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/learning/assignments${q ? `?${q}` : ''}`)
+}
+export const getAssignment = (id) =>
+  api.get(`/api/v1/learning/assignments/${id}`)
+export const createAssignment = (payload) =>
+  api.post('/api/v1/learning/assignments', payload)
+export const updateAssignment = (id, payload) =>
+  api.patch(`/api/v1/learning/assignments/${id}`, payload)
+export const listAssignmentSubmissions = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/learning/submissions${q ? `?${q}` : ''}`)
+}
+export const createAssignmentSubmission = (payload) =>
+  api.post('/api/v1/learning/submissions', payload)
+export const gradeAssignmentSubmission = (id, payload) =>
+  api.post(`/api/v1/learning/submissions/${id}/grade`, payload)
+
+// Homework aliases
+export const getHomeworkOverview = () => api.get('/api/v1/homework/overview')
+export const getHomeworkReports = () => api.get('/api/v1/homework/reports')
+
+// ── System (school reports, users, compliance, admin) ─────────────
+const schoolQ = (params = {}) => toQuery(params)
+
+export const getSchoolReportsOverview = () =>
+  api.get('/api/v1/school/reports/overview')
+export const getSchoolReportsStudents = () =>
+  api.get('/api/v1/school/reports/students')
+export const getSchoolReportsAttendance = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/reports/attendance${q ? `?${q}` : ''}`)
+}
+export const getSchoolReportsExams = () =>
+  api.get('/api/v1/school/reports/exams')
+export const getSchoolReportsTeachers = () =>
+  api.get('/api/v1/school/reports/teachers')
+export const getSchoolReportsFinance = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/reports/finance${q ? `?${q}` : ''}`)
+}
+export const getSchoolReportsInventory = () =>
+  api.get('/api/v1/school/reports/inventory')
+
+export const listSchoolUsers = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/users${q ? `?${q}` : ''}`)
+}
+export const createSchoolUser = (payload) =>
+  api.post('/api/v1/school/users', payload)
+export const updateSchoolUser = (id, payload) =>
+  api.patch(`/api/v1/school/users/${id}`, payload)
+export const listSchoolRoles = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/roles${q ? `?${q}` : ''}`)
+}
+export const updateSchoolRole = (id, payload) =>
+  api.patch(`/api/v1/school/roles/${id}`, payload)
+export const listSchoolPermissions = () =>
+  api.get('/api/v1/school/permissions')
+export const listSchoolAuditLogs = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/audit-logs${q ? `?${q}` : ''}`)
+}
+export const listSchoolLoginHistory = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/login-history${q ? `?${q}` : ''}`)
+}
+export const getPasswordPolicy = () =>
+  api.get('/api/v1/school/password-policy')
+export const updatePasswordPolicy = (payload) =>
+  api.put('/api/v1/school/password-policy', payload)
+export const getTwoFactorSettings = () => api.get('/api/v1/school/2fa')
+export const updateTwoFactorSettings = (payload) =>
+  api.put('/api/v1/school/2fa', payload)
+
+export const getComplianceOverview = () =>
+  api.get('/api/v1/school/compliance/overview')
+export const getComplianceCensus = () =>
+  api.get('/api/v1/school/compliance/census')
+export const getComplianceEnrollment = () =>
+  api.get('/api/v1/school/compliance/enrollment')
+export const getComplianceProfile = () =>
+  api.get('/api/v1/school/compliance/profile')
+export const getComplianceExport = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/compliance/export${q ? `?${q}` : ''}`)
+}
+
+export const getAdminSettings = () =>
+  api.get('/api/v1/school/admin/settings')
+export const updateAdminSettings = (payload) =>
+  api.put('/api/v1/school/admin/settings', payload)
+export const getGatewayConfig = (channel) =>
+  api.get(`/api/v1/school/admin/gateways/${channel}`)
+export const updateGatewayConfig = (channel, payload) =>
+  api.put(`/api/v1/school/admin/gateways/${channel}`, payload)
+export const listNotificationTemplates = () =>
+  api.get('/api/v1/school/admin/templates')
+export const saveNotificationTemplate = (payload) =>
+  api.post('/api/v1/school/admin/templates', payload)
+export const listWebhooks = () => api.get('/api/v1/school/admin/webhooks')
+export const createWebhook = (payload) =>
+  api.post('/api/v1/school/admin/webhooks', payload)
+export const updateWebhook = (id, payload) =>
+  api.patch(`/api/v1/school/admin/webhooks/${id}`, payload)
+export const deleteWebhook = (id) =>
+  api.delete(`/api/v1/school/admin/webhooks/${id}`)
+export const getBackupStatus = () => api.get('/api/v1/school/admin/backup')
+export const requestBackup = () =>
+  api.post('/api/v1/school/admin/backup/request')
+export const listSystemLogs = (params = {}) => {
+  const q = schoolQ(params)
+  return api.get(`/api/v1/school/admin/logs${q ? `?${q}` : ''}`)
+}
+export const getApiKeys = () => api.get('/api/v1/school/admin/api-keys')
+export const rotateApiKeys = () =>
+  api.post('/api/v1/school/admin/api-keys/rotate')
 
 // ── Attendance ────────────────────────────────────────────────────
 export const getAttendanceRoster = (params) => {

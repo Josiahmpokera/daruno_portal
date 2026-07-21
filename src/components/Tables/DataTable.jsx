@@ -22,6 +22,10 @@ function DataTable({
   getRowId = (row) => String(row.id ?? row.uuid ?? ''),
   initialState,
   tableOptions = {},
+  /** Sticky header + scrollable body max height (e.g. 420 or 'min(50vh, 420px)') */
+  maxHeight = null,
+  /** Hide top toolbar (useful on report pages) */
+  hideTopToolbar = false,
 }) {
   const memoColumns = useMemo(() => columns, [columns])
   const memoData = useMemo(() => data, [data])
@@ -45,6 +49,21 @@ function DataTable({
 
   const selectedCount = selectedRows.length
 
+  const containerStyle = maxHeight
+    ? {
+        maxHeight:
+          typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+        overflow: 'auto',
+      }
+    : undefined
+
+  const {
+    mantineTableContainerProps: userContainerProps,
+    state: userState,
+    initialState: userInitialState,
+    ...restTableOptions
+  } = tableOptions
+
   const table = useMantineReactTable({
     columns: memoColumns,
     data: memoData,
@@ -55,6 +74,9 @@ function DataTable({
     enableFullScreenToggle: false,
     enableHiding: false,
     enableStickyHeader: true,
+    enableTopToolbar:
+      !hideTopToolbar &&
+      (enableRowSelection || Boolean(renderBulkActions)),
     enableRowSelection,
     enableMultiRowSelection: enableRowSelection,
     enableSelectAll: enableRowSelection,
@@ -69,11 +91,12 @@ function DataTable({
       density: 'xs',
       pagination: { pageSize: 15, pageIndex: 0 },
       ...initialState,
+      ...userInitialState,
     },
     state: {
       isLoading,
       rowSelection,
-      ...tableOptions.state,
+      ...userState,
     },
     renderTopToolbarCustomActions: ({ table: t }) => {
       if (!enableRowSelection) {
@@ -116,6 +139,13 @@ function DataTable({
         borderColor: '#e4e4e7',
       },
     },
+    mantineTableContainerProps: {
+      ...userContainerProps,
+      style: {
+        ...(userContainerProps?.style || {}),
+        ...containerStyle,
+      },
+    },
     mantineTableProps: {
       highlightOnHover: true,
       withColumnBorders: false,
@@ -128,27 +158,31 @@ function DataTable({
     },
     mantineTableHeadCellProps: {
       style: {
-        backgroundColor: '#fafafa',
-        color: '#71717a',
+        backgroundColor: '#f8fafc',
+        color: '#64748b',
         fontSize: 10,
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.04em',
-        paddingTop: 6,
-        paddingBottom: 6,
-        paddingLeft: 8,
-        paddingRight: 8,
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingLeft: 10,
+        paddingRight: 10,
         lineHeight: 1.25,
+        position: 'sticky',
+        top: 0,
+        zIndex: 2,
+        boxShadow: 'inset 0 -1px 0 #e4e4e7',
       },
     },
     mantineTableBodyCellProps: {
       style: {
         fontSize: 11,
         color: '#27272a',
-        paddingTop: 4,
-        paddingBottom: 4,
-        paddingLeft: 8,
-        paddingRight: 8,
+        paddingTop: 6,
+        paddingBottom: 6,
+        paddingLeft: 10,
+        paddingRight: 10,
         lineHeight: 1.35,
       },
     },
@@ -191,7 +225,7 @@ function DataTable({
         enableResizing: false,
       },
     },
-    ...tableOptions,
+    ...restTableOptions,
   })
 
   return (

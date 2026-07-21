@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, Spinner, Switch, useDisclosure } from '@heroui/react'
-import { Plus } from 'lucide-react'
+import { Card, CardBody, Chip, Spinner, Switch, useDisclosure } from '@heroui/react'
+import {
+  BookOpen,
+  Bookmark,
+  CalendarDays,
+  CalendarRange,
+  Layers,
+  LayoutGrid,
+  Plus,
+  School,
+  Shapes,
+  UsersRound,
+} from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import ModulePlaceholder from '../../components/Layout/ModulePlaceholder.jsx'
@@ -1405,66 +1416,255 @@ function ClassesPanel() {
   )
 }
 
+function AcademicStatCard({ label, value, hint, icon: Icon, tone, onPress }) {
+  return (
+    <Card
+      isPressable={Boolean(onPress)}
+      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      onPress={onPress}
+    >
+      <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${tone}`}
+        >
+          <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+        </div>
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-[10px] font-medium uppercase tracking-wide text-slate-400">
+            {label}
+          </p>
+          <p className="truncate text-base font-semibold tabular-nums text-slate-900">
+            {value}
+          </p>
+          {hint ? (
+            <p className="truncate text-[10px] text-slate-500">{hint}</p>
+          ) : null}
+        </div>
+      </CardBody>
+    </Card>
+  )
+}
+
 function OverviewPanel() {
-  const yearsQ = useQuery({ queryKey: ['academic', 'years'], queryFn: listYears })
-  const termsQ = useQuery({ queryKey: ['academic', 'terms'], queryFn: () => listTerms() })
-  const levelsQ = useQuery({ queryKey: ['academic', 'levels'], queryFn: listLevels })
-  const streamsQ = useQuery({ queryKey: ['academic', 'streams'], queryFn: listStreams })
-  const classesQ = useQuery({ queryKey: ['academic', 'classes'], queryFn: listClasses })
+  const navigate = useNavigate()
+  const { school, session } = useAuth()
+  const schoolStages =
+    school?.education_stages ||
+    session?.school?.education_stages ||
+    session?.user?.school?.education_stages ||
+    []
+  const showCombinations =
+    schoolStages.length === 0 || schoolOffersSubjectCombinations(schoolStages)
+
+  const yearsQ = useQuery({
+    queryKey: ['academic', 'years'],
+    queryFn: listYears,
+    staleTime: 30_000,
+  })
+  const termsQ = useQuery({
+    queryKey: ['academic', 'terms'],
+    queryFn: () => listTerms(),
+    staleTime: 30_000,
+  })
+  const levelsQ = useQuery({
+    queryKey: ['academic', 'levels'],
+    queryFn: listLevels,
+    staleTime: 30_000,
+  })
+  const streamsQ = useQuery({
+    queryKey: ['academic', 'streams'],
+    queryFn: listStreams,
+    staleTime: 30_000,
+  })
+  const classesQ = useQuery({
+    queryKey: ['academic', 'classes'],
+    queryFn: listClasses,
+    staleTime: 30_000,
+  })
   const subjectsQ = useQuery({
     queryKey: ['academic', 'subjects', 'overview'],
     queryFn: () => listSubjects(),
+    staleTime: 30_000,
   })
+
+  const loading =
+    yearsQ.isLoading ||
+    termsQ.isLoading ||
+    levelsQ.isLoading ||
+    classesQ.isLoading ||
+    subjectsQ.isLoading
 
   const stats = [
     {
       label: 'Academic years',
-      value: yearsQ.data?.academic_years?.length ?? '—',
-      href: '/academic/years',
+      value: loading ? '…' : String(yearsQ.data?.academic_years?.length ?? 0),
+      hint: 'Configured years',
+      icon: CalendarRange,
+      tone: 'bg-emerald-50 text-emerald-700',
+      path: '/academic/years',
     },
     {
       label: 'Terms',
-      value: termsQ.data?.terms?.length ?? '—',
-      href: '/academic/terms',
-    },
-    {
-      label: 'Levels',
-      value: levelsQ.data?.levels?.length ?? '—',
-      href: '/academic/levels',
-    },
-    {
-      label: 'Subjects',
-      value: subjectsQ.data?.subjects?.length ?? '—',
-      href: '/academic/subjects',
-    },
-    {
-      label: 'Streams',
-      value: streamsQ.data?.streams?.length ?? '—',
-      href: '/academic/streams',
+      value: loading ? '…' : String(termsQ.data?.terms?.length ?? 0),
+      hint: 'Terms / semesters',
+      icon: CalendarDays,
+      tone: 'bg-sky-50 text-sky-700',
+      path: '/academic/terms',
     },
     {
       label: 'Classes',
-      value: classesQ.data?.classes?.length ?? '—',
-      href: '/academic/classes',
+      value: loading ? '…' : String(classesQ.data?.classes?.length ?? 0),
+      hint: 'Active classrooms',
+      icon: School,
+      tone: 'bg-violet-50 text-violet-700',
+      path: '/academic/classes',
+    },
+    {
+      label: 'Subjects',
+      value: loading ? '…' : String(subjectsQ.data?.subjects?.length ?? 0),
+      hint: 'Curriculum subjects',
+      icon: BookOpen,
+      tone: 'bg-amber-50 text-amber-800',
+      path: '/academic/subjects',
+    },
+    {
+      label: 'Levels',
+      value: loading ? '…' : String(levelsQ.data?.levels?.length ?? 0),
+      hint: 'Education levels',
+      icon: Layers,
+      tone: 'bg-rose-50 text-rose-700',
+      path: '/academic/levels',
+    },
+  ]
+
+  const modules = [
+    {
+      t: 'Academic Years',
+      d: 'Define school years and mark the current year',
+      p: '/academic/years',
+      icon: CalendarRange,
+    },
+    {
+      t: 'Terms / Semesters',
+      d: 'Terms linked to an academic year',
+      p: '/academic/terms',
+      icon: CalendarDays,
+    },
+    {
+      t: 'Education Levels',
+      d: 'TAMISEMI stages and class levels',
+      p: '/academic/levels',
+      icon: Layers,
+    },
+    {
+      t: 'Streams',
+      d: `Class streams (${streamsQ.data?.streams?.length ?? 0} configured)`,
+      p: '/academic/streams',
+      icon: Shapes,
+    },
+    {
+      t: 'Classes',
+      d: 'Classrooms with optional level and stream',
+      p: '/academic/classes',
+      icon: School,
+    },
+    {
+      t: 'All Subjects',
+      d: 'Primary and secondary curriculum subjects',
+      p: '/academic/subjects',
+      icon: BookOpen,
+    },
+    {
+      t: 'Subject Categories',
+      d: 'Group subjects (Languages, Sciences…)',
+      p: '/academic/subjects/categories',
+      icon: Bookmark,
+    },
+    ...(showCombinations
+      ? [
+          {
+            t: 'Subject Combinations',
+            d: 'NECTA packages (PCM, PCB, HGL…)',
+            p: '/academic/subjects/combinations',
+            icon: LayoutGrid,
+          },
+        ]
+      : []),
+    {
+      t: 'Class Assignment',
+      d: 'Assign subjects to each class',
+      p: '/academic/subjects/class-assignment',
+      icon: LayoutGrid,
+    },
+    {
+      t: 'Teacher Allocation',
+      d: 'Allocate teachers to subjects and classes',
+      p: '/academic/subjects/teacher-allocation',
+      icon: UsersRound,
     },
   ]
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {stats.map((s) => (
-        <Link
-          key={s.label}
-          to={s.href}
-          className="rounded-md border border-zinc-200 bg-white px-3 py-3 transition-colors hover:border-[#0B3D2E]/40"
-        >
-          <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
-            {s.label}
+    <div className="space-y-5">
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">At a glance</h2>
+            <p className="text-xs text-slate-500">
+              Live academic structure statistics
+            </p>
+          </div>
+          {(yearsQ.isFetching || classesQ.isFetching || subjectsQ.isFetching) &&
+          !loading ? (
+            <Spinner size="sm" color="success" />
+          ) : null}
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5">
+          {stats.map((stat) => (
+            <AcademicStatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              hint={stat.hint}
+              icon={stat.icon}
+              tone={stat.tone}
+              onPress={() => navigate(stat.path)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-2">
+          <h2 className="text-sm font-semibold text-slate-900">Modules</h2>
+          <p className="text-xs text-slate-500">
+            Jump into years, classes, subjects and allocations
           </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
-            {s.value}
-          </p>
-        </Link>
-      ))}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {modules.map((c) => {
+            const Icon = c.icon
+            return (
+              <Card
+                key={c.p}
+                isPressable
+                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                onPress={() => navigate(c.p)}
+              >
+                <CardBody className="flex flex-row items-start gap-3 p-3.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                    <Icon className="h-4 w-4" strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-slate-900">{c.t}</h3>
+                    <p className="mt-0.5 text-xs text-slate-500">{c.d}</p>
+                  </div>
+                </CardBody>
+              </Card>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

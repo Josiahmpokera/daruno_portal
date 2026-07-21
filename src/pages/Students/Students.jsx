@@ -14,7 +14,7 @@ import {
   FormSelect,
   FormButton,
 } from '../../components/Form'
-import { toastSuccess, toastError, toastInfo } from '../../components/Toast'
+import { toastSuccess, toastError } from '../../components/Toast'
 import {
   listStudents,
   createStudent,
@@ -80,6 +80,7 @@ function Students() {
   const [statusFilter, setStatusFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
   const [form, setForm] = useState({
+    id: null,
     first_name: '',
     last_name: '',
     admission_number: '',
@@ -90,6 +91,19 @@ function Students() {
     status: 'active',
   })
   const [formError, setFormError] = useState('')
+  const isEditing = Boolean(form.id)
+
+  const emptyForm = () => ({
+    id: null,
+    first_name: '',
+    last_name: '',
+    admission_number: '',
+    gender: '',
+    date_of_birth: '',
+    classroom_id: '',
+    academic_year_id: '',
+    status: 'active',
+  })
 
   const studentsQuery = useQuery({
     queryKey: ['students', filterValue, statusFilter],
@@ -111,25 +125,58 @@ function Students() {
     queryFn: listYears,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createStudent,
-    onSuccess: (data) => {
+  const saveMutation = useMutation({
+    mutationFn: (payload) =>
+      payload.id
+        ? updateStudent(payload.id, payload)
+        : createStudent(payload),
+    onSuccess: (data, vars) => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       setFormError('')
       const student = data?.student || data
       const name =
         student?.full_name ||
-        [form.first_name, form.last_name].filter(Boolean).join(' ') ||
+        [vars.first_name, vars.last_name].filter(Boolean).join(' ') ||
         'Student'
-      toastSuccess('Student added', `${name} is now on the student list.`)
+      toastSuccess(
+        vars.id ? 'Student updated' : 'Student added',
+        vars.id
+          ? `${name} was saved.`
+          : `${name} is now on the student list.`,
+      )
+      setForm(emptyForm())
       onClose()
     },
     onError: (err) => {
-      const msg = err.message || 'Failed to create student'
+      const msg = err.message || 'Failed to save student'
       setFormError(msg)
-      toastError('Could not add student', msg)
+      toastError('Could not save student', msg)
     },
   })
+
+  const openCreate = () => {
+    setForm(emptyForm())
+    setFormError('')
+    onOpen()
+  }
+
+  const openEdit = (s) => {
+    setForm({
+      id: s.id,
+      first_name: s.first_name || '',
+      last_name: s.last_name || '',
+      admission_number: s.admission_number || '',
+      gender: s.gender || '',
+      date_of_birth: s.date_of_birth
+        ? String(s.date_of_birth).slice(0, 10)
+        : '',
+      classroom_id: s.classroom?.id ? String(s.classroom.id) : '',
+      academic_year_id: '',
+      status: s.status || 'active',
+    })
+    setFormError('')
+    onOpen()
+  }
 
   const statusMut = useMutation({
     mutationFn: ({ id, status }) => updateStudent(id, { status }),
@@ -182,7 +229,9 @@ function Students() {
               {row.original.full_name}
             </span>
             <span className="text-[11px] text-zinc-400">
-              ID: {row.original.id}
+              {row.original.admission_number
+                ? `Adm: ${row.original.admission_number}`
+                : `ID: ${row.original.id}`}
             </span>
           </button>
         ),
@@ -245,25 +294,17 @@ function Students() {
                 {
                   key: 'edit',
                   label: 'Edit',
-                  onPress: () =>
-                    toastInfo(
-                      'Edit student',
-                      `Inline edit for ${s.full_name} will open here soon.`,
-                    ),
+                  onPress: () => openEdit(s),
                 },
                 {
                   key: 'transfer',
                   label: 'Transfer',
-                  onPress: () =>
-                    toastInfo(
-                      'Transfer',
-                      `Class transfer for ${s.full_name} will open here soon.`,
-                    ),
+                  onPress: () => navigate('/students/transfers'),
                 },
                 {
                   key: 'guardians',
                   label: 'Guardians',
-                  onPress: () => navigate(`/students/${s.id}`),
+                  onPress: () => navigate('/students/parents'),
                 },
                 {
                   key: 'deactivate',
@@ -293,7 +334,8 @@ function Students() {
       return
     }
     try {
-      await createMutation.mutateAsync({
+      await saveMutation.mutateAsync({
+        id: form.id || undefined,
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         admission_number: form.admission_number || undefined,
@@ -303,17 +345,9 @@ function Students() {
         classroom_id: form.classroom_id ? Number(form.classroom_id) : undefined,
         academic_year_id: form.academic_year_id
           ? Number(form.academic_year_id)
-          : currentYear?.id,
-      })
-      setForm({
-        first_name: '',
-        last_name: '',
-        admission_number: '',
-        gender: '',
-        date_of_birth: '',
-        classroom_id: '',
-        academic_year_id: '',
-        status: 'active',
+          : form.id
+            ? undefined
+            : currentYear?.id,
       })
     } catch {
       // Toast handled in mutation onError
@@ -324,15 +358,16 @@ function Students() {
     <DashboardLayout>
       <div className="flex flex-col gap-4">
         <PageHeader
-          title="Students"
+          title="All Students"
+          description="School learner directory"
           breadcrumbs={[
             { label: 'People', href: '/students' },
-            { label: 'Students' },
+            { label: 'All Students' },
           ]}
           actions={
             <FormButton
               startContent={<Plus className="h-4 w-4" />}
-              onPress={onOpen}
+              onPress={() => navigate('/students/registration')}
             >
               Add student
             </FormButton>
@@ -466,7 +501,7 @@ function Students() {
         <SideSheet
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          title="Add new student"
+          title={isEditing ? 'Edit student' : 'Add new student'}
           size="lg"
           footer={(close) => (
             <>
@@ -474,10 +509,10 @@ function Students() {
                 Cancel
               </FormButton>
               <FormButton
-                isLoading={createMutation.isPending}
+                isLoading={saveMutation.isPending}
                 onPress={onSave}
               >
-                Save student
+                {isEditing ? 'Update student' : 'Save student'}
               </FormButton>
             </>
           )}

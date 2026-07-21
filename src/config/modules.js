@@ -136,8 +136,8 @@ export const modules = [
     hasPanel: true,
     description: 'Registration, profiles, transfers, ID cards, alumni',
     features: [
-      { label: 'All Students', path: '/students' },
-      { label: 'Search', path: '/students/search' },
+      { label: 'Overview', path: '/students' },
+      { label: 'All Students', path: '/students/list' },
       {
         type: 'group',
         label: 'Registration & admissions',
@@ -464,7 +464,7 @@ export const modules = [
     shortLabel: 'Finance',
     path: '/finance',
     hasPanel: true,
-    description: 'Fee structures, invoices, payments, scholarships',
+    description: 'Fee structures, invoices, payments, receipts, refunds and reports',
     features: [
       { label: 'Overview', path: '/finance' },
       {
@@ -480,6 +480,7 @@ export const modules = [
         type: 'group',
         label: 'Invoices & payments',
         children: [
+          { label: 'Student Fees', path: '/finance/student-fees' },
           { label: 'Invoices', path: '/finance/invoices' },
           { label: 'Payments', path: '/finance/payments' },
           { label: 'Receipts', path: '/finance/receipts' },
@@ -490,7 +491,6 @@ export const modules = [
         type: 'group',
         label: 'Adjustments',
         children: [
-          { label: 'Scholarships', path: '/finance/scholarships' },
           { label: 'Discounts', path: '/finance/discounts' },
           { label: 'Fines / Penalties', path: '/finance/fines' },
         ],
@@ -1301,8 +1301,6 @@ export function matchPrimaryKey(pathname) {
   return best || 'overview'
 }
 
-const MODULE_ROOTS = new Set(modules.map((m) => m.path))
-
 export function isPathActive(currentPath, currentSearch, targetPath) {
   const [pathPart, queryPart = ''] = targetPath.split('?')
   const currentParams = new URLSearchParams(
@@ -1310,6 +1308,8 @@ export function isPathActive(currentPath, currentSearch, targetPath) {
   )
   const targetParams = new URLSearchParams(queryPart)
 
+  // Target specifies query params (e.g. /platform/subscriptions?tab=plans)
+  // → active only when path matches AND every target param matches current.
   if (queryPart) {
     if (currentPath !== pathPart) return false
     for (const [key, value] of targetParams.entries()) {
@@ -1318,8 +1318,12 @@ export function isPathActive(currentPath, currentSearch, targetPath) {
     return true
   }
 
+  // Target has no query (e.g. /platform/subscriptions).
+  // Do not mark active when the current URL uses a tab (or other) query that
+  // belongs to a sibling route — otherwise both "Subscriptions" and "Plans"
+  // highlight when viewing ?tab=plans.
   if (currentPath === pathPart) {
-    if (MODULE_ROOTS.has(pathPart) && currentParams.get('tab')) return false
+    if (currentParams.get('tab')) return false
     return true
   }
 

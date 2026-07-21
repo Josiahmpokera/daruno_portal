@@ -1,6 +1,6 @@
 /**
  * Super Admin SaaS navigation.
- * Left rail: Overview · Platform · Settings
+ * Left rail: Overview · Platform · Reports · Settings
  */
 
 export const superAdminNav = [
@@ -59,6 +59,53 @@ export const superAdminNav = [
     ],
   },
   {
+    key: 'reports',
+    label: 'Reports',
+    path: '/platform/reports/growth',
+    hasPanel: true,
+    prefixes: ['/platform/reports'],
+    categories: [
+      {
+        title: 'Platform insights',
+        items: [
+          {
+            type: 'link',
+            label: 'Growth & adoption',
+            path: '/platform/reports/growth',
+          },
+        ],
+      },
+      {
+        title: 'Tenant reports',
+        items: [
+          { type: 'link', label: 'Schools report', path: '/platform/reports/schools' },
+        ],
+      },
+      {
+        title: 'Commercial',
+        items: [
+          {
+            type: 'link',
+            label: 'Subscriptions report',
+            path: '/platform/reports/subscriptions',
+          },
+          {
+            type: 'link',
+            label: 'Revenue & billing',
+            path: '/platform/reports/revenue',
+          },
+        ],
+      },
+      {
+        title: 'Access & security',
+        items: [
+          { type: 'link', label: 'Users & access', path: '/platform/reports/users' },
+          { type: 'link', label: 'Audit activity', path: '/platform/reports/audit' },
+        ],
+      },
+    ],
+  },
+  {
     key: 'settings',
     label: 'Settings',
     path: '/platform/settings',
@@ -72,6 +119,11 @@ export const superAdminNav = [
         title: 'Configuration',
         items: [
           { type: 'link', label: 'General', path: '/platform/settings' },
+          {
+            type: 'link',
+            label: 'Tanzania Schools',
+            path: '/platform/settings/tanzania-schools',
+          },
           { type: 'link', label: 'Authentication', path: '/platform/settings/auth' },
           { type: 'link', label: 'Security', path: '/platform/settings/security' },
         ],
@@ -99,6 +151,10 @@ export const superAdminModuleMenus = {
     title: 'Platform',
     categories: superAdminNav.find((n) => n.key === 'platform')?.categories || [],
   },
+  reports: {
+    title: 'Reports',
+    categories: superAdminNav.find((n) => n.key === 'reports')?.categories || [],
+  },
   settings: {
     title: 'Settings',
     categories: superAdminNav.find((n) => n.key === 'settings')?.categories || [],
@@ -108,7 +164,10 @@ export const superAdminModuleMenus = {
 export function matchSuperAdminKey(pathname) {
   if (pathname === '/platform' || pathname === '/platform/') return 'overview'
 
-  // Settings module (check before generic /platform/*)
+  if (pathname.startsWith('/platform/reports')) {
+    return 'reports'
+  }
+
   if (
     pathname.startsWith('/platform/settings') ||
     pathname.startsWith('/platform/audit-logs')

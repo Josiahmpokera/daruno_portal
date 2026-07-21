@@ -258,7 +258,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
       ? mix.map((p, i) => ({
           label: p.name,
           value: p.active_subscriptions_count ?? 0,
-          hint: `$${Number(p.price).toLocaleString()}/${p.billing_cycle === 'annual' ? 'yr' : 'mo'} · ${p.subscriptions_count ?? 0} total`,
+          hint: `${Number(p.price).toLocaleString()} ${p.currency || 'TZS'}/${p.billing_cycle === 'annual' ? 'yr' : 'mo'} · ${p.subscriptions_count ?? 0} total`,
           icon: School,
           tone: planTones[i % planTones.length],
         }))

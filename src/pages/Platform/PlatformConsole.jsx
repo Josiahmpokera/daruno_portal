@@ -3,10 +3,15 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Spinner,
   useDisclosure,
 } from '@heroui/react'
-import { Plus } from 'lucide-react'
+import { AlertTriangle, Building2, Plus, Search } from 'lucide-react'
 import { toastSuccess, toastError } from '../../components/Toast'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -21,6 +26,10 @@ import {
   FormButton,
 } from '../../components/Form'
 import PlatformOverview from './PlatformOverview.jsx'
+import PlatformReports from './PlatformReports.jsx'
+import GeneralSettings from './GeneralSettings.jsx'
+import TanzaniaSchoolsImport from './TanzaniaSchoolsImport.jsx'
+import { formatMoney, formatPlanPrice } from '../../utils/money.js'
 import {
   platformDashboard,
   platformSchools,
@@ -70,11 +79,32 @@ function sectionFromPath(pathname, search) {
   if (pathname.startsWith('/platform/billing')) return 'billing'
   if (pathname.startsWith('/platform/notifications')) return 'notifications'
   if (pathname.startsWith('/platform/audit-logs')) return 'audit'
+
+  // Reports module (default → growth)
+  if (pathname.startsWith('/platform/reports/schools')) return 'reports-schools'
+  if (pathname.startsWith('/platform/reports/subscriptions')) {
+    return 'reports-subscriptions'
+  }
+  if (pathname.startsWith('/platform/reports/revenue')) return 'reports-revenue'
+  if (pathname.startsWith('/platform/reports/users')) return 'reports-users'
+  if (pathname.startsWith('/platform/reports/audit')) return 'reports-audit'
+  if (
+    pathname.startsWith('/platform/reports/growth') ||
+    pathname === '/platform/reports' ||
+    pathname === '/platform/reports/'
+  ) {
+    return 'reports-growth'
+  }
+  if (pathname.startsWith('/platform/reports')) return 'reports-growth'
+
   if (pathname.startsWith('/platform/settings/auth')) return 'settings-auth'
   if (pathname.startsWith('/platform/settings/security')) return 'settings-security'
   if (pathname.startsWith('/platform/settings/integrations')) return 'settings-integrations'
   if (pathname.startsWith('/platform/settings/branding')) return 'settings-branding'
   if (pathname.startsWith('/platform/settings/maintenance')) return 'settings-maintenance'
+  if (pathname.startsWith('/platform/settings/tanzania-schools')) {
+    return 'settings-tanzania-schools'
+  }
   if (pathname.startsWith('/platform/settings')) return 'settings'
   return 'overview'
 }
@@ -108,6 +138,40 @@ function StatusChip({ value }) {
   )
 }
 
+function DetailRow({ label, value }) {
+  if (value === null || value === undefined || value === '') {
+    return (
+      <div className="grid grid-cols-3 gap-2 border-b border-zinc-50 py-2 last:border-0">
+        <dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+          {label}
+        </dt>
+        <dd className="col-span-2 text-sm text-zinc-400">—</dd>
+      </div>
+    )
+  }
+  return (
+    <div className="grid grid-cols-3 gap-2 border-b border-zinc-50 py-2 last:border-0">
+      <dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+        {label}
+      </dt>
+      <dd className="col-span-2 text-sm text-zinc-800">{value}</dd>
+    </div>
+  )
+}
+
+function formatDate(value) {
+  if (!value) return null
+  try {
+    return new Date(value).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch {
+    return String(value)
+  }
+}
+
 function PlatformConsole() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -115,8 +179,14 @@ function PlatformConsole() {
   const section = sectionFromPath(location.pathname, location.search)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [detailSchool, setDetailSchool] = useState(null)
+  const [planToDelete, setPlanToDelete] = useState(null)
+  const [subStatusFilter, setSubStatusFilter] = useState('')
+  const [subSearch, setSubSearch] = useState('')
 
   const schoolSheet = useDisclosure()
+  const schoolDetailSheet = useDisclosure()
+  const planDeleteSheet = useDisclosure()
   const userSheet = useDisclosure()
   const invoiceSheet = useDisclosure()
   const notifSheet = useDisclosure()
@@ -167,8 +237,17 @@ function PlatformConsole() {
     enabled: ['plans', 'subscriptions', 'schools', 'overview'].includes(section),
   })
   const subsQ = useQuery({
-    queryKey: ['platform', 'subscriptions'],
-    queryFn: () => platformSubscriptions({ per_page: 100 }),
+    queryKey: [
+      'platform',
+      'subscriptions',
+      { status: subStatusFilter, q: subSearch },
+    ],
+    queryFn: () =>
+      platformSubscriptions({
+        per_page: 100,
+        status: subStatusFilter || undefined,
+        q: subSearch.trim() || undefined,
+      }),
     enabled: section === 'subscriptions',
   })
   const usersQ = useQuery({
@@ -351,11 +430,17 @@ function PlatformConsole() {
     }
   }
 
+  const invalidatePlanCaches = () => {
+    qc.invalidateQueries({ queryKey: ['platform', 'plans'] })
+    qc.invalidateQueries({ queryKey: ['platform', 'dashboard'] })
+    // Marketing website pricing section
+    qc.invalidateQueries({ queryKey: ['public', 'pricing', 'plans'] })
+  }
+
   const createPlanMut = useMutation({
     mutationFn: platformCreatePlan,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['platform', 'plans'] })
-      qc.invalidateQueries({ queryKey: ['platform', 'dashboard'] })
+      invalidatePlanCaches()
       setMessage('Plan created')
       toastSuccess('Plan created')
       setError('')
@@ -371,10 +456,9 @@ function PlatformConsole() {
   const updatePlanMut = useMutation({
     mutationFn: ({ id, payload }) => platformUpdatePlan(id, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['platform', 'plans'] })
-      qc.invalidateQueries({ queryKey: ['platform', 'dashboard'] })
+      invalidatePlanCaches()
       setMessage('Plan updated')
-      toastSuccess('Plan updated')
+      toastSuccess('Plan updated — pricing will update on the website')
       setError('')
       setPlanForm(emptyPlanForm())
       planSheet.onClose()
@@ -388,20 +472,37 @@ function PlatformConsole() {
   const deletePlanMut = useMutation({
     mutationFn: platformDeletePlan,
     onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: ['platform', 'plans'] })
-      qc.invalidateQueries({ queryKey: ['platform', 'dashboard'] })
+      invalidatePlanCaches()
       const msg = data?.deactivated
         ? 'Plan deactivated (still has active subscriptions)'
         : 'Plan deleted'
       setMessage(msg)
       toastSuccess(msg)
       setError('')
+      setPlanToDelete(null)
+      planDeleteSheet.onClose()
     },
     onError: (e) => {
       setError(e.message)
       toastError('Action failed', e.message)
     },
   })
+
+  const openDeletePlan = (plan) => {
+    setPlanToDelete(plan)
+    planDeleteSheet.onOpen()
+  }
+
+  const closeDeletePlan = () => {
+    if (deletePlanMut.isPending) return
+    setPlanToDelete(null)
+    planDeleteSheet.onClose()
+  }
+
+  const confirmDeletePlan = () => {
+    if (!planToDelete?.id) return
+    deletePlanMut.mutate(planToDelete.id)
+  }
 
   const savePlan = () => {
     setError('')
@@ -480,11 +581,60 @@ function PlatformConsole() {
           { label: 'Notifications' },
         ],
       },
+      'reports-growth': {
+        title: 'Growth & adoption',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Growth' },
+        ],
+      },
+      'reports-schools': {
+        title: 'Schools report',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Schools' },
+        ],
+      },
+      'reports-subscriptions': {
+        title: 'Subscriptions report',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Subscriptions' },
+        ],
+      },
+      'reports-revenue': {
+        title: 'Revenue & billing',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Revenue' },
+        ],
+      },
+      'reports-users': {
+        title: 'Users & access',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Users' },
+        ],
+      },
+      'reports-audit': {
+        title: 'Audit activity',
+        crumbs: [
+          { label: 'Reports', href: '/platform/reports/growth' },
+          { label: 'Audit' },
+        ],
+      },
       settings: {
         title: 'General Settings',
         crumbs: [
           { label: 'Settings', href: '/platform/settings' },
           { label: 'General' },
+        ],
+      },
+      'settings-tanzania-schools': {
+        title: 'Tanzania Schools',
+        crumbs: [
+          { label: 'Settings', href: '/platform/settings' },
+          { label: 'Tanzania Schools' },
         ],
       },
       'settings-auth': {
@@ -543,6 +693,11 @@ function PlatformConsole() {
   const logs = auditQ.data?.logs || []
   const stats = dashQ.data?.stats
 
+  const openSchoolDetail = (school) => {
+    setDetailSchool(school)
+    schoolDetailSheet.onOpen()
+  }
+
   const schoolColumns = useMemo(
     () => [
       {
@@ -550,13 +705,36 @@ function PlatformConsole() {
         header: 'School',
         size: 260,
         Cell: ({ row }) => (
-          <div>
-            <div className="font-medium text-zinc-900">{row.original.name}</div>
-            <div className="text-[11px] text-zinc-400">
-              {row.original.code || '—'} · {row.original.contact_email || '—'}
+          <button
+            type="button"
+            className="text-left"
+            onClick={() => openSchoolDetail(row.original)}
+          >
+            <div className="font-medium text-zinc-900 hover:text-[#0B3D2E]">
+              {row.original.name}
             </div>
-          </div>
+            <div className="text-[11px] text-zinc-400">
+              {row.original.code || '—'}
+              {row.original.contact_email
+                ? ` · ${row.original.contact_email}`
+                : ''}
+            </div>
+          </button>
         ),
+      },
+      {
+        id: 'location',
+        header: 'Location',
+        size: 160,
+        Cell: ({ row }) => {
+          const s = row.original
+          const loc = [s.district, s.region, s.country]
+            .filter(Boolean)
+            .join(', ')
+          return (
+            <span className="text-[12px] text-zinc-600">{loc || '—'}</span>
+          )
+        },
       },
       {
         accessorKey: 'status',
@@ -566,15 +744,32 @@ function PlatformConsole() {
       },
       {
         id: 'plan',
-        header: 'Plan',
-        size: 130,
-        accessorFn: (r) => r.current_subscription?.plan?.name || '—',
+        header: 'Subscription',
+        size: 150,
+        Cell: ({ row }) => {
+          const sub = row.original.current_subscription
+          if (!sub?.plan) {
+            return (
+              <span className="text-[12px] text-zinc-400">No subscription</span>
+            )
+          }
+          return (
+            <div>
+              <div className="text-[12px] font-medium text-zinc-800">
+                {sub.plan.name}
+              </div>
+              <div className="text-[11px] capitalize text-zinc-400">
+                {sub.status}
+              </div>
+            </div>
+          )
+        },
       },
       {
         accessorKey: 'users_count',
         header: 'Users',
         size: 80,
-        Cell: ({ cell }) => cell.getValue() ?? '—',
+        Cell: ({ cell }) => cell.getValue() ?? 0,
       },
       {
         id: 'actions',
@@ -590,7 +785,7 @@ function PlatformConsole() {
                 {
                   key: 'view',
                   label: 'View details',
-                  onPress: () => window.alert(s.name),
+                  onPress: () => openSchoolDetail(s),
                 },
                 {
                   key: 'activate',
@@ -660,12 +855,15 @@ function PlatformConsole() {
       {
         accessorKey: 'price',
         header: 'Price',
-        size: 120,
-        Cell: ({ row }) =>
-          `$${Number(row.original.price).toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-          })} ${row.original.currency || 'USD'}`.trim(),
+        size: 140,
+        Cell: ({ row }) => (
+          <span className="tabular-nums text-zinc-800">
+            {formatMoney(row.original.price, row.original.currency || 'TZS', {
+              withCycle: true,
+              billingCycle: row.original.billing_cycle,
+            })}
+          </span>
+        ),
       },
       {
         accessorKey: 'trial_days',
@@ -748,15 +946,7 @@ function PlatformConsole() {
                   key: 'delete',
                   label: 'Delete',
                   color: 'danger',
-                  onPress: () => {
-                    if (
-                      window.confirm(
-                        `Remove plan “${p.name}”? Active subscriptions will deactivate the plan instead of deleting it.`,
-                      )
-                    ) {
-                      deletePlanMut.mutate(p.id)
-                    }
-                  },
+                  onPress: () => openDeletePlan(p),
                 },
               ]}
             />
@@ -772,27 +962,96 @@ function PlatformConsole() {
     () => [
       {
         id: 'school',
-        header: 'School',
+        header: 'School / tenant',
+        size: 220,
+        Cell: ({ row }) => {
+          const s = row.original.school
+          if (!s) {
+            return <span className="text-zinc-400">Unknown school</span>
+          }
+          return (
+            <div>
+              <div className="font-medium text-zinc-900">{s.name}</div>
+              <div className="font-mono text-[11px] text-zinc-400">
+                {s.code || '—'}
+                {s.status ? ` · ${s.status}` : ''}
+              </div>
+            </div>
+          )
+        },
+      },
+      {
+        id: 'admin',
+        header: 'Admin user',
         size: 200,
-        accessorFn: (s) => s.school?.name || s.school_id,
+        Cell: ({ row }) => {
+          const u = row.original.admin_user
+          if (!u) {
+            return (
+              <span className="text-[12px] text-zinc-400">No admin user</span>
+            )
+          }
+          return (
+            <div>
+              <div className="text-[12px] font-medium text-zinc-800">
+                {u.name}
+              </div>
+              <div className="text-[11px] text-zinc-400">{u.email}</div>
+            </div>
+          )
+        },
       },
       {
         id: 'plan',
         header: 'Plan',
-        size: 140,
-        accessorFn: (s) => s.plan?.name || '—',
+        size: 150,
+        Cell: ({ row }) => {
+          const p = row.original.plan
+          if (!p) return <span className="text-zinc-400">—</span>
+          return (
+            <div>
+              <div className="text-[12px] font-medium text-zinc-800">
+                {p.name}
+              </div>
+              <div className="text-[11px] text-zinc-400">
+                {formatPlanPrice(p)}
+              </div>
+            </div>
+          )
+        },
       },
       {
         accessorKey: 'status',
         header: 'Status',
-        size: 110,
+        size: 100,
         Cell: ({ cell }) => <StatusChip value={cell.getValue()} />,
       },
       {
-        accessorKey: 'ends_on',
-        header: 'Ends',
-        size: 120,
-        Cell: ({ cell }) => cell.getValue() || '—',
+        id: 'period',
+        header: 'Period',
+        size: 160,
+        Cell: ({ row }) => {
+          const s = row.original
+          return (
+            <div className="text-[11px] leading-relaxed text-zinc-600">
+              <div>Start: {formatDate(s.starts_on) || '—'}</div>
+              <div>
+                {s.status === 'trial' ? 'Trial ends' : 'Ends'}:{' '}
+                {formatDate(s.trial_ends_on || s.ends_on) || '—'}
+              </div>
+            </div>
+          )
+        },
+      },
+      {
+        id: 'auto_renew',
+        header: 'Renew',
+        size: 80,
+        Cell: ({ row }) => (
+          <span className="text-[12px] text-zinc-600">
+            {row.original.auto_renew ? 'Yes' : 'No'}
+          </span>
+        ),
       },
       {
         id: 'actions',
@@ -806,8 +1065,30 @@ function PlatformConsole() {
               ariaLabel="Subscription actions"
               items={[
                 {
+                  key: 'view-school',
+                  label: 'View school',
+                  show: Boolean(s.school),
+                  onPress: () => {
+                    if (s.school) {
+                      openSchoolDetail({
+                        ...s.school,
+                        current_subscription: {
+                          id: s.id,
+                          status: s.status,
+                          starts_on: s.starts_on,
+                          ends_on: s.ends_on,
+                          trial_ends_on: s.trial_ends_on,
+                          auto_renew: s.auto_renew,
+                          plan: s.plan,
+                        },
+                      })
+                    }
+                  },
+                },
+                {
                   key: 'activate',
                   label: 'Activate',
+                  show: s.status !== 'active',
                   onPress: () =>
                     updateSubMut.mutate({
                       id: s.id,
@@ -818,6 +1099,7 @@ function PlatformConsole() {
                   key: 'cancel',
                   label: 'Cancel',
                   color: 'danger',
+                  show: s.status !== 'cancelled' && s.status !== 'expired',
                   onPress: () =>
                     updateSubMut.mutate({
                       id: s.id,
@@ -1116,6 +1398,10 @@ function PlatformConsole() {
           />
         )}
 
+        {section.startsWith('reports') && (
+          <PlatformReports section={section} />
+        )}
+
         {section === 'schools' && (
           <div className="min-w-0">
             {schoolsQ.isLoading ? (
@@ -1186,12 +1472,103 @@ function PlatformConsole() {
         )}
 
         {section === 'subscriptions' && (
-          <DataTable
-            columns={subColumns}
-            data={subs}
-            isLoading={subsQ.isLoading}
-            emptyMessage="No subscriptions"
-          />
+          <div className="flex flex-col gap-3">
+            {subsQ.data?.summary && (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                {[
+                  {
+                    label: 'Total',
+                    value: subsQ.data.summary.total,
+                    tone: 'text-zinc-900',
+                  },
+                  {
+                    label: 'Active',
+                    value: subsQ.data.summary.active,
+                    tone: 'text-emerald-700',
+                  },
+                  {
+                    label: 'Trial',
+                    value: subsQ.data.summary.trial,
+                    tone: 'text-sky-700',
+                  },
+                  {
+                    label: 'Past due',
+                    value: subsQ.data.summary.past_due,
+                    tone: 'text-amber-700',
+                  },
+                  {
+                    label: 'Cancelled',
+                    value: subsQ.data.summary.cancelled,
+                    tone: 'text-zinc-500',
+                  },
+                  {
+                    label: 'Expired',
+                    value: subsQ.data.summary.expired,
+                    tone: 'text-red-600',
+                  },
+                ].map((card) => (
+                  <div
+                    key={card.label}
+                    className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5"
+                  >
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+                      {card.label}
+                    </p>
+                    <p
+                      className={`text-lg font-semibold tabular-nums ${card.tone}`}
+                    >
+                      {card.value ?? 0}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 sm:flex-row sm:items-center">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                <FormInput
+                  value={subSearch}
+                  onValueChange={setSubSearch}
+                  placeholder="Search school, code, plan, admin…"
+                  classNames={{ inputWrapper: 'pl-8' }}
+                />
+              </div>
+              <FormSelect
+                placeholder="Status"
+                value={subStatusFilter || 'all'}
+                onChange={(v) => setSubStatusFilter(v === 'all' ? '' : v)}
+                options={[
+                  { value: 'all', label: 'All statuses' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'trial', label: 'Trial' },
+                  { value: 'past_due', label: 'Past due' },
+                  { value: 'cancelled', label: 'Cancelled' },
+                  { value: 'expired', label: 'Expired' },
+                ]}
+                className="sm:w-44"
+              />
+            </div>
+
+            <p className="text-[12px] text-zinc-500">
+              Showing onboarded tenants with a real subscription only. Bulk
+              school-registry imports do not create subscriptions.
+            </p>
+
+            {subsQ.isError ? (
+              <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {subsQ.error?.message || 'Failed to load subscriptions'}
+              </p>
+            ) : (
+              <DataTable
+                columns={subColumns}
+                data={subs}
+                isLoading={subsQ.isLoading}
+                emptyMessage="No real subscriptions yet. Register a school with a plan, or activate a tenant subscription."
+                enableRowSelection={false}
+              />
+            )}
+          </div>
         )}
 
         {section === 'users' && (
@@ -1249,76 +1626,58 @@ function PlatformConsole() {
         )}
 
         {section === 'settings' && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-4">
-            <p className="mb-3 text-sm font-medium text-zinc-800">
-              Platform configuration
-            </p>
-            {settingsQ.isLoading ? (
-              <Spinner color="primary" />
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(settingsQ.data?.settings || {}).map(
-                  ([key, value]) => (
-                    <div
-                      key={key}
-                      className="rounded-lg border border-zinc-200 p-3"
-                    >
-                      <p className="text-[10px] uppercase tracking-wide text-zinc-400">
-                        {key.replaceAll('_', ' ')}
-                      </p>
-                      <pre className="mt-1 whitespace-pre-wrap text-sm text-zinc-800">
-                        {typeof value === 'object'
-                          ? JSON.stringify(value, null, 2)
-                          : String(value)}
-                      </pre>
-                    </div>
-                  ),
-                )}
-                {!Object.keys(settingsQ.data?.settings || {}).length && (
-                  <p className="text-sm text-zinc-500 sm:col-span-2">
-                    No settings returned from the API yet.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+          <GeneralSettings
+            onOpenTanzaniaSchools={() =>
+              navigate('/platform/settings/tanzania-schools')
+            }
+          />
         )}
+
+        {section === 'settings-tanzania-schools' && <TanzaniaSchoolsImport />}
 
         {section === 'settings-auth' && (
           <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              {
-                title: 'JWT lifetime',
-                body: 'Access token expiry and refresh rotation for portal sessions.',
-                value: 'Access 60m · Refresh 7d',
-              },
-              {
-                title: 'Password policy',
-                body: 'Minimum length, complexity, and reset flow for tenant admins.',
-                value: 'Min 8 chars · reset link 24h',
-              },
-              {
-                title: 'MFA',
-                body: 'Optional multi-factor for super admins and school owners.',
-                value: 'Optional · TOTP',
-              },
-              {
-                title: 'Session limits',
-                body: 'Concurrent sessions per user across web and mobile.',
-                value: '5 concurrent',
-              },
-            ].map((card) => (
-              <div
-                key={card.title}
-                className="rounded-xl border border-zinc-200 bg-white p-4"
-              >
-                <p className="text-sm font-medium text-zinc-900">{card.title}</p>
-                <p className="mt-1 text-[12px] text-zinc-500">{card.body}</p>
-                <p className="mt-3 text-[12px] font-medium text-[#0B3D2E]">
-                  {card.value}
-                </p>
+            {settingsQ.isLoading ? (
+              <div className="col-span-full flex justify-center py-10">
+                <Spinner color="success" />
               </div>
-            ))}
+            ) : (
+              [
+                {
+                  title: 'JWT lifetime',
+                  body: 'Access token expiry for portal sessions (from General Settings).',
+                  value: `Access ${settingsQ.data?.settings?.jwt_ttl_minutes ?? settingsQ.data?.settings?.auth?.jwt_ttl_minutes ?? 60}m`,
+                },
+                {
+                  title: 'Password policy',
+                  body: 'Minimum length for tenant and platform user passwords.',
+                  value: `Min ${settingsQ.data?.settings?.password_min_length ?? settingsQ.data?.settings?.auth?.password_min_length ?? 8} chars`,
+                },
+                {
+                  title: 'MFA',
+                  body: 'Optional multi-factor for super admins and school owners.',
+                  value: 'Optional · TOTP',
+                },
+                {
+                  title: 'Session limits',
+                  body: 'Concurrent sessions per user across web and mobile.',
+                  value: '5 concurrent',
+                },
+              ].map((card) => (
+                <div
+                  key={card.title}
+                  className="rounded-xl border border-zinc-200 bg-white p-4"
+                >
+                  <p className="text-sm font-medium text-zinc-900">
+                    {card.title}
+                  </p>
+                  <p className="mt-1 text-[12px] text-zinc-500">{card.body}</p>
+                  <p className="mt-3 text-[12px] font-medium text-[#0B3D2E]">
+                    {card.value}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         )}
 
@@ -1449,6 +1808,216 @@ function PlatformConsole() {
         )}
       </div>
 
+      {/* School details modal */}
+      <Modal
+        isOpen={schoolDetailSheet.isOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            schoolDetailSheet.onOpen()
+          } else {
+            schoolDetailSheet.onClose()
+            setDetailSchool(null)
+          }
+        }}
+        size="2xl"
+        scrollBehavior="inside"
+        placement="center"
+        classNames={{
+          backdrop: 'bg-black/50 backdrop-blur-[2px]',
+          base: 'border border-zinc-200 shadow-xl',
+        }}
+      >
+        <ModalContent>
+          {(onClose) => {
+            const s = detailSchool
+            const sub = s?.current_subscription
+            const stages = Array.isArray(s?.education_stages)
+              ? s.education_stages.map((x) => String(x).replaceAll('_', ' ')).join(', ')
+              : null
+            return (
+              <>
+                <ModalHeader className="flex flex-col gap-1 border-b border-zinc-100 pb-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#0B3D2E]">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold text-zinc-900">
+                        {s?.name || 'School details'}
+                      </p>
+                      <p className="font-mono text-[12px] text-zinc-400">
+                        {s?.code || '—'}
+                        {s?.status ? (
+                          <span className="ml-2 inline-flex align-middle">
+                            <StatusChip value={s.status} />
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
+                  </div>
+                </ModalHeader>
+                <ModalBody className="py-4">
+                  {!s ? (
+                    <p className="text-sm text-zinc-500">No school selected.</p>
+                  ) : (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <section className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                          Identity
+                        </p>
+                        <dl>
+                          <DetailRow label="Name" value={s.name} />
+                          <DetailRow label="Code" value={s.code} />
+                          <DetailRow label="Slug" value={s.slug} />
+                          <DetailRow
+                            label="EMIS"
+                            value={s.emis_code}
+                          />
+                          <DetailRow
+                            label="Registration #"
+                            value={s.registration_number}
+                          />
+                          <DetailRow
+                            label="Type"
+                            value={s.school_type}
+                          />
+                          <DetailRow label="Ownership" value={s.ownership} />
+                        </dl>
+                      </section>
+
+                      <section className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                          Location & contact
+                        </p>
+                        <dl>
+                          <DetailRow label="Country" value={s.country} />
+                          <DetailRow label="Region" value={s.region} />
+                          <DetailRow label="District" value={s.district} />
+                          <DetailRow label="City" value={s.city} />
+                          <DetailRow label="Address" value={s.address} />
+                          <DetailRow label="Email" value={s.contact_email} />
+                          <DetailRow label="Phone" value={s.contact_phone} />
+                          <DetailRow label="Website" value={s.website} />
+                        </dl>
+                      </section>
+
+                      <section className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                          Academic
+                        </p>
+                        <dl>
+                          <DetailRow
+                            label="Level"
+                            value={s.education_level}
+                          />
+                          <DetailRow label="Stages" value={stages} />
+                          <DetailRow label="Motto" value={s.motto} />
+                        </dl>
+                      </section>
+
+                      <section className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                          Subscription
+                        </p>
+                        {sub?.plan || sub?.status ? (
+                          <dl>
+                            <DetailRow
+                              label="Plan"
+                              value={sub.plan?.name || '—'}
+                            />
+                            <DetailRow
+                              label="Status"
+                              value={
+                                <StatusChip value={sub.status} />
+                              }
+                            />
+                            <DetailRow
+                              label="Price"
+                              value={
+                                sub.plan ? formatPlanPrice(sub.plan) : null
+                              }
+                            />
+                            <DetailRow
+                              label="Starts"
+                              value={formatDate(sub.starts_on)}
+                            />
+                            <DetailRow
+                              label="Ends"
+                              value={formatDate(sub.ends_on)}
+                            />
+                            <DetailRow
+                              label="Trial ends"
+                              value={formatDate(sub.trial_ends_on)}
+                            />
+                            <DetailRow
+                              label="Auto renew"
+                              value={
+                                sub.auto_renew === undefined
+                                  ? null
+                                  : sub.auto_renew
+                                    ? 'Yes'
+                                    : 'No'
+                              }
+                            />
+                          </dl>
+                        ) : (
+                          <p className="py-3 text-sm text-zinc-500">
+                            This school has no subscription yet.
+                          </p>
+                        )}
+                        <div className="mt-2 border-t border-zinc-100 pt-2">
+                          <DetailRow
+                            label="Users"
+                            value={
+                              s.users_count !== undefined
+                                ? String(s.users_count)
+                                : null
+                            }
+                          />
+                          <DetailRow
+                            label="Created"
+                            value={formatDate(s.created_at)}
+                          />
+                          <DetailRow
+                            label="Source"
+                            value={
+                              s.settings?.source ||
+                              (typeof s.source === 'string' ? s.source : null)
+                            }
+                          />
+                        </div>
+                      </section>
+                    </div>
+                  )}
+                </ModalBody>
+                <ModalFooter className="border-t border-zinc-100">
+                  {s?.status !== 'active' && s?.id && (
+                    <FormButton
+                      appearance="bordered"
+                      onPress={() => {
+                        updateSchoolMut.mutate(
+                          { id: s.id, payload: { status: 'active' } },
+                          {
+                            onSuccess: () => {
+                              setDetailSchool((prev) =>
+                                prev ? { ...prev, status: 'active' } : prev,
+                              )
+                            },
+                          },
+                        )
+                      }}
+                    >
+                      Activate
+                    </FormButton>
+                  )}
+                  <FormButton onPress={onClose}>Close</FormButton>
+                </ModalFooter>
+              </>
+            )
+          }}
+        </ModalContent>
+      </Modal>
+
       {/* School form — right sheet */}
       <SideSheet
         isOpen={schoolSheet.isOpen}
@@ -1519,7 +2088,7 @@ function PlatformConsole() {
               onChange={(v) => setSchoolForm((f) => ({ ...f, plan_id: v }))}
               options={plans.map((pl) => ({
                 value: String(pl.id),
-                label: `${pl.name} — $${pl.price}/${pl.billing_cycle}`,
+                label: `${pl.name} — ${formatPlanPrice(pl)}`,
               }))}
             />
           </FormField>
@@ -1732,6 +2301,98 @@ function PlatformConsole() {
         </div>
       </SideSheet>
 
+      {/* Delete plan confirmation */}
+      <Modal
+        isOpen={planDeleteSheet.isOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            planDeleteSheet.onOpen()
+          } else {
+            closeDeletePlan()
+          }
+        }}
+        isDismissable={!deletePlanMut.isPending}
+        hideCloseButton={deletePlanMut.isPending}
+        placement="center"
+        size="md"
+        classNames={{
+          backdrop: 'bg-black/50 backdrop-blur-[2px]',
+          base: 'border border-zinc-200 shadow-xl',
+        }}
+      >
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 border-b border-zinc-100 pb-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-zinc-900">
+                      Delete subscription plan?
+                    </p>
+                    <p className="mt-0.5 text-[12px] font-normal text-zinc-500">
+                      This action cannot always be undone.
+                    </p>
+                  </div>
+                </div>
+              </ModalHeader>
+              <ModalBody className="py-4">
+                <p className="text-sm text-zinc-700">
+                  Are you sure you want to remove{' '}
+                  <span className="font-semibold text-zinc-900">
+                    “{planToDelete?.name || 'this plan'}”
+                  </span>
+                  {planToDelete?.code ? (
+                    <span className="font-mono text-[12px] text-zinc-400">
+                      {' '}
+                      ({planToDelete.code})
+                    </span>
+                  ) : null}
+                  ?
+                </p>
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-[12px] leading-relaxed text-amber-900">
+                  If the plan still has active or trial subscriptions, it will
+                  be <strong>deactivated</strong> instead of permanently deleted
+                  so billing history stays intact.
+                  {(planToDelete?.active_subscriptions_count || 0) > 0 ||
+                  (planToDelete?.trial_subscriptions_count || 0) > 0 ? (
+                    <p className="mt-1.5 font-medium">
+                      Current subscribers:{' '}
+                      {planToDelete.active_subscriptions_count ?? 0} active
+                      {(planToDelete.trial_subscriptions_count || 0) > 0
+                        ? ` · ${planToDelete.trial_subscriptions_count} trial`
+                        : ''}
+                      .
+                    </p>
+                  ) : null}
+                </div>
+              </ModalBody>
+              <ModalFooter className="border-t border-zinc-100">
+                <FormButton
+                  appearance="light"
+                  isDisabled={deletePlanMut.isPending}
+                  onPress={closeDeletePlan}
+                >
+                  Cancel
+                </FormButton>
+                <FormButton
+                  className="bg-red-600 text-white data-[hover=true]:bg-red-700"
+                  isLoading={deletePlanMut.isPending}
+                  onPress={confirmDeletePlan}
+                >
+                  { (planToDelete?.active_subscriptions_count || 0) > 0 ||
+                  (planToDelete?.trial_subscriptions_count || 0) > 0
+                    ? 'Deactivate plan'
+                    : 'Delete plan' }
+                </FormButton>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       {/* Plan form — create / edit */}
       <SideSheet
         isOpen={planSheet.isOpen}
@@ -1779,14 +2440,19 @@ function PlatformConsole() {
               ]}
             />
           </FormField>
-          <FormField label="Price" required>
+          <FormField
+            label="Price"
+            required
+            hint="Numeric amount only — currency code is separate (no $ symbol)"
+          >
             <FormInput
               type="number"
+              min={0}
               value={planForm.price}
               onValueChange={(v) => setPlanForm((f) => ({ ...f, price: v }))}
             />
           </FormField>
-          <FormField label="Currency">
+          <FormField label="Currency" hint="e.g. TZS, USD, EUR">
             <FormInput
               value={planForm.currency}
               onValueChange={(v) => setPlanForm((f) => ({ ...f, currency: v }))}
