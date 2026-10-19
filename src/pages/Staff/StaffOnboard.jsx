@@ -28,6 +28,7 @@ import {
   ProgressChecklist,
   ToggleRow,
 } from '../../components/Form'
+import { copyText } from '../../utils/clipboard'
 import { toastError, toastSuccess } from '../../components/Toast'
 import { useAuth } from '../../auth'
 import {
@@ -185,7 +186,7 @@ function OnboardSuccess({ result, onAnother }) {
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(password)
+      await copyText(password)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {

@@ -14,6 +14,7 @@ import {
   FormSelect,
   FormTextarea,
 } from '../../components/Form'
+import { copyText } from '../../utils/clipboard'
 import { toastError, toastSuccess } from '../../components/Toast'
 import { useAuth } from '../../auth'
 import {
@@ -271,7 +272,7 @@ export default function Applications() {
       return
     }
     try {
-      await navigator.clipboard.writeText(applyUrl)
+      await copyText(applyUrl)
       toastSuccess('Join link copied')
     } catch {
       toastError('Could not copy link')
