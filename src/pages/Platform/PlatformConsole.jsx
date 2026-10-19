@@ -249,6 +249,7 @@ function PlatformConsole() {
         q: subSearch.trim() || undefined,
       }),
     enabled: section === 'subscriptions',
+    placeholderData: (prev) => prev,
   })
   const usersQ = useQuery({
     queryKey: ['platform', 'users'],
@@ -1524,32 +1525,6 @@ function PlatformConsole() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 sm:flex-row sm:items-center">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-                <FormInput
-                  value={subSearch}
-                  onValueChange={setSubSearch}
-                  placeholder="Search school, code, plan, admin…"
-                  classNames={{ inputWrapper: 'pl-8' }}
-                />
-              </div>
-              <FormSelect
-                placeholder="Status"
-                value={subStatusFilter || 'all'}
-                onChange={(v) => setSubStatusFilter(v === 'all' ? '' : v)}
-                options={[
-                  { value: 'all', label: 'All statuses' },
-                  { value: 'active', label: 'Active' },
-                  { value: 'trial', label: 'Trial' },
-                  { value: 'past_due', label: 'Past due' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                  { value: 'expired', label: 'Expired' },
-                ]}
-                className="sm:w-44"
-              />
-            </div>
-
             <p className="text-[12px] text-zinc-500">
               Showing onboarded tenants with a real subscription only. Bulk
               school-registry imports do not create subscriptions.
@@ -1566,6 +1541,26 @@ function PlatformConsole() {
                 isLoading={subsQ.isLoading}
                 emptyMessage="No real subscriptions yet. Register a school with a plan, or activate a tenant subscription."
                 enableRowSelection={false}
+                searchPlaceholder="Search school, code, plan, admin…"
+                search={subSearch}
+                onSearchChange={setSubSearch}
+                filters={[
+                  {
+                    key: 'status',
+                    label: 'Status',
+                    value: subStatusFilter,
+                    onChange: setSubStatusFilter,
+                    options: [
+                      { value: 'active', label: 'Active' },
+                      { value: 'trial', label: 'Trial' },
+                      { value: 'past_due', label: 'Past due' },
+                      { value: 'cancelled', label: 'Cancelled' },
+                      { value: 'expired', label: 'Expired' },
+                    ],
+                  },
+                ]}
+                onRefresh={() => subsQ.refetch()}
+                isRefreshing={subsQ.isFetching}
               />
             )}
           </div>

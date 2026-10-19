@@ -7,6 +7,7 @@ import {
   FormField,
   FormInput,
   FormSelect,
+  FormTextarea,
 } from '../../components/Form'
 import { toastError, toastSuccess } from '../../components/Toast'
 import { platformSettings, platformUpdateSettings } from '../../api/domain.js'
@@ -20,6 +21,21 @@ const CURRENCY_OPTIONS = [
   { value: 'UGX', label: 'UGX — Ugandan Shilling' },
 ]
 
+const emptyFooterColumns = () => [
+  {
+    title: 'Product',
+    linksText: 'Features|/features\nPricing|/#pricing\nRegister school|/register-school',
+  },
+  {
+    title: 'Company',
+    linksText: 'About|/#about\nContact|/#contact\nSupport|/#support',
+  },
+  {
+    title: 'Legal',
+    linksText: 'Privacy|/#privacy\nTerms|/#terms',
+  },
+]
+
 const emptyForm = () => ({
   app_name: '',
   support_email: '',
@@ -31,7 +47,41 @@ const emptyForm = () => ({
   password_min_length: '8',
   email_enabled: true,
   sms_enabled: false,
+  website_tagline: '',
+  website_subtitle: '',
+  website_phone: '',
+  website_address: '',
+  website_facebook: '',
+  website_twitter: '',
+  website_linkedin: '',
+  website_instagram: '',
+  website_copyright: '',
+  footer_columns: emptyFooterColumns(),
 })
+
+function columnsToForm(cols) {
+  if (!Array.isArray(cols) || !cols.length) return emptyFooterColumns()
+  return cols.map((c) => ({
+    title: c.title || '',
+    linksText: (c.links || [])
+      .map((l) => `${l.label || ''}|${l.href || ''}`)
+      .join('\n'),
+  }))
+}
+
+function formColumnsToPayload(cols) {
+  return (cols || []).map((c) => ({
+    title: (c.title || '').trim() || 'Links',
+    links: String(c.linksText || '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [label, href] = line.split('|').map((s) => s.trim())
+        return { label: label || 'Link', href: href || '#' }
+      }),
+  }))
+}
 
 function settingsToForm(settings = {}) {
   return {
@@ -53,6 +103,23 @@ function settingsToForm(settings = {}) {
     sms_enabled: Boolean(
       settings.sms_enabled ?? settings.notifications?.sms_enabled ?? false,
     ),
+    website_tagline: settings.website_tagline ?? settings.website?.tagline ?? '',
+    website_subtitle: settings.website_subtitle ?? settings.website?.subtitle ?? '',
+    website_phone: settings.website_phone ?? settings.website?.phone ?? '',
+    website_address: settings.website_address ?? settings.website?.address ?? '',
+    website_facebook:
+      settings.website_facebook ?? settings.website?.social?.facebook ?? '',
+    website_twitter:
+      settings.website_twitter ?? settings.website?.social?.twitter ?? '',
+    website_linkedin:
+      settings.website_linkedin ?? settings.website?.social?.linkedin ?? '',
+    website_instagram:
+      settings.website_instagram ?? settings.website?.social?.instagram ?? '',
+    website_copyright:
+      settings.website_copyright ?? settings.website?.copyright ?? '',
+    footer_columns: columnsToForm(
+      settings.website_footer_columns ?? settings.website?.footer_columns,
+    ),
   }
 }
 
@@ -68,6 +135,16 @@ function formToPayload(form) {
     password_min_length: Number(form.password_min_length) || 8,
     email_enabled: Boolean(form.email_enabled),
     sms_enabled: Boolean(form.sms_enabled),
+    website_tagline: form.website_tagline.trim(),
+    website_subtitle: form.website_subtitle.trim(),
+    website_phone: form.website_phone.trim(),
+    website_address: form.website_address.trim(),
+    website_facebook: form.website_facebook.trim(),
+    website_twitter: form.website_twitter.trim(),
+    website_linkedin: form.website_linkedin.trim(),
+    website_instagram: form.website_instagram.trim(),
+    website_copyright: form.website_copyright.trim(),
+    website_footer_columns: formColumnsToPayload(form.footer_columns),
   }
 }
 
@@ -146,6 +223,34 @@ export default function GeneralSettings({ onOpenTanzaniaSchools }) {
     )
   }
 
+  const setFooterCol = (idx, key, value) => {
+    setForm((prev) => {
+      const cols = [...(prev.footer_columns || [])]
+      cols[idx] = { ...cols[idx], [key]: value }
+      return { ...prev, footer_columns: cols }
+    })
+    setDirty(true)
+  }
+
+  const addFooterCol = () => {
+    setForm((prev) => ({
+      ...prev,
+      footer_columns: [
+        ...(prev.footer_columns || []),
+        { title: 'New column', linksText: 'Label|/path' },
+      ],
+    }))
+    setDirty(true)
+  }
+
+  const removeFooterCol = (idx) => {
+    setForm((prev) => ({
+      ...prev,
+      footer_columns: (prev.footer_columns || []).filter((_, i) => i !== idx),
+    }))
+    setDirty(true)
+  }
+
   return (
     <div className="space-y-4">
       {/* Branding & contact */}
@@ -174,6 +279,128 @@ export default function GeneralSettings({ onOpenTanzaniaSchools }) {
               placeholder="support@shengena.app"
             />
           </FormField>
+        </div>
+      </section>
+
+      {/* Public website & footer */}
+      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-zinc-900">
+            Public website & footer
+          </h3>
+          <p className="mt-0.5 text-[12px] text-zinc-500">
+            Hero copy, contact details and multi-column footer on the marketing site
+            (home, features, pricing). Changes appear after save — no redeploy.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <FormField label="Hero tagline" className="sm:col-span-2">
+            <FormInput
+              value={form.website_tagline}
+              onValueChange={(v) => setField('website_tagline', v)}
+              placeholder="One classroom, one system."
+            />
+          </FormField>
+          <FormField label="Hero subtitle" className="sm:col-span-2">
+            <FormTextarea
+              value={form.website_subtitle}
+              onValueChange={(v) => setField('website_subtitle', v)}
+              placeholder="Shengena gives private schools…"
+            />
+          </FormField>
+          <FormField label="Public phone">
+            <FormInput
+              value={form.website_phone}
+              onValueChange={(v) => setField('website_phone', v)}
+              placeholder="+255 …"
+            />
+          </FormField>
+          <FormField label="Address">
+            <FormInput
+              value={form.website_address}
+              onValueChange={(v) => setField('website_address', v)}
+              placeholder="Dar es Salaam, Tanzania"
+            />
+          </FormField>
+          <FormField label="Facebook URL">
+            <FormInput
+              value={form.website_facebook}
+              onValueChange={(v) => setField('website_facebook', v)}
+            />
+          </FormField>
+          <FormField label="X / Twitter URL">
+            <FormInput
+              value={form.website_twitter}
+              onValueChange={(v) => setField('website_twitter', v)}
+            />
+          </FormField>
+          <FormField label="LinkedIn URL">
+            <FormInput
+              value={form.website_linkedin}
+              onValueChange={(v) => setField('website_linkedin', v)}
+            />
+          </FormField>
+          <FormField label="Instagram URL">
+            <FormInput
+              value={form.website_instagram}
+              onValueChange={(v) => setField('website_instagram', v)}
+            />
+          </FormField>
+          <FormField
+            label="Copyright line"
+            hint="Use {year} for the current year"
+            className="sm:col-span-2"
+          >
+            <FormInput
+              value={form.website_copyright}
+              onValueChange={(v) => setField('website_copyright', v)}
+              placeholder="© {year} Shengena. All rights reserved."
+            />
+          </FormField>
+        </div>
+
+        <div className="mt-5 border-t border-zinc-100 pt-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-zinc-900">Footer columns</p>
+              <p className="text-[12px] text-zinc-500">
+                One link per line as <code className="text-[11px]">Label|path</code> (e.g.{' '}
+                <code className="text-[11px]">Features|/features</code>).
+              </p>
+            </div>
+            <FormButton size="sm" appearance="bordered" onPress={addFooterCol}>
+              Add column
+            </FormButton>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {(form.footer_columns || []).map((col, idx) => (
+              <div
+                key={idx}
+                className="rounded-lg border border-zinc-100 bg-zinc-50/60 p-3"
+              >
+                <FormField label="Column title">
+                  <FormInput
+                    value={col.title}
+                    onValueChange={(v) => setFooterCol(idx, 'title', v)}
+                  />
+                </FormField>
+                <FormField label="Links" className="mt-2">
+                  <FormTextarea
+                    value={col.linksText}
+                    onValueChange={(v) => setFooterCol(idx, 'linksText', v)}
+                    placeholder={'Features|/features\nPricing|/#pricing'}
+                  />
+                </FormField>
+                <button
+                  type="button"
+                  className="mt-2 text-[11px] font-medium text-rose-600 hover:underline"
+                  onClick={() => removeFooterCol(idx)}
+                >
+                  Remove column
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

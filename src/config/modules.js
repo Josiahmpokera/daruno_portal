@@ -261,9 +261,10 @@ export const modules = [
     shortLabel: 'Staff',
     path: '/staff',
     hasPanel: true,
-    description: 'Non-teaching staff, departments, contracts, payroll link',
+    description: 'Staff HR: onboarding, contracts, attendance, leave, payroll',
     features: [
       { label: 'All Staff', path: '/staff' },
+      { label: 'Onboard Staff', path: '/staff/onboard' },
       { label: 'Profiles', path: '/staff/profiles' },
       {
         type: 'group',
@@ -1102,6 +1103,7 @@ export const navHubs = [
         title: 'Directory',
         items: [
           { type: 'link', label: 'All Staff', path: '/staff' },
+          { type: 'link', label: 'Onboard Staff', path: '/staff/onboard' },
           { type: 'link', label: 'Profiles', path: '/staff/profiles' },
         ],
       },

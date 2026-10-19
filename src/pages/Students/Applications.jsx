@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Chip, Spinner, useDisclosure } from '@heroui/react'
-import { Check, Copy, Plus, RefreshCw, Search, X } from 'lucide-react'
+import { Check, Copy, Plus, Search, X } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
@@ -80,6 +80,7 @@ export default function Applications() {
         status: status || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const classesQ = useQuery({
@@ -348,43 +349,32 @@ export default function Applications() {
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <div className="relative min-w-[180px] flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-            <FormInput
-              value={q}
-              onValueChange={setQ}
-              placeholder="Search name, app #, phone…"
-              classNames={{ inputWrapper: 'pl-8' }}
-            />
-          </div>
-          <FormSelect
-            className="w-40"
-            placeholder="Status"
-            value={status || 'all'}
-            onChange={(v) => setStatus(v === 'all' ? '' : v)}
-            options={[
-              { value: 'all', label: 'All statuses' },
-              { value: 'pending', label: 'Pending' },
-              { value: 'approved', label: 'Approved' },
-              { value: 'enrolled', label: 'Enrolled' },
-              { value: 'rejected', label: 'Rejected' },
-            ]}
-          />
-          <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-            <RefreshCw className="mr-1 h-3.5 w-3.5" />
-            Refresh
-          </FormButton>
-        </div>
-
         <DataTable
           columns={columns}
           data={listQ.data?.applications || []}
           isLoading={listQ.isLoading}
           emptyMessage="No applications yet — share the public join link"
           enableRowSelection={false}
-          hideTopToolbar
           maxHeight="min(55vh, 480px)"
+          searchPlaceholder="Search name, app #, phone…"
+          search={q}
+          onSearchChange={setQ}
+          filters={[
+            {
+              key: 'status',
+              label: 'Status',
+              value: status,
+              onChange: setStatus,
+              options: [
+                { value: 'pending', label: 'Pending' },
+                { value: 'approved', label: 'Approved' },
+                { value: 'enrolled', label: 'Enrolled' },
+                { value: 'rejected', label: 'Rejected' },
+              ],
+            },
+          ]}
+          onRefresh={() => listQ.refetch()}
+          isRefreshing={listQ.isFetching}
         />
 
         {/* Create application */}

@@ -76,10 +76,17 @@ export function normalizeSession(payload) {
 
   // /me returns { user } without token — merge handled by caller
   const access_token = raw.access_token || raw.token || null
-  const user = raw.user || null
+  let user = raw.user || null
   if (!access_token && !user) return null
 
-  const school = user?.school || raw.school || null
+  let school = user?.school || raw.school || null
+  // Registration may attach subscription/invoice alongside the token payload
+  if (school && raw.subscription && !school.subscription) {
+    school = { ...school, subscription: raw.subscription }
+  }
+  if (user && school) {
+    user = { ...user, school }
+  }
   const audience = audienceFromUser(user) || raw.audience || null
   const expires_in =
     raw.expires_in != null && raw.expires_in !== ''
@@ -97,6 +104,10 @@ export function normalizeSession(payload) {
         ? saved_at + expires_in * 1000
         : raw.expires_at ?? null,
     audience,
+    // Preserve registration extras for one-shot UI (trial toast, invoice)
+    subscription: raw.subscription || school?.subscription || null,
+    invoice: raw.invoice || null,
+    registration_mode: raw.registration_mode || null,
     user: user
       ? {
           id: user.id,
@@ -119,9 +130,15 @@ export function normalizeSession(payload) {
                   ? school.education_stages
                   : [],
                 education_level: school.education_level ?? null,
+                status: school.status ?? null,
               }
             : null,
           school_id: user.school_id ?? school?.id ?? null,
+          // RBAC area map from the API: { finance: { read, write }, ... }
+          permissions:
+            user.permissions && typeof user.permissions === 'object'
+              ? user.permissions
+              : null,
         }
       : null,
     school: school
@@ -134,6 +151,7 @@ export function normalizeSession(payload) {
             ? school.education_stages
             : [],
           education_level: school.education_level ?? null,
+          status: school.status ?? null,
         }
       : null,
     saved_at,

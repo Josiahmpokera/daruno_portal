@@ -19,6 +19,7 @@ import {
   isSchoolSession,
   AUDIENCE,
 } from '../auth/sessionStorage.js'
+import { AUTH_TIMEOUT_MS, fetchWithTimeout } from './http.js'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || ''
 
@@ -119,19 +120,13 @@ const request = async (path, options = {}) => {
     ...(options.headers || {}),
   }
 
-  let response
-  try {
-    response = await fetch(buildUrl(path), {
-      ...options,
-      headers,
-    })
-  } catch {
-    const error = new Error(
-      'Cannot reach API. Is the backend running on VITE_BASE_URL?',
-    )
-    error.status = 0
-    throw error
-  }
+  // Sign-in must never spin forever: fail with a clear message after AUTH_TIMEOUT_MS
+  const { token: _token, ...fetchOptions } = options
+  const response = await fetchWithTimeout(buildUrl(path), {
+    timeout: AUTH_TIMEOUT_MS,
+    ...fetchOptions,
+    headers,
+  })
 
   const contentType = response.headers.get('content-type') || ''
   const isJson = contentType.includes('application/json')

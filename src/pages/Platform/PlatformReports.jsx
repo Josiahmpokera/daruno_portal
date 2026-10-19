@@ -186,7 +186,9 @@ function reportTableProps(extra = {}) {
   const { tableOptions: extraTableOptions, ...rest } = extra
   return {
     enableRowSelection: false,
-    hideTopToolbar: true,
+    // Search inside the table card; report-level filters above drive charts + table
+    filters: false,
+    searchPlaceholder: 'Search this report…',
     maxHeight: TABLE_MAX,
     initialState: { density: 'xs', pagination: { pageSize: 25, pageIndex: 0 } },
     tableOptions: {

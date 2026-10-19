@@ -1,4 +1,5 @@
 import { api, buildUrl, getAuthHeaders } from './client.js'
+import { fetchWithTimeout } from './http.js'
 
 // ── Super Admin Platform ──────────────────────────────────────────
 export const platformDashboard = () => api.get('/api/v1/platform/dashboard')
@@ -28,6 +29,19 @@ export const platformDeletePlan = (id) =>
 
 /** Public marketing pricing — active plans only (no auth). */
 export const publicPricingPlans = () => api.get('/api/v1/pricing/plans')
+/** Public marketing site content (footer, contact, branding). */
+export const getPublicSite = () => api.get('/api/v1/public/site')
+/** Public school directory search (registration typeahead). */
+export const searchRegistrySchools = (params = {}) => {
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+  return api.get(`/api/v1/auth/register-school/search${q ? `?${q}` : ''}`)
+}
 
 // ── Super Admin Platform Reports ─────────────────────────────────
 const reportQuery = (params = {}) =>
@@ -277,18 +291,61 @@ export const publicSubmitApplication = (code, payload) =>
     payload,
   )
 
-// ── Staff (non-teaching) ──────────────────────────────────────────
-export const listStaff = (params = {}) => {
-  const q = new URLSearchParams(
+// ── Staff HR (directory, onboarding, contracts, leave…) ───────────
+const staffQ = (params = {}) =>
+  new URLSearchParams(
     Object.fromEntries(
       Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''),
     ),
   ).toString()
+
+export const getStaffOverview = () => api.get('/api/v1/staff/overview')
+export const listStaff = (params = {}) => {
+  const q = staffQ(params)
   return api.get(`/api/v1/staff${q ? `?${q}` : ''}`)
 }
+export const getStaff = (id) => api.get(`/api/v1/staff/${id}`)
 export const createStaff = (payload) => api.post('/api/v1/staff', payload)
+export const onboardStaff = (payload) => api.post('/api/v1/staff/onboard', payload)
 export const updateStaff = (id, payload) => api.patch(`/api/v1/staff/${id}`, payload)
 export const deleteStaff = (id) => api.delete(`/api/v1/staff/${id}`)
+
+export const listStaffContracts = (params = {}) => {
+  const q = staffQ(params)
+  return api.get(`/api/v1/staff/contracts${q ? `?${q}` : ''}`)
+}
+export const createStaffContract = (payload) => api.post('/api/v1/staff/contracts', payload)
+export const updateStaffContract = (id, payload) =>
+  api.patch(`/api/v1/staff/contracts/${id}`, payload)
+
+export const listStaffDocuments = (params = {}) => {
+  const q = staffQ(params)
+  return api.get(`/api/v1/staff/documents${q ? `?${q}` : ''}`)
+}
+export const createStaffDocument = (payload) => api.post('/api/v1/staff/documents', payload)
+export const deleteStaffDocument = (id) => api.delete(`/api/v1/staff/documents/${id}`)
+
+export const listStaffLeave = (params = {}) => {
+  const q = staffQ(params)
+  return api.get(`/api/v1/staff/leave${q ? `?${q}` : ''}`)
+}
+export const createStaffLeave = (payload) => api.post('/api/v1/staff/leave', payload)
+export const approveStaffLeave = (id) => api.post(`/api/v1/staff/leave/${id}/approve`, {})
+export const rejectStaffLeave = (id, payload = {}) =>
+  api.post(`/api/v1/staff/leave/${id}/reject`, payload)
+
+export const listStaffAttendance = (params = {}) => {
+  const q = staffQ(params)
+  return api.get(`/api/v1/staff/attendance${q ? `?${q}` : ''}`)
+}
+export const getStaffAttendanceRoster = (params = {}) => {
+  const q = staffQ(params)
+  return api.get(`/api/v1/staff/attendance/roster${q ? `?${q}` : ''}`)
+}
+export const markStaffAttendance = (payload) =>
+  api.post('/api/v1/staff/attendance/mark', payload)
+
+export const getStaffPayroll = () => api.get('/api/v1/staff/payroll')
 
 export const listDepartments = () => api.get('/api/v1/staff-departments')
 export const createDepartment = (payload) => api.post('/api/v1/staff-departments', payload)
@@ -388,7 +445,48 @@ export const updateTeacherAllocation = (id, payload) =>
 export const deleteTeacherAllocation = (id) =>
   api.delete(`/api/v1/academic/teacher-allocations/${id}`)
 
+// ── Grading system (TAMISEMI / NECTA) ─────────────────────────────
+export const listGradingSystems = () => api.get('/api/v1/academic/grading')
+export const createGradingSystem = (payload) =>
+  api.post('/api/v1/academic/grading', payload)
+export const updateGradingSystem = (id, payload) =>
+  api.patch(`/api/v1/academic/grading/${id}`, payload)
+export const deleteGradingSystem = (id) =>
+  api.delete(`/api/v1/academic/grading/${id}`)
+export const setDefaultGradingSystem = (id) =>
+  api.post(`/api/v1/academic/grading/${id}/default`, {})
+export const previewGrading = (payload) =>
+  api.post('/api/v1/academic/grading/preview', payload)
+
+// ── Curriculum frameworks ─────────────────────────────────────────
+export const listCurricula = () => api.get('/api/v1/academic/curriculum')
+export const getCurriculum = (id) => api.get(`/api/v1/academic/curriculum/${id}`)
+export const createCurriculum = (payload) =>
+  api.post('/api/v1/academic/curriculum', payload)
+export const updateCurriculum = (id, payload) =>
+  api.patch(`/api/v1/academic/curriculum/${id}`, payload)
+export const deleteCurriculum = (id) =>
+  api.delete(`/api/v1/academic/curriculum/${id}`)
+export const createCurriculumTopic = (curriculumId, payload) =>
+  api.post(`/api/v1/academic/curriculum/${curriculumId}/topics`, payload)
+export const updateCurriculumTopic = (topicId, payload) =>
+  api.patch(`/api/v1/academic/curriculum/topics/${topicId}`, payload)
+export const deleteCurriculumTopic = (topicId) =>
+  api.delete(`/api/v1/academic/curriculum/topics/${topicId}`)
+
 // ── Finance ───────────────────────────────────────────────────────
+export const getFinanceOverview = (params = {}) => {
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+  return api.get(`/api/v1/finance/overview${q ? `?${q}` : ''}`)
+}
+export const getFinanceSetupStatus = () =>
+  api.get('/api/v1/finance/setup-status')
 export const listFeeCategories = () => api.get('/api/v1/finance/categories')
 export const createFeeCategory = (payload) => api.post('/api/v1/finance/categories', payload)
 export const listFeeStructures = (params = {}) => {
@@ -396,6 +494,8 @@ export const listFeeStructures = (params = {}) => {
   return api.get(`/api/v1/finance/structures${q ? `?${q}` : ''}`)
 }
 export const createFeeStructure = (payload) => api.post('/api/v1/finance/structures', payload)
+export const updateFeeStructure = (id, payload) =>
+  api.patch(`/api/v1/finance/structures/${id}`, payload)
 export const listInvoices = (params = {}) => {
   const q = new URLSearchParams(params).toString()
   return api.get(`/api/v1/finance/invoices${q ? `?${q}` : ''}`)
@@ -429,8 +529,16 @@ export const listStudentFees = (params = {}) => {
   ).toString()
   return api.get(`/api/v1/finance/student-fees${q ? `?${q}` : ''}`)
 }
-export const getStudentFees = (id) =>
-  api.get(`/api/v1/finance/student-fees/${id}`)
+export const getStudentFees = (id, params = {}) => {
+  const q = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== '',
+      ),
+    ),
+  ).toString()
+  return api.get(`/api/v1/finance/student-fees/${id}${q ? `?${q}` : ''}`)
+}
 
 const financeQ = (params = {}) =>
   new URLSearchParams(
@@ -728,6 +836,34 @@ export const gradeAssignmentSubmission = (id, payload) =>
 export const getHomeworkOverview = () => api.get('/api/v1/homework/overview')
 export const getHomeworkReports = () => api.get('/api/v1/homework/reports')
 
+// ── Promotions (TAMISEMI end-of-year) ─────────────────────────────
+export const getPromotionsOverview = () =>
+  api.get('/api/v1/promotions/overview')
+export const listPromotionRules = () => api.get('/api/v1/promotions/rules')
+export const createPromotionRule = (payload) =>
+  api.post('/api/v1/promotions/rules', payload)
+export const updatePromotionRule = (id, payload) =>
+  api.patch(`/api/v1/promotions/rules/${id}`, payload)
+export const deletePromotionRule = (id) =>
+  api.delete(`/api/v1/promotions/rules/${id}`)
+export const listPromotionCandidates = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/promotions/candidates${q ? `?${q}` : ''}`)
+}
+export const runAutomaticPromotion = (payload) =>
+  api.post('/api/v1/promotions/run/automatic', payload)
+export const runManualPromotion = (payload) =>
+  api.post('/api/v1/promotions/run/manual', payload)
+export const runRepeatClass = (payload) =>
+  api.post('/api/v1/promotions/run/repeat', payload)
+export const listPromotionRuns = () => api.get('/api/v1/promotions/runs')
+export const getPromotionRun = (id) =>
+  api.get(`/api/v1/promotions/runs/${id}`)
+export const getPromotionReports = (params = {}) => {
+  const q = financeQ(params)
+  return api.get(`/api/v1/promotions/reports${q ? `?${q}` : ''}`)
+}
+
 // ── System (school reports, users, compliance, admin) ─────────────
 const schoolQ = (params = {}) => toQuery(params)
 
@@ -893,7 +1029,8 @@ export async function fetchReportCardHtml(params) {
   // HTML responses should not force Content-Type: application/json semantics
   delete headers['Content-Type']
 
-  const response = await fetch(reportCardHtmlUrl(params), { headers })
+  // Report card rendering can be slow for large classes — allow longer than the default
+  const response = await fetchWithTimeout(reportCardHtmlUrl(params), { headers, timeout: 60_000 })
   const text = await response.text()
 
   if (!response.ok) {
@@ -1073,3 +1210,50 @@ export async function openReportCardHtml(paramsOrList) {
 
   return { opened: htmlParts.length, total: list.length }
 }
+
+// ── Communication: parent messaging, announcements, notice board ──
+
+const commQuery = (params = {}) => {
+  const usp = new URLSearchParams()
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === '') return
+    if (Array.isArray(v)) v.forEach((x) => usp.append(`${k}[]`, String(x)))
+    else usp.append(k, String(v))
+  })
+  const q = usp.toString()
+  return q ? `?${q}` : ''
+}
+
+export const getCommunicationOverview = () => api.get('/api/v1/communication/overview')
+export const getCommunicationChannels = () => api.get('/api/v1/communication/channels')
+export const searchMessageRecipients = (q) =>
+  api.get(`/api/v1/communication/recipients${commQuery({ q })}`)
+
+export const listParentThreads = (params = {}) =>
+  api.get(`/api/v1/communication/threads${commQuery(params)}`)
+export const getParentThread = (id) => api.get(`/api/v1/communication/threads/${id}`)
+export const createParentThread = (payload) => api.post('/api/v1/communication/threads', payload)
+export const updateParentThread = (id, payload) =>
+  api.patch(`/api/v1/communication/threads/${id}`, payload)
+export const sendParentMessage = (id, payload) =>
+  api.post(`/api/v1/communication/threads/${id}/messages`, payload)
+export const logParentReply = (id, payload) =>
+  api.post(`/api/v1/communication/threads/${id}/inbound`, payload)
+
+export const listAnnouncements = (params = {}) =>
+  api.get(`/api/v1/communication/announcements${commQuery(params)}`)
+export const getAnnouncement = (id) => api.get(`/api/v1/communication/announcements/${id}`)
+export const createAnnouncement = (payload) => api.post('/api/v1/communication/announcements', payload)
+export const updateAnnouncement = (id, payload) =>
+  api.patch(`/api/v1/communication/announcements/${id}`, payload)
+export const publishAnnouncement = (id) =>
+  api.post(`/api/v1/communication/announcements/${id}/publish`, {})
+export const archiveAnnouncement = (id) =>
+  api.post(`/api/v1/communication/announcements/${id}/archive`, {})
+export const deleteAnnouncement = (id) => api.delete(`/api/v1/communication/announcements/${id}`)
+export const previewAudience = (params) =>
+  api.get(`/api/v1/communication/audience-preview${commQuery(params)}`)
+export const getNoticeBoard = (params = {}) =>
+  api.get(`/api/v1/communication/notice-board${commQuery(params)}`)
+export const getDeliveryLog = (params) =>
+  api.get(`/api/v1/communication/delivery-log${commQuery(params)}`)

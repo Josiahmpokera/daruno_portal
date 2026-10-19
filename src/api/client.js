@@ -4,6 +4,7 @@ import {
   saveAuth,
   getAccessToken,
 } from './auth.js'
+import { fetchWithTimeout } from './http.js'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || ''
 
@@ -66,21 +67,11 @@ export async function apiRequest(path, options = {}) {
     }
   })
 
-  let response
-  try {
-    response = await fetch(buildUrl(path), {
-      ...options,
-      headers,
-    })
-  } catch (networkError) {
-    const error = new Error(
-      networkError?.message?.includes('fetch')
-        ? 'Cannot reach API. Check that the backend is running and VITE_BASE_URL is correct.'
-        : networkError.message || 'Network error',
-    )
-    error.status = 0
-    throw error
-  }
+  // Times out (status 0, code TIMEOUT) instead of hanging when the API is unreachable
+  const response = await fetchWithTimeout(buildUrl(path), {
+    ...options,
+    headers,
+  })
 
   const contentType = response.headers.get('content-type') || ''
   const isJson = contentType.includes('application/json')

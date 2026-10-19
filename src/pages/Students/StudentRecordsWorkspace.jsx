@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, Spinner, useDisclosure } from '@heroui/react'
-import { Plus, RefreshCw, Search } from 'lucide-react'
+import { Chip, useDisclosure } from '@heroui/react'
+import { Plus, Search } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
@@ -95,6 +95,7 @@ function ParentsSection() {
         relationship: relationship || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -226,47 +227,37 @@ function ParentsSection() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search guardian or student…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-40"
-          placeholder="Relationship"
-          value={relationship || 'all'}
-          onChange={(v) => setRelationship(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All' },
-            { value: 'father', label: 'Father' },
-            { value: 'mother', label: 'Mother' },
-            { value: 'guardian', label: 'Guardian' },
-            { value: 'other', label: 'Other' },
-          ]}
-        />
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-        <FormButton onPress={openCreate}>
-          <Plus className="mr-1 h-3.5 w-3.5" />
-          Add guardian
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.guardians || []}
         isLoading={listQ.isLoading}
         emptyMessage="No parents or guardians yet"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search guardian or student…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'relationship',
+            label: 'Relationship',
+            value: relationship,
+            onChange: setRelationship,
+            options: [
+              { value: 'father', label: 'Father' },
+              { value: 'mother', label: 'Mother' },
+              { value: 'guardian', label: 'Guardian' },
+              { value: 'other', label: 'Other' },
+            ],
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton className="h-8 min-h-8" startContent={<Plus className="h-3.5 w-3.5" />} onPress={openCreate}>
+            Add guardian
+          </FormButton>
+        }
       />
 
       <SideSheet
@@ -397,6 +388,7 @@ function MedicalSection() {
     queryKey: ['students', 'medical', q],
     queryFn: () =>
       listMedicalRecords({ q: q || undefined, per_page: 50, include_all: 1 }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -500,30 +492,18 @@ function MedicalSection() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search student…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.records || []}
         isLoading={listQ.isLoading}
         emptyMessage="No medical records"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search student…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
       />
 
       <SideSheet
@@ -630,6 +610,7 @@ function PreviousSchoolSection() {
         has_previous: hasPrevious || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -721,41 +702,30 @@ function PreviousSchoolSection() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search student or school…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-44"
-          placeholder="Filter"
-          value={hasPrevious || 'all'}
-          onChange={(v) => setHasPrevious(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All students' },
-            { value: 'yes', label: 'Has previous school' },
-            { value: 'no', label: 'No previous school' },
-          ]}
-        />
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.students || []}
         isLoading={listQ.isLoading}
         emptyMessage="No students found"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search student or school…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'has_previous',
+            label: 'Previous school',
+            value: hasPrevious,
+            onChange: setHasPrevious,
+            options: [
+              { value: 'yes', label: 'Has previous school' },
+              { value: 'no', label: 'No previous school' },
+            ],
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
       />
 
       <SideSheet
@@ -837,6 +807,7 @@ function DocumentsSection() {
         document_type: docType || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const types = listQ.data?.document_types || [
@@ -979,47 +950,32 @@ function DocumentsSection() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search document or student…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-48"
-          placeholder="Type"
-          value={docType || 'all'}
-          onChange={(v) => setDocType(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All types' },
-            ...types.map((t) => ({
-              value: t,
-              label: t.replaceAll('_', ' '),
-            })),
-          ]}
-        />
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-        <FormButton onPress={openCreate}>
-          <Plus className="mr-1 h-3.5 w-3.5" />
-          Add document
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.documents || []}
         isLoading={listQ.isLoading}
         emptyMessage="No documents recorded"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search document or student…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'doc_type',
+            label: 'Type',
+            value: docType,
+            onChange: setDocType,
+            options: types.map((t) => ({ value: t, label: t.replaceAll('_', ' ') })),
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton className="h-8 min-h-8" startContent={<Plus className="h-3.5 w-3.5" />} onPress={openCreate}>
+            Add document
+          </FormButton>
+        }
       />
 
       <SideSheet
@@ -1161,6 +1117,7 @@ function StatusSection() {
         status: statusFilter || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const bulkMut = useMutation({
@@ -1307,56 +1264,6 @@ function StatusSection() {
         })}
       </div>
 
-      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-zinc-200 bg-white p-2.5">
-        <div className="relative min-w-[180px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search students…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-40"
-          placeholder="Filter status"
-          value={statusFilter || 'all'}
-          onChange={(v) => setStatusFilter(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All statuses' },
-            { value: 'active', label: 'Active' },
-            { value: 'transferred', label: 'Transferred' },
-            { value: 'graduated', label: 'Graduated' },
-            { value: 'inactive', label: 'Inactive' },
-          ]}
-        />
-        <FormSelect
-          className="w-40"
-          placeholder="Bulk status"
-          value={bulkStatus}
-          onChange={setBulkStatus}
-          options={[
-            { value: 'active', label: 'Active' },
-            { value: 'transferred', label: 'Transferred' },
-            { value: 'graduated', label: 'Graduated' },
-            { value: 'inactive', label: 'Inactive' },
-          ]}
-        />
-        <FormButton
-          isDisabled={!selectedIds.length || bulkMut.isPending}
-          isLoading={bulkMut.isPending}
-          onPress={() => {
-            if (!selectedIds.length) {
-              toastError('Select at least one student')
-              return
-            }
-            bulkMut.mutate({ ids: selectedIds, status: bulkStatus })
-          }}
-        >
-          Apply to {selectedIds.length || 0} selected
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.students || []}
@@ -1367,7 +1274,51 @@ function StatusSection() {
         onRowSelectionChange={setRowSelection}
         getRowId={(row) => String(row.id)}
         maxHeight="min(50vh, 440px)"
-        hideTopToolbar={false}
+        searchPlaceholder="Search students…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'status',
+            label: 'Status',
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: 'active', label: 'Active' },
+              { value: 'transferred', label: 'Transferred' },
+              { value: 'graduated', label: 'Graduated' },
+              { value: 'inactive', label: 'Inactive' },
+            ],
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        renderBulkActions={() => (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] text-zinc-500">Change status to</span>
+            <div className="w-36">
+              <FormSelect
+                placeholder="Bulk status"
+                value={bulkStatus}
+                onChange={setBulkStatus}
+                options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'transferred', label: 'Transferred' },
+                  { value: 'graduated', label: 'Graduated' },
+                  { value: 'inactive', label: 'Inactive' },
+                ]}
+              />
+            </div>
+            <FormButton
+              className="h-8 min-h-8"
+              isDisabled={!selectedIds.length || bulkMut.isPending || !bulkStatus}
+              isLoading={bulkMut.isPending}
+              onPress={() => bulkMut.mutate({ ids: selectedIds, status: bulkStatus })}
+            >
+              Apply
+            </FormButton>
+          </div>
+        )}
       />
     </>
   )

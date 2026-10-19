@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Chip, Spinner } from '@heroui/react'
-import { Search, RefreshCw, Hash } from 'lucide-react'
+import { Chip } from '@heroui/react'
+import { Search, Hash } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import DataTable from '../../components/Tables/DataTable.jsx'
-import { FormInput, FormSelect, FormButton } from '../../components/Form'
+import { FormButton } from '../../components/Form'
 import { listStudents } from '../../api/domain.js'
 
 /**
@@ -26,6 +26,7 @@ function AdmissionNumbers() {
         status: statusFilter || undefined,
         per_page: 100,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const students = studentsQ.data?.students || []
@@ -125,47 +126,7 @@ function AdmissionNumbers() {
           }
         />
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <FormInput
-            isClearable
-            className="w-full sm:max-w-xs"
-            placeholder="Search name or admission no..."
-            startContent={<Search className="h-4 w-4 text-zinc-400" />}
-            value={q}
-            onValueChange={setQ}
-          />
-          <FormSelect
-            placeholder="Status"
-            className="w-full sm:w-40"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={[
-              { value: 'active', label: 'Active' },
-              { value: 'transferred', label: 'Transferred' },
-              { value: 'graduated', label: 'Graduated' },
-              { value: 'inactive', label: 'Inactive' },
-            ]}
-          />
-          <FormButton
-            appearance="flat"
-            isIconOnly
-            onPress={() => studentsQ.refetch()}
-          >
-            <RefreshCw className="h-4 w-4" />
-          </FormButton>
-          <span className="text-[11px] text-zinc-400 sm:ml-auto">
-            {studentsQ.data?.meta?.total ?? students.length} learner(s)
-            {missingCount > 0
-              ? ` · ${missingCount} without admission no.`
-              : ''}
-          </span>
-        </div>
-
-        {studentsQ.isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner color="primary" />
-          </div>
-        ) : studentsQ.isError ? (
+        {studentsQ.isError && !studentsQ.data ? (
           <p className="py-8 text-center text-sm text-rose-600">
             {studentsQ.error?.message || 'Failed to load admission numbers'}
           </p>
@@ -173,14 +134,37 @@ function AdmissionNumbers() {
           <DataTable
             columns={columns}
             data={students}
+            isLoading={studentsQ.isLoading}
             emptyMessage="No students found. Register a learner to generate an admission number."
+            searchPlaceholder="Search name or admission no…"
+            search={q}
+            onSearchChange={setQ}
+            filters={[
+              {
+                key: 'status',
+                label: 'Status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                options: [
+                  { value: 'active', label: 'Active' },
+                  { value: 'transferred', label: 'Transferred' },
+                  { value: 'graduated', label: 'Graduated' },
+                  { value: 'inactive', label: 'Inactive' },
+                ],
+              },
+            ]}
+            onRefresh={() => studentsQ.refetch()}
+            isRefreshing={studentsQ.isFetching}
+            toolbarActions={
+              <span className="whitespace-nowrap text-[11px] text-zinc-500">
+                {studentsQ.data?.meta?.total ?? students.length} learner(s)
+                {missingCount > 0 ? ` · ${missingCount} without admission no.` : ''}
+              </span>
+            }
             enableRowSelection
             getRowId={(row) => String(row.id)}
-            renderBulkActions={(selected, { clearSelection }) => (
+            renderBulkActions={(selected) => (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] text-zinc-500">
-                  {selected.length} selected
-                </span>
                 <FormButton
                   appearance="bordered"
                   className="!h-7 min-h-7 text-[11px]"
@@ -192,13 +176,6 @@ function AdmissionNumbers() {
                   isDisabled={selected.length !== 1}
                 >
                   Open profile
-                </FormButton>
-                <FormButton
-                  appearance="light"
-                  className="!h-7 min-h-7 text-[11px]"
-                  onPress={clearSelection}
-                >
-                  Clear
                 </FormButton>
               </div>
             )}

@@ -3,6 +3,8 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardBody, Chip, Spinner, Switch, useDisclosure } from '@heroui/react'
 import {
+  Award,
+  BookMarked,
   BookOpen,
   Bookmark,
   CalendarDays,
@@ -67,12 +69,25 @@ import {
   ClassAssignmentPanel,
   TeacherAllocationPanel,
 } from './SubjectManagement.jsx'
+import { CurriculumPanel, GradingPanel } from './GradingCurriculum.jsx'
 
 const sectionMeta = {
   '/academic': {
     title: 'Academic Setup',
-    description: 'Years, terms, levels, streams, classes and subjects',
+    description: 'Years, terms, levels, streams, classes, curriculum and grading',
     section: 'overview',
+  },
+  '/academic/curriculum': {
+    title: 'Curriculum',
+    description:
+      'TAMISEMI curriculum frameworks: subjects and topics by education stage',
+    section: 'curriculum',
+  },
+  '/academic/grading': {
+    title: 'Grading System',
+    description:
+      'NECTA / primary grade bands, pass marks and grade points for exams & report cards',
+    section: 'grading',
   },
   '/academic/years': {
     title: 'Academic Years',
@@ -373,41 +388,21 @@ function CatalogShell({
           {error || message}
         </p>
       )}
-      <div className="flex justify-end">
-        <FormButton
-          startContent={<Plus className="h-4 w-4" />}
-          onPress={onAdd}
-        >
-          {addLabel}
-        </FormButton>
-      </div>
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Spinner color="primary" />
-        </div>
-      ) : listError ? (
+      {listError ? (
         <p className="py-8 text-center text-sm text-red-600">{listError}</p>
       ) : (
         <DataTable
           columns={columns}
           data={data}
+          isLoading={loading}
           emptyMessage={emptyMessage}
-          enableRowSelection
+          toolbarActions={
+            <FormButton className="h-8 min-h-8" startContent={<Plus className="h-3.5 w-3.5" />} onPress={onAdd}>
+              {addLabel}
+            </FormButton>
+          }
+          enableRowSelection={false}
           getRowId={(row) => String(row.id)}
-          renderBulkActions={(selected, { clearSelection }) => (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] text-zinc-500">
-                {selected.length} selected
-              </span>
-              <FormButton
-                appearance="light"
-                className="!h-7 min-h-7 text-[11px]"
-                onPress={clearSelection}
-              >
-                Clear
-              </FormButton>
-            </div>
-          )}
         />
       )}
       <SideSheet
@@ -1539,6 +1534,18 @@ function OverviewPanel() {
 
   const modules = [
     {
+      t: 'Curriculum',
+      d: 'TAMISEMI frameworks, subjects and topics by stage',
+      p: '/academic/curriculum',
+      icon: BookMarked,
+    },
+    {
+      t: 'Grading System',
+      d: 'NECTA / primary grade bands for exams & report cards',
+      p: '/academic/grading',
+      icon: Award,
+    },
+    {
       t: 'Academic Years',
       d: 'Define school years and mark the current year',
       p: '/academic/years',
@@ -1697,6 +1704,12 @@ function AcademicSetup() {
   switch (meta.section) {
     case 'overview':
       body = <OverviewPanel />
+      break
+    case 'curriculum':
+      body = <CurriculumPanel />
+      break
+    case 'grading':
+      body = <GradingPanel />
       break
     case 'years':
       body = <YearsPanel />

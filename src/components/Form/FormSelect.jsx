@@ -1,5 +1,6 @@
 import { Select, SelectItem } from '@heroui/react'
 import { FIELD_RADIUS, selectClassNames } from './formStyles.js'
+import { POPOVER_MOTION } from '../motion.js'
 
 /**
  * App-standard select (HeroUI, not native).
@@ -14,6 +15,7 @@ function FormSelect({
   isRequired,
   className = '',
   isDisabled,
+  isInvalid,
   classNames,
 }) {
   return (
@@ -32,7 +34,9 @@ function FormSelect({
       aria-label={label || placeholder}
       isRequired={isRequired}
       isDisabled={isDisabled}
+      isInvalid={isInvalid}
       disallowEmptySelection={false}
+      popoverProps={{ motionProps: POPOVER_MOTION }}
     >
       {options.map((opt) => {
         const key = typeof opt === 'object' ? String(opt.value) : String(opt)

@@ -72,6 +72,7 @@ import {
   superAdminModuleMenus,
   matchSuperAdminKey,
 } from '../../config/superAdminNav.js'
+import { POPOVER_MOTION } from '../motion.js'
 
 const iconMap = {
   overview: LayoutDashboard,
@@ -418,6 +419,55 @@ function formatRunningTime(date) {
   })
 }
 
+/**
+ * Drop menu links the role cannot read, then empty groups / categories / hubs.
+ * A hub whose landing page is off-limits points at its first allowed link.
+ */
+function filterSchoolNav(primaryNav, moduleMenus, canPath) {
+  const allowed = (path) => !path || canPath(path)
+  const menus = {}
+
+  Object.entries(moduleMenus).forEach(([key, menu]) => {
+    const categories = (menu.categories || [])
+      .map((cat) => ({
+        ...cat,
+        items: (cat.items || [])
+          .map((item) =>
+            item.type === 'group'
+              ? { ...item, children: (item.children || []).filter((c) => allowed(c.path)) }
+              : item,
+          )
+          .filter((item) =>
+            item.type === 'group' ? item.children.length > 0 : allowed(item.path),
+          ),
+      }))
+      .filter((cat) => cat.items.length > 0)
+    if (categories.length) menus[key] = { ...menu, categories }
+  })
+
+  const firstPath = (menu) => {
+    for (const cat of menu?.categories || []) {
+      for (const item of cat.items) {
+        if (item.type === 'group') return item.children[0]?.path
+        if (item.path) return item.path
+      }
+    }
+    return null
+  }
+
+  const nav = primaryNav
+    .map((item) => {
+      if (item.key === 'overview') return item
+      const menu = menus[item.key]
+      if (canPath(item.path)) return item
+      const fallback = firstPath(menu)
+      return fallback ? { ...item, path: fallback } : null
+    })
+    .filter(Boolean)
+
+  return { primaryNav: nav, moduleMenus: menus }
+}
+
 function DashboardLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -438,6 +488,7 @@ function DashboardLayout({ children }) {
     isPlatform,
     logout: authLogout,
     isHydrating,
+    canPath,
   } = useAuth()
 
   // Never fall back to a generic "Admin" label — that confuses school users
@@ -461,8 +512,13 @@ function DashboardLayout({ children }) {
     ''
   const isSuperAdmin = isPlatform
 
-  const primaryNav = isSuperAdmin ? superAdminNav : schoolPrimaryNav
-  const moduleMenus = isSuperAdmin ? superAdminModuleMenus : schoolModuleMenus
+  // School users only see hubs / links their role can open (RBAC from /me).
+  const { primaryNav, moduleMenus } = useMemo(() => {
+    if (isSuperAdmin) {
+      return { primaryNav: superAdminNav, moduleMenus: superAdminModuleMenus }
+    }
+    return filterSchoolNav(schoolPrimaryNav, schoolModuleMenus, canPath)
+  }, [isSuperAdmin, canPath])
 
   const logoutMutation = useMutation({
     mutationFn: () => authLogout(),
@@ -569,17 +625,21 @@ function DashboardLayout({ children }) {
               closePanelAnimated()
               navigate(isSuperAdmin ? '/platform' : '/dashboard')
             }}
-            className="flex cursor-pointer items-center justify-center"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white p-1.5 transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             title="Shengena home"
+            aria-label="Shengena home"
           >
             <ShengenaLogo
               variant="icon"
-              iconClassName="h-8 w-8 object-contain"
+              iconClassName="h-full w-full object-contain"
             />
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col items-center gap-3 px-1 pt-4">
+        <nav
+          className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1.5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="Main navigation"
+        >
           {primaryNav.map((item) => {
             const Icon = iconMap[item.key] || LayoutDashboard
             const isActive = activeKey === item.key
@@ -588,18 +648,25 @@ function DashboardLayout({ children }) {
                 key={item.key}
                 type="button"
                 title={item.label}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => handlePrimaryClick(item)}
-                className={`flex w-full cursor-pointer flex-col items-center gap-1 px-0.5 transition-colors ${
+                className={`relative flex w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
                   isActive
-                    ? 'text-white'
-                    : 'text-white/55 hover:text-white'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/65 hover:bg-white/5 hover:text-white'
                 }`}
               >
+                {isActive && (
+                  <span
+                    className="absolute -left-1.5 top-2 bottom-2 w-[3px] rounded-r-full bg-emerald-400"
+                    aria-hidden="true"
+                  />
+                )}
                 <Icon
-                  className="h-[18px] w-[18px]"
+                  className="h-[18px] w-[18px] shrink-0"
                   strokeWidth={isActive ? 2.25 : 1.75}
                 />
-                <span className="max-w-[4.25rem] text-center text-[9px] font-normal leading-tight">
+                <span className="w-full truncate text-center text-[10px] font-medium leading-tight">
                   {item.label}
                 </span>
               </button>
@@ -705,7 +772,7 @@ function DashboardLayout({ children }) {
 
             <div className="hidden h-5 w-px bg-zinc-200 sm:block" aria-hidden />
 
-            <Dropdown placement="bottom-end">
+            <Dropdown placement="bottom-end" motionProps={POPOVER_MOTION}>
               <DropdownTrigger>
                 <button
                   type="button"
@@ -721,7 +788,10 @@ function DashboardLayout({ children }) {
                       name: 'text-[13px] font-semibold leading-none',
                     }}
                   />
-                  <span className="hidden max-w-[9rem] truncate text-left text-[12px] font-normal text-zinc-800 sm:block">
+                  <span
+                    className="hidden max-w-[9rem] truncate text-left text-[12px] font-normal text-zinc-800 sm:block lg:max-w-[15rem]"
+                    title={displayName}
+                  >
                     {displayName}
                   </span>
                   <ChevronDown className="hidden h-3.5 w-3.5 text-zinc-400 sm:block" />
@@ -819,7 +889,10 @@ function DashboardLayout({ children }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-zinc-200 bg-white md:hidden">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 flex overflow-x-auto border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
+        aria-label="Main navigation"
+      >
         {primaryNav.map((item) => {
           const Icon = iconMap[item.key] || LayoutDashboard
           const isActive = activeKey === item.key
@@ -827,17 +900,24 @@ function DashboardLayout({ children }) {
             <button
               key={item.key}
               type="button"
+              aria-current={isActive ? 'page' : undefined}
               onClick={() => handlePrimaryClick(item)}
-              className={`flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-0.5 px-0.5 py-2 text-[9px] font-normal ${
-                isActive ? 'text-zinc-900' : 'text-zinc-500'
+              className={`relative flex min-w-[4.25rem] flex-1 shrink-0 cursor-pointer flex-col items-center gap-1 px-1 py-2 text-[10px] font-medium ${
+                isActive ? 'text-[#0B3D2E]' : 'text-zinc-500'
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              <span className="truncate">{item.label}</span>
+              {isActive && (
+                <span
+                  className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-[#0B3D2E]"
+                  aria-hidden="true"
+                />
+              )}
+              <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.25 : 1.75} />
+              <span className="max-w-full truncate">{item.label}</span>
             </button>
           )
         })}
-      </div>
+      </nav>
     </div>
   )
 }

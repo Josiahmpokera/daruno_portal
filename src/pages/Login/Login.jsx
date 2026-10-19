@@ -1,227 +1,338 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { Button, Input } from '@heroui/react'
+import { Spinner } from '@heroui/react'
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Lock,
+  Mail,
+  ReceiptText,
+  Users,
+} from 'lucide-react'
 import ShengenaLogo from '../../components/Brand/ShengenaLogo.jsx'
 import { useAuth } from '../../auth'
-import { toastSuccess, toastError } from '../../components/Toast'
+import { toastSuccess } from '../../components/Toast'
+
+const BLOCKED_SCHOOL_STATUSES = ['suspended', 'rejected']
+
+const HIGHLIGHTS = [
+  { icon: GraduationCap, text: 'Students, exams and NECTA report cards' },
+  { icon: ReceiptText, text: 'Fees, invoices and school accounts' },
+  { icon: Users, text: 'Staff, parents and daily attendance' },
+]
+
+/** Human message for a failed sign-in. */
+function signInErrorMessage(err) {
+  if (!err) return ''
+  if (err.status === 0) return err.message
+  if (err.status === 401) return 'Incorrect email or password. Please try again.'
+  if (err.status === 429) return 'Too many attempts. Wait a minute, then try again.'
+  if (err.status === 422) return err.message || 'Check your email and password.'
+  return err.message || 'Sign-in failed. Please try again.'
+}
+
+/** The three stepped bars of the Shengena mark — decorative only. */
+function BrandMark({ className = '' }) {
+  const bars = [
+    { shift: 0, color: 'bg-emerald-300' },
+    { shift: 24, color: 'bg-emerald-500' },
+    { shift: 2, color: 'bg-emerald-800' },
+  ]
+  return (
+    <div className={`flex w-[280px] flex-col gap-3 ${className}`} aria-hidden="true">
+      {bars.map((bar) => (
+        <div
+          key={bar.color}
+          className={`h-[72px] w-[72%] ${bar.color}`}
+          style={{
+            marginLeft: `${bar.shift}%`,
+            clipPath: 'polygon(0 0, 100% 0, 80% 100%, 20% 100%)',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function Field({ id, label, icon, trailing, ...inputProps }) {
+  const FieldIcon = icon
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="block text-xs font-medium text-slate-700">
+        {label}
+      </label>
+      <div className="group relative">
+        <FieldIcon
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#0B3D2E]"
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+        <input
+          id={id}
+          className={`block h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B3D2E] focus:ring-4 focus:ring-[#0B3D2E]/10 disabled:cursor-not-allowed disabled:bg-slate-50 ${
+            trailing ? 'pr-10' : 'pr-3'
+          }`}
+          {...inputProps}
+        />
+        {trailing}
+      </div>
+    </div>
+  )
+}
 
 function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const location = useLocation()
+  const { login, logout } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [step, setStep] = useState('identifier')
+  const [showPassword, setShowPassword] = useState(false)
+  const [capsLock, setCapsLock] = useState(false)
+  const [showResetHelp, setShowResetHelp] = useState(false)
+  const [blockedMessage, setBlockedMessage] = useState('')
 
   const loginMutation = useMutation({
-    mutationFn: async ({ email: loginEmail, password: loginPassword }) => {
-      return login({
-        email: loginEmail,
-        password: loginPassword,
-      })
-    },
-    onSuccess: (session) => {
+    mutationFn: (credentials) => login(credentials),
+    onSuccess: async (session) => {
       const role = session?.user?.role?.name
-      const isPlatform =
-        session?.audience === 'platform' || role === 'super_admin'
-      const name = session?.user?.name || session?.user?.email || 'User'
+      const isPlatform = session?.audience === 'platform' || role === 'super_admin'
+      const school = session?.user?.school || session?.school || null
+
+      // A suspended / rejected school cannot use the portal — explain, don't half-load
+      if (!isPlatform && BLOCKED_SCHOOL_STATUSES.includes(school?.status)) {
+        await logout()
+        setBlockedMessage(
+          `${school?.name || 'This school'} is ${school.status}. Contact Shengena support to restore access.`,
+        )
+        return
+      }
+
+      const name = session?.user?.name || session?.user?.email || 'there'
       toastSuccess(
-        'Welcome back',
-        isPlatform
-          ? `${name} — platform console`
-          : `${name}${session?.school?.name ? ` · ${session.school.name}` : ''}`,
+        `Welcome back, ${name.split(' ')[0]}`,
+        isPlatform ? 'Platform console' : school?.name || '',
       )
-      navigate(isPlatform ? '/platform' : '/dashboard', { replace: true })
-    },
-    onError: (err) => {
-      toastError('Sign-in failed', err?.message || 'Check your email and password.')
+
+      // Return to the page that asked for sign-in, when it belongs to this audience
+      const from = location.state?.from
+      const fromOk =
+        typeof from === 'string' &&
+        from !== '/login' &&
+        (isPlatform ? from.startsWith('/platform') : !from.startsWith('/platform'))
+      navigate(fromOk ? from : isPlatform ? '/platform' : '/dashboard', { replace: true })
     },
   })
 
+  const pending = loginMutation.isPending
+  const errorMessage =
+    blockedMessage || (loginMutation.isError ? signInErrorMessage(loginMutation.error) : '')
+  const canSubmit = email.trim() !== '' && password !== '' && !pending
+
   const onSubmit = (event) => {
     event.preventDefault()
-    if (step === 'identifier') {
-      if (!email.trim()) {
-        return
-      }
-      setStep('password')
-      return
-    }
+    if (!canSubmit) return
+    setBlockedMessage('')
+    loginMutation.mutate({ email: email.trim(), password })
+  }
 
-    loginMutation.mutate({ email, password })
+  const clearError = () => {
+    if (loginMutation.isError) loginMutation.reset()
+    if (blockedMessage) setBlockedMessage('')
+  }
+
+  const trackCapsLock = (event) => {
+    if (typeof event.getModifierState === 'function') {
+      setCapsLock(event.getModifierState('CapsLock'))
+    }
   }
 
   const year = new Date().getFullYear()
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-hidden">
-      {/* Page background texture (outside card) */}
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0B3D2E] via-[#0a3628] to-[#06271c]">
+      {/* Background texture + brand mark (decorative) */}
       <div
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '24px 24px',
+        }}
         aria-hidden="true"
-      >
-        <div className="absolute inset-0 bg-slate-100" />
-        {/* Soft brand glow */}
-        <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-[#0B3D2E]/[0.07] blur-3xl" />
-        <div className="absolute -bottom-28 -right-20 h-96 w-96 rounded-full bg-zinc-900/[0.06] blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 h-64 w-64 rounded-full bg-[#0B3D2E]/[0.04] blur-3xl" />
-        {/* Dot grid texture */}
-        <div
-          className="absolute inset-0 opacity-[0.45]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.45) 1px, transparent 0)',
-            backgroundSize: '22px 22px',
-          }}
-        />
-        {/* Fine diagonal hatch */}
-        <div
-          className="absolute inset-0 opacity-[0.2]"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(-12deg, transparent, transparent 11px, rgb(100 116 139 / 0.08) 11px, rgb(100 116 139 / 0.08) 12px)',
-          }}
-        />
-      </div>
+      />
+      <BrandMark className="pointer-events-none absolute -left-16 bottom-16 hidden opacity-[0.10] lg:flex" />
 
-      <div className="relative flex w-full max-w-3xl items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white">
-        {/* Compact brand panel */}
-        <div className="hidden w-[220px] shrink-0 bg-gradient-to-br from-zinc-900 to-[#0B3D2E] p-6 text-white md:flex flex-col justify-between">
-          <div>
-            <h2 className="text-lg font-semibold leading-snug">Shengena Portal</h2>
-            <p className="mt-1.5 text-xs text-white/90 leading-relaxed">
-              Sign in to continue
-            </p>
-          </div>
-          <p className="text-[11px] text-white/70 leading-relaxed">
-            Secure access for school admins, teachers, and staff.
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 pb-16 pt-10 lg:justify-between lg:px-12">
+        {/* Brand copy — desktop only */}
+        <section className="hidden max-w-md text-white lg:block">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300/90">
+            Shengena School Portal
           </p>
-        </div>
+          <h2 className="mt-5 text-4xl font-semibold leading-[1.15] tracking-tight">
+            One classroom,
+            <br />
+            one system.
+          </h2>
+          <p className="mt-4 text-[15px] leading-relaxed text-white/75">
+            Everything your school runs on, from admissions to report cards, in one
+            secure place.
+          </p>
+          <ul className="mt-8 space-y-3.5">
+            {HIGHLIGHTS.map((item) => (
+              <li key={item.text} className="flex items-center gap-3 text-sm text-white/90">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
+                  <item.icon className="h-4 w-4 text-emerald-300" strokeWidth={1.75} />
+                </span>
+                {item.text}
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        {/* Form takes remaining space — single column, shared left edge */}
-        <div className="min-w-0 flex-1 flex items-center">
-          <div className="w-full max-w-md mx-auto px-8 py-10 sm:px-10">
-            <div className="flex flex-col items-start gap-6">
-              <button
-                type="button"
-                className="-ml-1.5 inline-flex shrink-0 items-center transition-opacity hover:opacity-80"
-                onClick={() => navigate('/')}
-                aria-label="Go to home"
-              >
-              <ShengenaLogo
-              variant="full"
-              iconClassName=" w-32 object-contain"  // increased from h-9 to h-16
-              wordClassName=" w-auto object-contain object-left"  // increased from h-7 to h-12
+        {/* Compact sign-in card */}
+        <main className="w-full max-w-[340px] rounded-xl bg-white p-6 shadow-2xl shadow-black/25 ring-1 ring-black/5">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="-ml-0.5 inline-flex rounded-md transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/40"
+            aria-label="Shengena home"
+          >
+            <ShengenaLogo iconClassName="h-8 w-auto object-contain" />
+          </button>
+
+          <h1 className="mt-5 text-lg font-semibold tracking-tight text-slate-900">Sign in</h1>
+          <p className="mt-0.5 text-xs text-slate-500">Use the account your school gave you.</p>
+
+          <form className="mt-5 space-y-3.5" onSubmit={onSubmit} noValidate>
+            <Field
+              id="login-email"
+              label="Email address"
+              icon={Mail}
+              type="email"
+              name="email"
+              autoComplete="username"
+              inputMode="email"
+              placeholder="you@school.ac.tz"
+              autoFocus
+              required
+              value={email}
+              disabled={pending}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                clearError()
+              }}
             />
-              </button>
 
-              <div className="w-full space-y-1">
-                <h1 className="text-xl font-semibold leading-tight text-slate-900">
-                  {step === 'identifier' ? 'Sign in' : 'Enter password'}
-                </h1>
-                <p className="text-sm leading-snug text-slate-500 break-all">
-                  {step === 'identifier' ? 'to your Shengena account' : email}
-                </p>
-              </div>
-
-              <form className="w-full space-y-5" onSubmit={onSubmit}>
-                {step === 'identifier' && (
-                  <>
-                    <Input
-                      radius="none"
-                      variant="underlined"
-                      size="lg"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email address"
-                      classNames={{
-                        base: 'w-full',
-                        mainWrapper: 'w-full',
-                        inputWrapper: 'px-0 after:bg-[#0B3D2E]',
-                        input: 'text-left',
-                      }}
-                      isRequired
-                    />
-
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span>No account?</span>
-                      <button
-                        type="button"
-                        className="font-semibold text-[#0B3D2E] hover:underline"
-                        onClick={() => navigate('/register-school')}
-                      >
-                        Create one!
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {step === 'password' && (
-                  <>
-                    <Input
-                      radius="none"
-                      variant="underlined"
-                      size="lg"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Password"
-                      classNames={{
-                        base: 'w-full',
-                        mainWrapper: 'w-full',
-                        inputWrapper: 'px-0 after:bg-[#0B3D2E]',
-                        input: 'text-left',
-                      }}
-                      isRequired
-                      autoFocus
-                    />
-                    <div className="flex w-full items-center justify-between text-xs">
-                      <button
-                        type="button"
-                        className="text-slate-500 hover:text-slate-700"
-                        onClick={() => setStep('identifier')}
-                      >
-                        ← Back
-                      </button>
-                      <button type="button" className="text-[#0B3D2E] hover:underline">
-                        Forgot password?
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {loginMutation.isError ? (
-                  <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                    {loginMutation.error?.message || 'Sign-in failed. Check your email and password.'}
-                  </p>
-                ) : null}
-
-                <div className="flex w-full justify-end pt-1">
-                  <Button
-                    type="submit"
-                    color="primary"
-                    className="bg-[#0B3D2E] px-8 font-semibold text-white"
-                    isLoading={loginMutation.isPending}
+            <div className="space-y-1">
+              <Field
+                id="login-password"
+                label="Password"
+                icon={Lock}
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                required
+                value={password}
+                disabled={pending}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  clearError()
+                }}
+                onKeyDown={trackCapsLock}
+                onKeyUp={trackCapsLock}
+                onBlur={() => setCapsLock(false)}
+                trailing={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/40"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
                   >
-                    {step === 'identifier' ? 'Next' : 'Sign in'}
-                  </Button>
-                </div>
-              </form>
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" strokeWidth={1.75} />
+                    ) : (
+                      <Eye className="h-4 w-4" strokeWidth={1.75} />
+                    )}
+                  </button>
+                }
+              />
+              <div className="flex min-h-5 items-center justify-between gap-3 text-xs">
+                <span className="text-amber-700" aria-live="polite">
+                  {capsLock ? 'Caps Lock is on' : ''}
+                </span>
+                <button
+                  type="button"
+                  className="font-medium text-[#0B3D2E] hover:underline focus-visible:outline-none focus-visible:underline"
+                  onClick={() => setShowResetHelp((v) => !v)}
+                  aria-expanded={showResetHelp}
+                >
+                  Forgot password?
+                </button>
+              </div>
+              {showResetHelp && (
+                <p className="rounded-md bg-slate-50 px-2.5 py-2 text-[11px] leading-relaxed text-slate-600 ring-1 ring-slate-200">
+                  Ask your school administrator to reset it from{' '}
+                  <span className="font-medium text-slate-800">Users &amp; Roles</span>.
+                </p>
+              )}
             </div>
-          </div>
-        </div>
+
+            <div aria-live="assertive">
+              {errorMessage ? (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs text-rose-700"
+                >
+                  <AlertCircle className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                  <span>{errorMessage}</span>
+                </div>
+              ) : null}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0B3D2E] text-sm font-semibold text-white transition hover:bg-[#093326] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B3D2E]/25 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {pending ? (
+                <>
+                  <Spinner size="sm" color="white" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </>
+              )}
+            </button>
+          </form>
+
+          <p className="mt-5 border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
+            New to Shengena?{' '}
+            <button
+              type="button"
+              className="font-semibold text-[#0B3D2E] hover:underline"
+              onClick={() => navigate('/register-school')}
+            >
+              Register your school
+            </button>
+          </p>
+        </main>
       </div>
 
-      <footer className="relative mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs text-slate-500">
-        <span>© {year} Shengena. All rights reserved.</span>
-        <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
-          ·
-        </span>
+      <footer className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 pb-5 text-center text-xs text-white/50">
+        <span>© {year} Shengena</span>
+        <span aria-hidden="true">·</span>
         <button
           type="button"
-          className="text-slate-500 hover:text-[#0B3D2E] hover:underline transition-colors"
+          className="hover:text-white hover:underline"
           onClick={() => navigate('/privacy-policy')}
         >
           Privacy Policy

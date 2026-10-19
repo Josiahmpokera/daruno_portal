@@ -5,6 +5,7 @@ import {
   DrawerBody,
   DrawerFooter,
 } from '@heroui/react'
+import { SHEET_MOTION } from '../motion.js'
 
 /**
  * Right-side form sheet (drawer). Use for create/edit forms instead of
@@ -24,11 +25,13 @@ function SideSheet({
       onOpenChange={onOpenChange}
       placement="right"
       size={size}
-      backdrop="blur"
+      // Plain dim backdrop: a blurred backdrop "pops" in Chrome as it fades (flash)
+      backdrop="opaque"
+      motionProps={SHEET_MOTION}
       classNames={{
         base: 'data-[placement=right]:sm:m-2 data-[placement=right]:sm:rounded-xl',
         wrapper: 'z-[100]',
-        backdrop: 'z-[99]',
+        backdrop: 'z-[99] bg-zinc-950/35 ![backdrop-filter:none]',
       }}
     >
       <DrawerContent>

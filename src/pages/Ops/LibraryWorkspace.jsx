@@ -126,15 +126,18 @@ function CatalogueSection({ isbnMode = false }) {
   const sheet = useDisclosure()
   const [q, setQ] = useState('')
   const [isbn, setIsbn] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const catsQ = useQuery({ queryKey: ['library', 'categories'], queryFn: listLibCategories })
   const listQ = useQuery({
-    queryKey: ['library', 'books', q, isbn, isbnMode],
+    queryKey: ['library', 'books', q, isbn, isbnMode, categoryId],
     queryFn: () =>
       listLibBooks({
         q: isbnMode ? undefined : q || undefined,
         isbn: isbnMode ? isbn || undefined : undefined,
+        category_id: categoryId || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
   const [form, setForm] = useState({
     title: '', author: '', isbn: '', category_id: '', total_copies: '1', shelf_location: '', publisher: '',
@@ -162,19 +165,32 @@ function CatalogueSection({ isbnMode = false }) {
   )
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {isbnMode ? (
-          <FormInput className="min-w-[200px]" placeholder="ISBN search…" value={isbn} onChange={(e) => setIsbn(e.target.value)} />
-        ) : (
-          <FormInput className="min-w-[200px]" placeholder="Search title, author, ISBN…" value={q} onChange={(e) => setQ(e.target.value)} />
-        )}
-        <div className="flex-1" />
-        <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>Refresh</FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>Add book</FormButton>
-      </div>
-      {listQ.isLoading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : (
-        <DataTable columns={columns} data={listQ.data?.books || []} emptyMessage="No books found." />
-      )}
+      <DataTable
+        key={isbnMode ? 'isbn' : 'catalogue'}
+        columns={columns}
+        data={listQ.data?.books || []}
+        isLoading={listQ.isLoading}
+        emptyMessage="No books found."
+        searchPlaceholder={isbnMode ? 'Search by ISBN…' : 'Search title, author, ISBN…'}
+        search={isbnMode ? isbn : q}
+        onSearchChange={isbnMode ? setIsbn : setQ}
+        filters={[
+          {
+            key: 'category_id',
+            label: 'Category',
+            value: categoryId,
+            onChange: setCategoryId,
+            options: (catsQ.data?.categories || []).map((c) => ({ value: String(c.id), label: c.name })),
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton className="h-8 min-h-8 bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+            Add book
+          </FormButton>
+        }
+      />
       <SideSheet isOpen={sheet.isOpen} onOpenChange={sheet.onOpenChange} title="Add book" size="md">
         <div className="space-y-3">
           <FormField label="Title" required><FormInput value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} /></FormField>

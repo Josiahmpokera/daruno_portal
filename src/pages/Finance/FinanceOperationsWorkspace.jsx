@@ -102,6 +102,7 @@ function ReceiptsSection() {
   const listQ = useQuery({
     queryKey: ['finance', 'receipts', q],
     queryFn: () => listReceipts({ q: q || undefined, per_page: 50 }),
+    placeholderData: (prev) => prev,
   })
 
   const rows = listQ.data?.receipts || []
@@ -176,32 +177,14 @@ function ReceiptsSection() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
-            placeholder="Search receipt #, reference, student…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <FormButton
-          appearance="bordered"
-          startContent={<RefreshCw className="h-4 w-4" />}
-          onPress={() => listQ.refetch()}
-        >
-          Refresh
-        </FormButton>
-      </div>
-
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
-      ) : (
-        <DataTable columns={columns} data={rows} emptyMessage="No receipts yet. Record a payment first." />
-      )}
+      <DataTable
+        isLoading={listQ.isLoading} columns={columns} data={rows} emptyMessage="No receipts yet. Record a payment first."
+        searchPlaceholder="Search receipt #, reference, student…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+      />
     </div>
   )
 }
@@ -706,6 +689,7 @@ function OutstandingSection({ mode = 'outstanding' }) {
   const listQ = useQuery({
     queryKey: ['finance', 'outstanding', q, mode],
     queryFn: () => listOutstandingFees({ q: q || undefined, per_page: 50 }),
+    placeholderData: (prev) => prev,
   })
 
   const rows = listQ.data?.invoices || []
@@ -789,36 +773,17 @@ function OutstandingSection({ mode = 'outstanding' }) {
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
-            placeholder="Search student or invoice reference…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <FormButton
-          appearance="bordered"
-          startContent={<RefreshCw className="h-4 w-4" />}
-          onPress={() => listQ.refetch()}
-        >
-          Refresh
-        </FormButton>
-      </div>
-
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          emptyMessage="No outstanding balances. All invoices are settled."
-        />
-      )}
+      <DataTable
+        isLoading={listQ.isLoading}
+        columns={columns}
+        data={rows}
+        emptyMessage="No outstanding balances. All invoices are settled."
+        searchPlaceholder="Search student or invoice reference…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+      />
     </div>
   )
 }

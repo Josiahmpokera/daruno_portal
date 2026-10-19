@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardHeader, CardBody, Chip, Spinner } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -10,13 +11,15 @@ import {
   AlertTriangle,
   GraduationCap,
   Building2,
+  X,
+  ArrowRight,
 } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import EChart from '../../components/Charts/EChart.jsx'
 import FisheyeLineChart from '../../components/Charts/FisheyeLineChart.jsx'
 import { useAuth } from '../../auth'
-import { studentHeadcountByLevel } from '../../api/domain.js'
+import { getFinanceSetupStatus, studentHeadcountByLevel } from '../../api/domain.js'
 import { formatStagesSummary } from '../../config/educationStages.js'
 import {
   feePaymentVsExpensesOption,
@@ -24,6 +27,107 @@ import {
   schoolPerformanceFisheyeOption,
   negativeValueBarOption,
 } from './dashboardChartOptions.js'
+
+/** Chart heights chosen so the left chart card lines up with the two stacked cards. */
+const STACKED_CHART_HEIGHT = 150
+const LEFT_CHART_HEIGHT = 368
+
+const FEE_SETUP_DISMISS_KEY = 'shengena.dashboard.feeSetupBanner.dismissed'
+
+function FeeSetupBanner() {
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return sessionStorage.getItem(FEE_SETUP_DISMISS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+
+  const { can } = useAuth()
+  const setupQ = useQuery({
+    queryKey: ['finance', 'setup-status'],
+    queryFn: getFinanceSetupStatus,
+    enabled: can('finance'),
+    staleTime: 60_000,
+    retry: 1,
+  })
+
+  const data = setupQ.data
+  if (dismissed || setupQ.isLoading || setupQ.isError || !data || data.complete) {
+    return null
+  }
+
+  const summary = data.summary || {}
+  const yearName = data.academic_year?.name
+  const pct = summary.coverage_percent ?? 0
+  const missing = summary.missing_pairs_count ?? 0
+  const blockers = Array.isArray(data.blockers) ? data.blockers : []
+  const cta = data.cta_path || '/finance/structures'
+
+  const detail =
+    summary.total_pairs > 0
+      ? `${summary.covered_pairs ?? 0}/${summary.total_pairs} class×term covered${
+          missing > 0 ? ` · ${missing} remaining` : ''
+        }`
+      : blockers.slice(0, 2).join(' · ') || 'Fee structures incomplete'
+
+  const dismiss = () => {
+    try {
+      sessionStorage.setItem(FEE_SETUP_DISMISS_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+    setDismissed(true)
+  }
+
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-start gap-x-2.5 gap-y-2 rounded-lg border border-amber-200/90 bg-amber-50/90 px-3 py-2.5 text-amber-950 shadow-none sm:flex-nowrap sm:items-center"
+    >
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-800 sm:mt-0">
+        <Banknote className="h-3.5 w-3.5" strokeWidth={2} />
+      </div>
+      <div className="min-w-0 flex-1 leading-snug">
+        <p className="text-[12px] font-medium text-amber-950">
+          Complete fee structure setup
+          {yearName ? (
+            <span className="font-normal text-amber-800/90"> · {yearName}</span>
+          ) : null}
+          {summary.total_pairs > 0 ? (
+            <span className="ml-1.5 inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900">
+              {pct}%
+            </span>
+          ) : null}
+        </p>
+        <p className="mt-0.5 text-[11px] text-amber-900/80">
+          {data.message ||
+            'Set fee amounts for every class and term so student fees can be tracked accurately.'}
+          {detail ? (
+            <span className="text-amber-800/70"> — {detail}</span>
+          ) : null}
+        </p>
+      </div>
+      <div className="flex w-full shrink-0 items-center gap-1 pl-[2.375rem] sm:w-auto sm:pl-0">
+        <Link
+          to={cta}
+          className="inline-flex items-center gap-1 rounded-md bg-[#0B3D2E] px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-[#0B3D2E]/90"
+        >
+          Set up fees
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Dismiss fee setup reminder"
+          className="rounded-md p-1 text-amber-800/70 transition-colors hover:bg-amber-100 hover:text-amber-950"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  )
+}
 
 /** Compact dummy KPIs */
 const KPIS = [
@@ -151,19 +255,19 @@ function MiniTable({ columns, rows, keyField = 'id' }) {
 
 function StatCard({ label, value, hint, icon: Icon, tone }) {
   return (
-    <Card className="border border-zinc-200 shadow-none">
-      <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
+    <Card className="h-full border border-zinc-200 shadow-none">
+      <CardBody className="flex h-full flex-row items-center gap-3 p-3">
         <div
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${tone}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}
         >
-          <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+          <Icon className="h-4 w-4" strokeWidth={2} />
         </div>
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-[10px] font-normal uppercase tracking-wide text-zinc-400">
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-[10px] font-medium uppercase tracking-wide text-zinc-400" title={label}>
             {label}
           </p>
-          <p className="text-base font-semibold text-zinc-900">{value}</p>
-          <p className="truncate text-[10px] text-zinc-400">{hint}</p>
+          <p className="mt-0.5 truncate text-base font-semibold tabular-nums text-zinc-900">{value}</p>
+          <p className="truncate text-[11px] text-zinc-400" title={hint}>{hint}</p>
         </div>
       </CardBody>
     </Card>
@@ -171,12 +275,13 @@ function StatCard({ label, value, hint, icon: Icon, tone }) {
 }
 
 function Dashboard() {
-  const { session, school: authSchool } = useAuth()
+  const { session, school: authSchool, can } = useAuth()
   const school = authSchool || session?.user?.school || session?.school || null
 
   const headcountQ = useQuery({
     queryKey: ['students', 'headcount-by-level'],
     queryFn: studentHeadcountByLevel,
+    enabled: can('students'),
   })
 
   const headcountRows = headcountQ.data?.by_level || []
@@ -200,7 +305,7 @@ function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4">
         <PageHeader
           title="Overview"
           breadcrumbs={[
@@ -215,15 +320,17 @@ function Dashboard() {
           }
         />
 
+        <FeeSetupBanner />
+
         {/* Compact stats */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-8 [&>*]:min-w-0">
           {KPIS.map((k) => (
             <StatCard key={k.label} {...k} />
           ))}
         </div>
 
         {/* Three charts: fee vs expenses (left) · doughnut + fisheye performance (right) */}
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
           {/* Left — keep full size */}
           <Card className="border border-zinc-200 shadow-none">
             <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2.5 pb-0">
@@ -235,12 +342,12 @@ function Dashboard() {
               </p>
             </CardHeader>
             <CardBody className="px-2 pb-2 pt-1">
-              <EChart option={feePayVsExpOpt} height={300} />
+              <EChart option={feePayVsExpOpt} height={LEFT_CHART_HEIGHT} />
             </CardBody>
           </Card>
 
           {/* Right — two stacked charts */}
-          <div className="flex min-h-0 flex-col gap-3">
+          <div className="flex min-h-0 min-w-0 flex-col gap-3">
             <Card className="border border-zinc-200 shadow-none">
               <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2 pb-0">
                 <h2 className="text-sm font-medium text-zinc-900">
@@ -251,7 +358,7 @@ function Dashboard() {
                 </p>
               </CardHeader>
               <CardBody className="px-2 pb-2 pt-0">
-                <EChart option={feeDoughnutOpt} height={148} />
+                <EChart option={feeDoughnutOpt} height={STACKED_CHART_HEIGHT} />
               </CardBody>
             </Card>
 
@@ -268,7 +375,7 @@ function Dashboard() {
               <CardBody className="px-2 pb-2 pt-0">
                 <FisheyeLineChart
                   option={performanceFisheyeOpt}
-                  height={148}
+                  height={STACKED_CHART_HEIGHT}
                 />
               </CardBody>
             </Card>
@@ -276,7 +383,7 @@ function Dashboard() {
         </div>
 
         {/* Budget + headcount */}
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 [&>*]:min-w-0">
           <Card className="border border-zinc-200 shadow-none">
             <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2.5 pb-0">
               <h2 className="text-sm font-medium text-zinc-900">
@@ -399,7 +506,7 @@ function Dashboard() {
         </div>
 
         {/* Data tables grid */}
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4 [&>*]:min-w-0">
           <Card className="border border-zinc-200 shadow-none">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
@@ -469,7 +576,7 @@ function Dashboard() {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 shadow-none md:col-span-2 xl:col-span-1">
+          <Card className="border border-zinc-200 shadow-none">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
                 Teacher workload
@@ -506,7 +613,7 @@ function Dashboard() {
         </div>
 
         {/* Summary strip */}
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3 [&>*]:min-w-0">
           <Card className="border border-zinc-200 shadow-none">
             <CardBody className="p-3">
               <p className="text-[10px] uppercase tracking-wide text-zinc-400">

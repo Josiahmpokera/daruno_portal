@@ -6,7 +6,6 @@ import {
   BookOpen,
   ClipboardList,
   Plus,
-  RefreshCw,
   Search,
   Users,
   UsersRound,
@@ -120,6 +119,7 @@ function useGuardians(q) {
   return useQuery({
     queryKey: ['guardians', 'parents-ws', q],
     queryFn: () => listGuardians({ q: q || undefined, per_page: 100 }),
+    placeholderData: (prev) => prev,
   })
 }
 
@@ -238,24 +238,21 @@ function AccountsSection() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
-            placeholder="Search guardian or phone…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>
-          Refresh
-        </FormButton>
-        <FormButton
-          className="bg-[#0B3D2E]"
-          color="primary"
-          startContent={<Plus className="h-4 w-4" />}
-          onPress={() => {
+      <DataTable
+        columns={columns}
+        data={listQ.data?.guardians || []}
+        isLoading={listQ.isLoading}
+        emptyMessage="No parents/guardians yet."
+        searchPlaceholder="Search guardian or phone…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton
+            className="h-8 min-h-8"
+            startContent={<Plus className="h-3.5 w-3.5" />}
+            onPress={() => {
             setForm({
               id: null,
               student_id: '',
@@ -269,20 +266,12 @@ function AccountsSection() {
               is_primary: true,
             })
             sheet.onOpen()
-          }}
-        >
-          Add guardian
-        </FormButton>
-      </div>
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={listQ.data?.guardians || []}
-          emptyMessage="No parents/guardians yet."
-        />
-      )}
+            }}
+          >
+            Add guardian
+          </FormButton>
+        }
+      />
       <SideSheet
         isOpen={sheet.isOpen}
         onOpenChange={sheet.onOpenChange}

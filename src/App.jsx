@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Home from './pages/Home/Home.jsx'
+import Features from './pages/Home/Features.jsx'
 import Login from './pages/Login/Login.jsx'
 import RegisterSchool from './pages/RegisterSchool/RegisterSchool.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
@@ -26,6 +27,7 @@ import TransportWorkspace from './pages/Ops/TransportWorkspace.jsx'
 import HostelWorkspace from './pages/Ops/HostelWorkspace.jsx'
 import LearningWorkspace from './pages/Learning/LearningWorkspace.jsx'
 import HomeworkWorkspace from './pages/Learning/HomeworkWorkspace.jsx'
+import PromotionsWorkspace from './pages/Learning/PromotionsWorkspace.jsx'
 import DailyAttendance from './pages/Attendance/DailyAttendance.jsx'
 import ExamWorkspace from './pages/Examinations/ExamWorkspace.jsx'
 import ReportCardsWorkspace from './pages/ReportCards/ReportCardsWorkspace.jsx'
@@ -33,12 +35,16 @@ import PlatformConsole from './pages/Platform/PlatformConsole.jsx'
 import SchoolProfile from './pages/SchoolProfile/SchoolProfile.jsx'
 import Staff from './pages/Staff/Staff.jsx'
 import SystemWorkspace from './pages/System/SystemWorkspace.jsx'
+import CommunicationWorkspace from './pages/Communication/CommunicationWorkspace.jsx'
 import { modules } from './config/modules.js'
 import {
   RedirectIfAuthenticated,
   RequirePlatform,
   RequireSchool,
+  useAuth,
 } from './auth'
+import { hasNoPortalAccess } from './auth/permissions.js'
+import NoAccess from './components/Layout/NoAccess.jsx'
 
 const RICH_ROOTS = new Set([
   'students',
@@ -54,6 +60,7 @@ const RICH_ROOTS = new Set([
   'hostel',
   'learning',
   'homework',
+  'promotions',
   'attendance',
   'examinations',
   'report-cards',
@@ -62,10 +69,29 @@ const RICH_ROOTS = new Set([
   'users',
   'compliance',
   'admin',
+  'communication',
 ])
 
+/** Role gate for school pages: RBAC map from /me (the API enforces it too). */
+function AreaGate({ children }) {
+  const location = useLocation()
+  const { canPath, permissions } = useAuth()
+
+  if (hasNoPortalAccess(permissions)) {
+    return <NoAccess portal />
+  }
+  if (!canPath(location.pathname)) {
+    return <NoAccess />
+  }
+  return children
+}
+
 function SchoolRoute({ children }) {
-  return <RequireSchool>{children}</RequireSchool>
+  return (
+    <RequireSchool>
+      <AreaGate>{children}</AreaGate>
+    </RequireSchool>
+  )
 }
 
 function PlatformRoute({ children }) {
@@ -76,6 +102,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/features" element={<Features />} />
       <Route
         path="/login"
         element={
@@ -258,6 +285,25 @@ function App() {
         element={
           <SchoolRoute>
             <StudentIdGate />
+          </SchoolRoute>
+        }
+      />
+      {/* Parents-area shortcuts → the real communication pages */}
+      <Route path="/parents/messages" element={<Navigate to="/communication/messages" replace />} />
+      <Route path="/parents/announcements" element={<Navigate to="/communication/announcements" replace />} />
+      <Route
+        path="/communication"
+        element={
+          <SchoolRoute>
+            <CommunicationWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/communication/*"
+        element={
+          <SchoolRoute>
+            <CommunicationWorkspace />
           </SchoolRoute>
         }
       />
@@ -626,6 +672,22 @@ function App() {
         element={
           <SchoolRoute>
             <HomeworkWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/promotions"
+        element={
+          <SchoolRoute>
+            <PromotionsWorkspace />
+          </SchoolRoute>
+        }
+      />
+      <Route
+        path="/promotions/*"
+        element={
+          <SchoolRoute>
+            <PromotionsWorkspace />
           </SchoolRoute>
         }
       />

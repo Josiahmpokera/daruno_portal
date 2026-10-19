@@ -1,9 +1,10 @@
 import main_logo from '../../assets/logo/shengena_full_logo_no_bg.png'
+import icon_logo from '../../assets/logo/shengena_icon.png'
 
 /**
  * Shengena brand mark.
- * Uses main_logo for all variants
- * - variant "icon" | "word" | "full" (all display the same main logo)
+ * - variant "icon": square stepped mark only (compact spots such as the app rail)
+ * - variant "word" | "full": full logo with wordmark
  */
 function ShengenaLogo({
   variant = 'full',
@@ -12,15 +13,16 @@ function ShengenaLogo({
   wordClassName = 'h-20 w-auto object-contain',
   alt = 'Shengena',
 }) {
-  // All variants use the same main_logo
+  const src = variant === 'icon' ? icon_logo : main_logo
+
   return (
-    <img 
-      src={main_logo} 
-      alt={alt} 
-      className={`${iconClassName} ${className}`} 
+    <img
+      src={src}
+      alt={alt}
+      className={`${iconClassName} ${className}`}
     />
   )
 }
 
-export { main_logo as shengenaIcon, main_logo as shengenaWordmark }
+export { icon_logo as shengenaIcon, main_logo as shengenaWordmark }
 export default ShengenaLogo

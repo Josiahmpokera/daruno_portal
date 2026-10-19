@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, useDisclosure, Spinner } from '@heroui/react'
-import { Plus, Search, RefreshCw } from 'lucide-react'
+import { Chip, useDisclosure } from '@heroui/react'
+import { Plus, Search } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
@@ -78,6 +78,7 @@ function Students() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const [filterValue, setFilterValue] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [classFilter, setClassFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
   const [form, setForm] = useState({
     id: null,
@@ -106,13 +107,16 @@ function Students() {
   })
 
   const studentsQuery = useQuery({
-    queryKey: ['students', filterValue, statusFilter],
+    queryKey: ['students', filterValue, statusFilter, classFilter],
     queryFn: () =>
       listStudents({
         q: filterValue || undefined,
         status: statusFilter || undefined,
+        classroom_id: classFilter || undefined,
         per_page: 50,
       }),
+    // Keep the table (and its search box) mounted while a new search loads
+    placeholderData: (prev) => prev,
   })
 
   const classesQuery = useQuery({
@@ -374,46 +378,7 @@ function Students() {
           }
         />
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <FormInput
-            isClearable
-            className="w-full sm:max-w-xs"
-            placeholder="Search name or admission no..."
-            startContent={<Search className="h-4 w-4 text-zinc-400" />}
-            value={filterValue}
-            onValueChange={setFilterValue}
-          />
-          <FormSelect
-            placeholder="Status"
-            className="w-full sm:w-40"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={[
-              { value: 'active', label: 'Active' },
-              { value: 'transferred', label: 'Transferred' },
-              { value: 'graduated', label: 'Graduated' },
-              { value: 'inactive', label: 'Inactive' },
-            ]}
-          />
-          <FormButton
-            appearance="flat"
-            isIconOnly
-            onPress={() => studentsQuery.refetch()}
-          >
-            <RefreshCw className="h-4 w-4" />
-          </FormButton>
-          {studentsQuery.data?.meta && (
-            <span className="text-[11px] text-zinc-400 sm:ml-auto">
-              {studentsQuery.data.meta.total} total
-            </span>
-          )}
-        </div>
-
-        {studentsQuery.isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner color="primary" />
-          </div>
-        ) : studentsQuery.isError ? (
+        {studentsQuery.isError && !studentsQuery.data ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center">
             <p className="text-sm text-red-600">
               {studentsQuery.error?.message || 'Failed to load students'}
@@ -430,12 +395,49 @@ function Students() {
           <DataTable
             columns={columns}
             data={students}
+            isLoading={studentsQuery.isLoading}
             emptyMessage="No students yet. Add your first student."
+            searchPlaceholder="Search name, admission or PREMS no…"
+            search={filterValue}
+            onSearchChange={setFilterValue}
+            filters={[
+              {
+                key: 'status',
+                label: 'Status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                options: [
+                  { value: 'active', label: 'Active' },
+                  { value: 'transferred', label: 'Transferred' },
+                  { value: 'graduated', label: 'Graduated' },
+                  { value: 'inactive', label: 'Inactive' },
+                ],
+              },
+              {
+                key: 'classroom_id',
+                label: 'Class',
+                value: classFilter,
+                onChange: setClassFilter,
+                options: (classesQuery.data?.classes || []).map((c) => ({
+                  value: String(c.id),
+                  label: c.name,
+                })),
+              },
+            ]}
+            onRefresh={() => studentsQuery.refetch()}
+            isRefreshing={studentsQuery.isFetching}
+            toolbarActions={
+              studentsQuery.data?.meta ? (
+                <span className="whitespace-nowrap text-[11px] tabular-nums text-zinc-500">
+                  {studentsQuery.data.meta.total} total
+                </span>
+              ) : null
+            }
             enableRowSelection
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
             getRowId={(row) => String(row.id)}
-            renderBulkActions={(selected, { clearSelection }) => (
+            renderBulkActions={(selected) => (
               <div className="flex flex-wrap items-center gap-1.5">
                 <FormButton
                   appearance="bordered"
@@ -485,13 +487,6 @@ function Students() {
                   }}
                 >
                   Export CSV
-                </FormButton>
-                <FormButton
-                  appearance="light"
-                  className="!h-7 min-h-7 text-[11px]"
-                  onPress={clearSelection}
-                >
-                  Clear
                 </FormButton>
               </div>
             )}

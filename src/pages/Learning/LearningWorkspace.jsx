@@ -201,6 +201,7 @@ function ResourcesSection({ type }) {
   const listQ = useQuery({
     queryKey: ['learning', 'resources', type, q],
     queryFn: () => listLearningResources({ type, q: q || undefined, per_page: 50 }),
+    placeholderData: (prev) => prev,
   })
 
   const mut = useMutation({
@@ -283,22 +284,19 @@ function ResourcesSection({ type }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <FormInput className="min-w-[200px]" placeholder="Search title, code…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <div className="flex-1" />
-        <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>
-          Refresh
-        </FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
-          Add {meta.label.slice(0, -1).toLowerCase()}
-        </FormButton>
-      </div>
-
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
-      ) : (
-        <DataTable columns={columns} data={listQ.data?.resources || []} emptyMessage={`No ${meta.label.toLowerCase()} yet.`} />
-      )}
+      <DataTable
+        isLoading={listQ.isLoading} columns={columns} data={listQ.data?.resources || []} emptyMessage={`No ${meta.label.toLowerCase()} yet.`}
+        searchPlaceholder="Search title, code…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton className="h-8 min-h-8 bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+            Add {meta.label.slice(0, -1).toLowerCase()}
+          </FormButton>
+        }
+      />
 
       <SideSheet isOpen={sheet.isOpen} onOpenChange={sheet.onOpenChange} title={`Add ${meta.label.slice(0, -1).toLowerCase()}`} size="lg">
         <div className="space-y-3">

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, Spinner, Switch, useDisclosure } from '@heroui/react'
+import { Chip, Switch, useDisclosure } from '@heroui/react'
 import { Plus } from 'lucide-react'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
 import DataTable from '../../components/Tables/DataTable.jsx'
@@ -79,7 +79,13 @@ function PanelShell({
   saving,
   onSave,
   children,
-  toolbar,
+  note = null,
+  search,
+  onSearchChange,
+  searchPlaceholder,
+  filters,
+  queryFetching = false,
+  onRefresh,
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -88,41 +94,30 @@ function PanelShell({
           {error}
         </p>
       ) : null}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">{toolbar}</div>
-        {onAdd ? (
-          <FormButton startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>
-            {addLabel}
-          </FormButton>
-        ) : null}
-      </div>
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Spinner color="primary" />
-        </div>
-      ) : listError ? (
+      {note ? <div className="text-[11px] text-zinc-500">{note}</div> : null}
+      {listError ? (
         <p className="py-8 text-center text-sm text-red-600">{listError}</p>
       ) : (
         <DataTable
           columns={columns}
           data={data}
+          isLoading={loading}
           emptyMessage={emptyMessage}
-          enableRowSelection
+          enableRowSelection={false}
           getRowId={(row) => String(row.id)}
-          renderBulkActions={(selected, { clearSelection }) => (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] text-zinc-500">
-                {selected.length} row{selected.length === 1 ? '' : 's'}
-              </span>
-              <FormButton
-                appearance="light"
-                className="!h-7 min-h-7 text-[11px]"
-                onPress={clearSelection}
-              >
-                Clear
+          search={search}
+          onSearchChange={onSearchChange}
+          searchPlaceholder={searchPlaceholder}
+          filters={filters}
+          onRefresh={onRefresh}
+          isRefreshing={queryFetching}
+          toolbarActions={
+            onAdd ? (
+              <FormButton className="h-8 min-h-8" startContent={<Plus className="h-3.5 w-3.5" />} onPress={onAdd}>
+                {addLabel}
               </FormButton>
-            </div>
-          )}
+            ) : null
+          }
         />
       )}
       {sheet ? (
@@ -412,6 +407,7 @@ export function SubjectsPanel() {
         stage: stageFilter || undefined,
         q: q || undefined,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const categories = catsQ.data?.categories || []
@@ -586,40 +582,35 @@ export function SubjectsPanel() {
   return (
     <PanelShell
       error={error}
-      toolbar={
+      note={
         <>
-          <p className="w-full text-[11px] text-zinc-500 sm:w-auto">
-            Showing stages:{' '}
-            <span className="font-medium text-zinc-700">
-              {formatStagesSummary(offeredFromApi)}
-            </span>
-            {' · '}
-            <a
-              href="/school-profile/levels"
-              className="text-[#0B3D2E] underline-offset-2 hover:underline"
-            >
-              Change
-            </a>
-          </p>
-          <FormInput
-            className="w-full sm:w-48"
-            placeholder="Search name / code…"
-            value={q}
-            onValueChange={setQ}
-            isClearable
-          />
-          <FormSelect
-            className="w-full sm:w-48"
-            placeholder="All school stages"
-            value={stageFilter}
-            onChange={setStageFilter}
-            options={stagesForSchool(offeredFromApi).map((s) => ({
-              value: s.value,
-              label: s.label,
-            }))}
-          />
+          Showing stages:{' '}
+          <span className="font-medium text-zinc-700">
+            {formatStagesSummary(offeredFromApi)}
+          </span>
+          {' · '}
+          <a
+            href="/school-profile/levels"
+            className="text-[#0B3D2E] underline-offset-2 hover:underline"
+          >
+            Change
+          </a>
         </>
       }
+      search={q}
+      onSearchChange={setQ}
+      searchPlaceholder="Search name / code…"
+      filters={[
+        {
+          key: 'stage',
+          label: 'Stage',
+          value: stageFilter,
+          onChange: setStageFilter,
+          options: stagesForSchool(offeredFromApi).map((st) => ({ value: st.value, label: st.label })),
+        },
+      ]}
+      onRefresh={() => listQ.refetch()}
+      queryFetching={listQ.isFetching}
       onAdd={() => {
         setEditingId(null)
         setForm({
@@ -1236,30 +1227,24 @@ export function ClassAssignmentPanel() {
   return (
     <PanelShell
       error={error}
-      toolbar={
-        <>
-          <FormSelect
-            className="w-full sm:w-40"
-            placeholder="All years"
-            value={yearFilter}
-            onChange={setYearFilter}
-            options={years.map((y) => ({
-              value: String(y.id),
-              label: `${y.name}${y.is_current ? ' ★' : ''}`,
-            }))}
-          />
-          <FormSelect
-            className="w-full sm:w-40"
-            placeholder="All classes"
-            value={classFilter}
-            onChange={setClassFilter}
-            options={classes.map((c) => ({
-              value: String(c.id),
-              label: c.name,
-            }))}
-          />
-        </>
-      }
+      filters={[
+        {
+          key: 'year',
+          label: 'Year',
+          value: yearFilter,
+          onChange: setYearFilter,
+          options: years.map((y) => ({ value: String(y.id), label: `${y.name}${y.is_current ? ' ★' : ''}` })),
+        },
+        {
+          key: 'class',
+          label: 'Class',
+          value: classFilter,
+          onChange: setClassFilter,
+          options: classes.map((c) => ({ value: String(c.id), label: c.name })),
+        },
+      ]}
+      onRefresh={() => listQ.refetch()}
+      queryFetching={listQ.isFetching}
       onAdd={() => {
         setForm({
           classroom_id: '',
@@ -1523,18 +1508,17 @@ export function TeacherAllocationPanel() {
   return (
     <PanelShell
       error={error}
-      toolbar={
-        <FormSelect
-          className="w-full sm:w-44"
-          placeholder="All years"
-          value={yearFilter}
-          onChange={setYearFilter}
-          options={years.map((y) => ({
-            value: String(y.id),
-            label: `${y.name}${y.is_current ? ' ★' : ''}`,
-          }))}
-        />
-      }
+      filters={[
+        {
+          key: 'year',
+          label: 'Year',
+          value: yearFilter,
+          onChange: setYearFilter,
+          options: years.map((y) => ({ value: String(y.id), label: `${y.name}${y.is_current ? ' ★' : ''}` })),
+        },
+      ]}
+      onRefresh={() => listQ.refetch()}
+      queryFetching={listQ.isFetching}
       onAdd={() => {
         setForm({
           staff_id: '',

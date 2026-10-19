@@ -1,11 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
   Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Spinner,
   Switch,
   useDisclosure,
@@ -15,11 +21,14 @@ import {
   Banknote,
   CircleAlert,
   FileSpreadsheet,
+  FolderPlus,
   Plus,
   Receipt,
   RefreshCw,
   Search,
+  Tags,
   TrendingUp,
+  Users,
   Wallet,
 } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
@@ -41,6 +50,7 @@ import {
   createFeeCategory,
   listFeeStructures,
   createFeeStructure,
+  updateFeeStructure,
   listInvoices,
   generateInvoices,
   listPayments,
@@ -56,6 +66,7 @@ import {
   listTerms,
   listStudents,
   getFinancialReports,
+  getFinanceOverview,
 } from '../../api/domain.js'
 
 const money = (n) =>
@@ -163,29 +174,40 @@ function FinanceAnalyticsCard({ label, value, hint, icon: Icon, tone, onPress })
   )
 }
 
-function OverviewPanel() {
+function OverviewPanel({ academicYearId = '' }) {
   const navigate = useNavigate()
 
-  const monthStart = useMemo(() => {
-    const d = new Date()
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10)
-  }, [])
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
-
-  const reportsQ = useQuery({
-    queryKey: ['finance', 'overview-analytics', monthStart, today],
-    queryFn: () => getFinancialReports({ from: monthStart, to: today }),
+  const overviewQ = useQuery({
+    queryKey: ['finance', 'overview', academicYearId || 'current'],
+    queryFn: () =>
+      getFinanceOverview(
+        academicYearId ? { academic_year_id: Number(academicYearId) } : {},
+      ),
     staleTime: 30_000,
   })
 
-  const summary = reportsQ.data?.summary || {}
-  const loading = reportsQ.isLoading
+  const summary = overviewQ.data?.summary || {}
+  const yearName = overviewQ.data?.academic_year?.name || 'Academic year'
+  const loading = overviewQ.isLoading
+  const enrolled = summary.enrolled_students ?? 0
+  const withStructure = summary.students_with_structure ?? 0
+  const rate = summary.collection_rate ?? 0
 
   const analytics = [
     {
-      label: 'Collections',
+      label: 'Expected fees',
+      value: loading ? '…' : `TZS ${money(summary.expected_fees ?? summary.billed)}`,
+      hint: `${enrolled} enrolled · structure × students`,
+      icon: FileSpreadsheet,
+      tone: 'bg-amber-50 text-amber-800',
+      path: '/finance/structures',
+    },
+    {
+      label: 'Collected',
       value: loading ? '…' : `TZS ${money(summary.collections)}`,
-      hint: 'Received this month',
+      hint: loading
+        ? '…'
+        : `${summary.students_paid ?? 0} students paid · ${rate}% of expected`,
       icon: Wallet,
       tone: 'bg-emerald-50 text-emerald-700',
       path: '/finance/payments',
@@ -193,26 +215,20 @@ function OverviewPanel() {
     {
       label: 'Outstanding',
       value: loading ? '…' : `TZS ${money(summary.outstanding)}`,
-      hint: 'Open balances (all time)',
+      hint: 'Expected minus collected',
       icon: CircleAlert,
       tone: 'bg-rose-50 text-rose-700',
-      path: '/finance/outstanding',
+      path: '/finance/student-fees',
     },
     {
-      label: 'Net collections',
-      value: loading ? '…' : `TZS ${money(summary.net_collections)}`,
-      hint: 'Collections minus refunds',
-      icon: TrendingUp,
+      label: 'Students',
+      value: loading ? '…' : String(enrolled),
+      hint: loading
+        ? '…'
+        : `${withStructure} with fee structure · ${summary.structure_lines ?? 0} lines`,
+      icon: Users,
       tone: 'bg-sky-50 text-sky-700',
-      path: '/finance/reports',
-    },
-    {
-      label: 'Billed',
-      value: loading ? '…' : `TZS ${money(summary.billed)}`,
-      hint: 'Invoices issued this month',
-      icon: FileSpreadsheet,
-      tone: 'bg-amber-50 text-amber-800',
-      path: '/finance/invoices',
+      path: '/finance/student-fees',
     },
   ]
 
@@ -298,10 +314,11 @@ function OverviewPanel() {
           <div>
             <h2 className="text-sm font-semibold text-slate-900">At a glance</h2>
             <p className="text-xs text-slate-500">
-              Live fee analytics for this month
+              Live fee analytics from fee structure × enrolled students
+              {yearName ? ` · ${yearName}` : ''}
             </p>
           </div>
-          {reportsQ.isFetching && !loading ? (
+          {overviewQ.isFetching && !loading ? (
             <Spinner size="sm" color="success" />
           ) : null}
         </div>
@@ -318,9 +335,9 @@ function OverviewPanel() {
             />
           ))}
         </div>
-        {reportsQ.isError ? (
+        {overviewQ.isError ? (
           <p className="mt-2 text-xs text-rose-600">
-            Could not load analytics. {reportsQ.error?.message || ''}
+            Could not load analytics. {overviewQ.error?.message || ''}
           </p>
         ) : null}
       </div>
@@ -362,18 +379,25 @@ function OverviewPanel() {
   )
 }
 
-function StructuresPanel() {
+const emptyStructForm = () => ({
+  academic_year_id: '',
+  term_id: '',
+  classroom_id: '',
+  fee_category_id: '',
+  amount: '',
+  due_date: '',
+  is_active: true,
+})
+
+function StructuresPanel({ onRegisterActions } = {}) {
   const qc = useQueryClient()
-  const [error, setError] = useState('')
+  const categoryModal = useDisclosure()
+  const structureModal = useDisclosure()
+  const [catError, setCatError] = useState('')
+  const [structError, setStructError] = useState('')
+  const [editingId, setEditingId] = useState(null)
   const [catForm, setCatForm] = useState({ name: '', code: '' })
-  const [structForm, setStructForm] = useState({
-    academic_year_id: '',
-    term_id: '',
-    classroom_id: '',
-    fee_category_id: '',
-    amount: '',
-    due_date: '',
-  })
+  const [structForm, setStructForm] = useState(emptyStructForm)
 
   const catsQ = useQuery({
     queryKey: ['finance', 'categories'],
@@ -392,36 +416,212 @@ function StructuresPanel() {
 
   const categories = catsQ.data?.categories || []
   const structures = structsQ.data?.structures || []
-  const years = yearsQ.data?.academic_years || []
+  const years = yearsQ.data?.academic_years || yearsQ.data?.years || []
   const classes = classesQ.data?.classes || []
-  const terms = termsQ.data?.terms || []
+  const allTerms = termsQ.data?.terms || []
+  const terms = structForm.academic_year_id
+    ? allTerms.filter(
+        (t) => String(t.academic_year_id) === String(structForm.academic_year_id),
+      )
+    : allTerms
+
+  const resetCatForm = () => setCatForm({ name: '', code: '' })
+  const resetStructForm = () => {
+    setStructForm(emptyStructForm())
+    setEditingId(null)
+    setStructError('')
+  }
+
+  const openCategoryModal = () => {
+    setCatError('')
+    resetCatForm()
+    categoryModal.onOpen()
+  }
+
+  const openCreateStructure = () => {
+    if (categories.length === 0) {
+      toastError('Add a fee category first', 'Create at least one category before structure lines.')
+      openCategoryModal()
+      return
+    }
+    resetStructForm()
+    // Prefer current academic year as default
+    const current =
+      years.find((y) => y.is_current) || years[0] || null
+    setStructForm({
+      ...emptyStructForm(),
+      academic_year_id: current ? String(current.id) : '',
+    })
+    structureModal.onOpen()
+  }
+
+  const openEditStructure = (row) => {
+    setEditingId(row.id)
+    setStructError('')
+    setStructForm({
+      academic_year_id: row.academic_year_id
+        ? String(row.academic_year_id)
+        : row.academic_year?.id
+          ? String(row.academic_year.id)
+          : '',
+      term_id: row.term_id
+        ? String(row.term_id)
+        : row.term?.id
+          ? String(row.term.id)
+          : '',
+      classroom_id: row.classroom_id
+        ? String(row.classroom_id)
+        : row.classroom?.id
+          ? String(row.classroom.id)
+          : '',
+      fee_category_id: row.fee_category_id
+        ? String(row.fee_category_id)
+        : row.category?.id
+          ? String(row.category.id)
+          : '',
+      amount: row.amount != null ? String(row.amount) : '',
+      due_date: row.due_date ? String(row.due_date).slice(0, 10) : '',
+      is_active: row.is_active !== false,
+    })
+    structureModal.onOpen()
+  }
+
+  // Keep page-header actions in sync (ref assignment — no re-render)
+  onRegisterActions?.({
+    openCategoryModal,
+    openCreateStructure,
+    refresh: () => {
+      catsQ.refetch()
+      structsQ.refetch()
+    },
+  })
 
   const catMut = useMutation({
     mutationFn: createFeeCategory,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance', 'categories'] })
-      setCatForm({ name: '', code: '' })
-      setError('')
+      resetCatForm()
+      setCatError('')
+      categoryModal.onClose()
       toastSuccess('Fee category added')
     },
     onError: (e) => {
-      setError(e.message)
+      setCatError(e.message)
       toastError('Could not add category', e.message)
     },
   })
 
   const structMut = useMutation({
-    mutationFn: createFeeStructure,
+    mutationFn: (payload) =>
+      editingId
+        ? updateFeeStructure(editingId, payload)
+        : createFeeStructure(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance', 'structures'] })
-      setError('')
-      toastSuccess('Fee structure line added')
+      qc.invalidateQueries({ queryKey: ['finance', 'setup-status'] })
+      toastSuccess(editingId ? 'Fee structure updated' : 'Fee structure line added')
+      resetStructForm()
+      structureModal.onClose()
     },
     onError: (e) => {
-      setError(e.message)
-      toastError('Could not add structure', e.message)
+      const code = e?.body?.data?.code
+      const existingId = e?.body?.data?.existing_id
+      const existing = e?.body?.data?.structure
+      const msg =
+        e?.message ||
+        'A fee structure already exists for this combination. Edit the existing line instead.'
+      setStructError(msg)
+      toastError(
+        code === 'fee_structure_duplicate'
+          ? 'Duplicate fee structure'
+          : editingId
+            ? 'Could not update structure'
+            : 'Could not add structure',
+        msg,
+      )
+      // Offer seamless switch to the existing line when create hits a duplicate
+      if (code === 'fee_structure_duplicate' && existingId && !editingId) {
+        const row =
+          existing ||
+          (structsQ.data?.structures || []).find((s) => s.id === existingId)
+        if (row) {
+          // Keep modal open with existing values so user can edit amount
+          setEditingId(existingId)
+          setStructForm({
+            academic_year_id: row.academic_year_id
+              ? String(row.academic_year_id)
+              : row.academic_year?.id
+                ? String(row.academic_year.id)
+                : structForm.academic_year_id,
+            term_id: row.term_id
+              ? String(row.term_id)
+              : row.term?.id
+                ? String(row.term.id)
+                : '',
+            classroom_id: row.classroom_id
+              ? String(row.classroom_id)
+              : row.classroom?.id
+                ? String(row.classroom.id)
+                : '',
+            fee_category_id: row.fee_category_id
+              ? String(row.fee_category_id)
+              : row.category?.id
+                ? String(row.category.id)
+                : structForm.fee_category_id,
+            amount: row.amount != null ? String(row.amount) : '',
+            due_date: row.due_date ? String(row.due_date).slice(0, 10) : '',
+            is_active: row.is_active !== false,
+          })
+          qc.invalidateQueries({ queryKey: ['finance', 'structures'] })
+        }
+      }
     },
   })
+
+  const toggleActiveMut = useMutation({
+    mutationFn: ({ id, is_active }) => updateFeeStructure(id, { is_active }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['finance', 'structures'] })
+      qc.invalidateQueries({ queryKey: ['finance', 'setup-status'] })
+      toastSuccess('Structure status updated')
+    },
+    onError: (e) => toastError('Could not update status', e.message),
+  })
+
+  const submitCategory = () => {
+    if (!catForm.name.trim()) {
+      setCatError('Category name is required')
+      return
+    }
+    catMut.mutate({
+      name: catForm.name.trim(),
+      code: catForm.code.trim() || null,
+    })
+  }
+
+  const submitStructure = () => {
+    if (
+      !structForm.academic_year_id ||
+      !structForm.fee_category_id ||
+      structForm.amount === '' ||
+      structForm.amount == null
+    ) {
+      setStructError('Year, category and amount are required')
+      return
+    }
+    structMut.mutate({
+      academic_year_id: Number(structForm.academic_year_id),
+      term_id: structForm.term_id ? Number(structForm.term_id) : null,
+      classroom_id: structForm.classroom_id
+        ? Number(structForm.classroom_id)
+        : null,
+      fee_category_id: Number(structForm.fee_category_id),
+      amount: Number(structForm.amount),
+      due_date: structForm.due_date || null,
+      currency: 'TZS',
+      is_active: Boolean(structForm.is_active),
+    })
+  }
 
   const columns = useMemo(
     () => [
@@ -436,9 +636,19 @@ function StructuresPanel() {
         Cell: ({ row }) => row.original.academic_year?.name || '—',
       },
       {
+        accessorKey: 'term',
+        header: 'Term',
+        Cell: ({ row }) => row.original.term?.name || 'All',
+      },
+      {
         accessorKey: 'classroom',
         header: 'Class',
         Cell: ({ row }) => row.original.classroom?.name || 'All',
+      },
+      {
+        accessorKey: 'due_date',
+        header: 'Due date',
+        Cell: ({ row }) => row.original.due_date || '—',
       },
       {
         accessorKey: 'amount',
@@ -446,176 +656,477 @@ function StructuresPanel() {
         Cell: ({ row }) =>
           `${money(row.original.amount)} ${row.original.currency || 'TZS'}`,
       },
+      {
+        accessorKey: 'is_active',
+        header: 'Status',
+        size: 90,
+        Cell: ({ row }) => (
+          <Chip
+            size="sm"
+            variant="flat"
+            color={row.original.is_active !== false ? 'success' : 'default'}
+            className="h-5 text-[10px]"
+          >
+            {row.original.is_active !== false ? 'Active' : 'Inactive'}
+          </Chip>
+        ),
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        size: 90,
+        enableSorting: false,
+        Cell: ({ row }) => {
+          const r = row.original
+          return (
+            <RowActionsMenu
+              ariaLabel={`Actions for ${r.category?.name || 'structure'}`}
+              items={[
+                {
+                  key: 'edit',
+                  label: 'Edit',
+                  onPress: () => openEditStructure(r),
+                },
+                {
+                  key: 'toggle',
+                  label: r.is_active !== false ? 'Deactivate' : 'Activate',
+                  color: r.is_active !== false ? 'warning' : 'default',
+                  onPress: () =>
+                    toggleActiveMut.mutate({
+                      id: r.id,
+                      is_active: r.is_active === false,
+                    }),
+                },
+              ]}
+            />
+          )
+        },
+      },
     ],
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [toggleActiveMut.isPending],
   )
 
   return (
-    <div className="flex flex-col gap-4">
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-none">
-          <CardHeader className="font-semibold">Category</CardHeader>
-          <CardBody className="flex flex-col gap-3">
-            <FormField label="Name" required>
-              <FormInput
-                value={catForm.name}
-                onValueChange={(v) => setCatForm((f) => ({ ...f, name: v }))}
-              />
-            </FormField>
-            <FormField label="Code">
-              <FormInput
-                value={catForm.code}
-                onValueChange={(v) => setCatForm((f) => ({ ...f, code: v }))}
-              />
-            </FormField>
-            <FormButton
-              isLoading={catMut.isPending}
-              onPress={() => {
-                if (!catForm.name.trim()) {
-                  setError('Category name is required')
-                  return
-                }
-                catMut.mutate({
-                  name: catForm.name.trim(),
-                  code: catForm.code.trim() || null,
-                })
-              }}
-            >
-              Add category
-            </FormButton>
-            <div className="mt-1 flex flex-wrap gap-1">
+    <div className="flex flex-col gap-5">
+      {/* Categories overview */}
+      <Card className="border border-slate-200 shadow-none">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-1">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+              <Tags className="h-4 w-4" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">
+                Fee categories
+              </p>
+              <p className="text-xs text-slate-500">
+                {catsQ.isLoading
+                  ? 'Loading…'
+                  : `${categories.length} categor${categories.length === 1 ? 'y' : 'ies'}`}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="flat"
+            className="bg-[#0B3D2E]/8 text-[#0B3D2E]"
+            startContent={<Plus className="h-3.5 w-3.5" />}
+            onPress={openCategoryModal}
+          >
+            New category
+          </Button>
+        </CardHeader>
+        <CardBody className="pt-2">
+          {catsQ.isLoading ? (
+            <div className="flex justify-center py-6">
+              <Spinner color="primary" size="sm" />
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center">
+              <Tags className="mb-2 h-8 w-8 text-slate-300" />
+              <p className="text-sm font-medium text-slate-700">
+                No categories yet
+              </p>
+              <p className="mt-1 max-w-sm text-xs text-slate-500">
+                Add categories such as Tuition, Transport, or Examination before
+                defining structure amounts.
+              </p>
+              <Button
+                size="sm"
+                className="mt-4 bg-[#0B3D2E] text-white"
+                startContent={<FolderPlus className="h-3.5 w-3.5" />}
+                onPress={openCategoryModal}
+              >
+                Add category
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
               {categories.map((c) => (
-                <Chip key={c.id} size="sm" variant="flat">
-                  {c.name}
+                <Chip
+                  key={c.id}
+                  size="md"
+                  variant="flat"
+                  className="border border-slate-200 bg-white"
+                  classNames={{ content: 'px-1' }}
+                >
+                  <span className="font-medium text-slate-800">{c.name}</span>
+                  {c.code ? (
+                    <span className="ml-1.5 text-xs text-slate-400">
+                      {c.code}
+                    </span>
+                  ) : null}
                 </Chip>
               ))}
             </div>
-          </CardBody>
-        </Card>
+          )}
+        </CardBody>
+      </Card>
 
-        <Card className="border border-slate-200 shadow-none">
-          <CardHeader className="font-semibold">Structure line</CardHeader>
-          <CardBody className="flex flex-col gap-3">
-            <FormField label="Academic year" required>
-              <FormSelect
-                label="Year"
-                placeholder="Academic year"
-                value={structForm.academic_year_id}
-                onChange={(v) =>
-                  setStructForm((f) => ({ ...f, academic_year_id: v }))
-                }
-                options={years.map((y) => ({
-                  value: String(y.id),
-                  label: y.name,
-                }))}
-              />
-            </FormField>
-            <FormField label="Term">
-              <FormSelect
-                label="Term"
-                placeholder="Term (optional)"
-                value={structForm.term_id}
-                onChange={(v) => setStructForm((f) => ({ ...f, term_id: v }))}
-                options={terms.map((t) => ({
-                  value: String(t.id),
-                  label: t.name,
-                }))}
-              />
-            </FormField>
-            <FormField label="Class">
-              <FormSelect
-                label="Class"
-                placeholder="Class (optional / all)"
-                value={structForm.classroom_id}
-                onChange={(v) =>
-                  setStructForm((f) => ({ ...f, classroom_id: v }))
-                }
-                options={classes.map((c) => ({
-                  value: String(c.id),
-                  label: c.name,
-                }))}
-              />
-            </FormField>
-            <FormField label="Category" required>
-              <FormSelect
-                label="Category"
-                placeholder="Category"
-                value={structForm.fee_category_id}
-                onChange={(v) =>
-                  setStructForm((f) => ({ ...f, fee_category_id: v }))
-                }
-                options={categories.map((c) => ({
-                  value: String(c.id),
-                  label: c.name,
-                }))}
-              />
-            </FormField>
-            <FormField label="Amount (TZS)" required>
-              <FormInput
-                type="number"
-                value={structForm.amount}
-                onValueChange={(v) =>
-                  setStructForm((f) => ({ ...f, amount: v }))
-                }
-              />
-            </FormField>
-            <FormField label="Due date">
-              <FormInput
-                type="date"
-                value={structForm.due_date}
-                onValueChange={(v) =>
-                  setStructForm((f) => ({ ...f, due_date: v }))
-                }
-              />
-            </FormField>
-            <FormButton
-              isLoading={structMut.isPending}
+      {/* Active structure lines (full width) */}
+      <Card className="border border-slate-200 shadow-none">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-1">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">
+              Active structure lines
+            </p>
+            <p className="text-xs text-slate-500">
+              {structsQ.isLoading
+                ? 'Loading…'
+                : `${structures.length} line${structures.length === 1 ? '' : 's'}`}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              color="primary"
+              className="bg-[#0B3D2E]"
+              startContent={<Plus className="h-3.5 w-3.5" />}
+              onPress={openCreateStructure}
+            >
+              New structure line
+            </Button>
+            <Button
+              size="sm"
+              variant="bordered"
+              className="border-slate-200"
+              startContent={<RefreshCw className="h-3.5 w-3.5" />}
               onPress={() => {
-                if (
-                  !structForm.academic_year_id ||
-                  !structForm.fee_category_id ||
-                  !structForm.amount
-                ) {
-                  setError('Year, category and amount are required')
-                  return
-                }
-                structMut.mutate({
-                  academic_year_id: Number(structForm.academic_year_id),
-                  term_id: structForm.term_id
-                    ? Number(structForm.term_id)
-                    : null,
-                  classroom_id: structForm.classroom_id
-                    ? Number(structForm.classroom_id)
-                    : null,
-                  fee_category_id: Number(structForm.fee_category_id),
-                  amount: Number(structForm.amount),
-                  due_date: structForm.due_date || null,
-                  currency: 'TZS',
-                })
+                catsQ.refetch()
+                structsQ.refetch()
               }}
             >
-              Add structure
-            </FormButton>
-          </CardBody>
-        </Card>
-      </div>
-
-      <Card className="border border-slate-200 shadow-none">
-        <CardHeader className="font-semibold">Active structure lines</CardHeader>
-        <CardBody>
+              Refresh
+            </Button>
+          </div>
+        </CardHeader>
+        <CardBody className="pt-2">
           {structsQ.isLoading ? (
-            <Spinner color="primary" />
+            <div className="flex justify-center py-10">
+              <Spinner color="primary" />
+            </div>
           ) : (
             <DataTable
               columns={columns}
               data={structures}
               enableRowSelection={false}
-              emptyMessage="No fee structures yet"
+              emptyMessage="No fee structure lines yet — click New structure line to add one"
             />
           )}
         </CardBody>
       </Card>
+
+      {/* Structure create / edit modal */}
+      <Modal
+        isOpen={structureModal.isOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            structureModal.onOpen()
+          } else {
+            structureModal.onClose()
+            resetStructForm()
+          }
+        }}
+        placement="center"
+        size="lg"
+        scrollBehavior="inside"
+        classNames={{
+          base: 'border border-slate-200',
+          header: 'border-b border-slate-100',
+          footer: 'border-t border-slate-100',
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-0.5">
+                <span className="text-base font-semibold text-slate-900">
+                  {editingId ? 'Edit structure line' : 'New structure line'}
+                </span>
+                <span className="text-xs font-normal text-slate-500">
+                  Link a category to year / term / class with an amount
+                </span>
+              </ModalHeader>
+              <ModalBody className="gap-3 py-4">
+                {structError ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                    <p className="font-medium">
+                      {editingId ? 'Update note' : 'Cannot create duplicate'}
+                    </p>
+                    <p className="mt-0.5 text-[12px] leading-snug text-amber-900/90">
+                      {structError}
+                    </p>
+                    {editingId ? (
+                      <p className="mt-1.5 text-[11px] text-amber-800/80">
+                        You are now editing the existing line — change the
+                        amount or due date, then save.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <FormField label="Academic year" required>
+                  <FormSelect
+                    label="Year"
+                    placeholder="Select year"
+                    value={structForm.academic_year_id}
+                    onChange={(v) =>
+                      setStructForm((f) => ({
+                        ...f,
+                        academic_year_id: v,
+                        term_id: '', // reset term when year changes
+                      }))
+                    }
+                    options={years.map((y) => ({
+                      value: String(y.id),
+                      label: y.name,
+                    }))}
+                  />
+                </FormField>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Term">
+                    <FormSelect
+                      label="Term"
+                      placeholder="All terms"
+                      value={structForm.term_id}
+                      onChange={(v) =>
+                        setStructForm((f) => ({ ...f, term_id: v }))
+                      }
+                      options={[
+                        { value: '', label: 'All terms' },
+                        ...terms.map((t) => ({
+                          value: String(t.id),
+                          label: t.name,
+                        })),
+                      ]}
+                    />
+                  </FormField>
+                  <FormField label="Class">
+                    <FormSelect
+                      label="Class"
+                      placeholder="All classes"
+                      value={structForm.classroom_id}
+                      onChange={(v) =>
+                        setStructForm((f) => ({ ...f, classroom_id: v }))
+                      }
+                      options={[
+                        { value: '', label: 'All classes' },
+                        ...classes.map((c) => ({
+                          value: String(c.id),
+                          label: c.name,
+                        })),
+                      ]}
+                    />
+                  </FormField>
+                </div>
+                <FormField label="Category" required>
+                  <FormSelect
+                    label="Category"
+                    placeholder={
+                      categories.length
+                        ? 'Select category'
+                        : 'Add a category first'
+                    }
+                    value={structForm.fee_category_id}
+                    onChange={(v) =>
+                      setStructForm((f) => ({ ...f, fee_category_id: v }))
+                    }
+                    options={categories.map((c) => ({
+                      value: String(c.id),
+                      label: c.name,
+                    }))}
+                  />
+                </FormField>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Amount (TZS)" required>
+                    <FormInput
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      value={structForm.amount}
+                      onValueChange={(v) =>
+                        setStructForm((f) => ({ ...f, amount: v }))
+                      }
+                    />
+                  </FormField>
+                  <FormField label="Due date">
+                    <FormInput
+                      type="date"
+                      value={structForm.due_date}
+                      onValueChange={(v) =>
+                        setStructForm((f) => ({ ...f, due_date: v }))
+                      }
+                    />
+                  </FormField>
+                </div>
+                <FormField label="Status">
+                  <FormSelect
+                    label="Status"
+                    value={structForm.is_active ? '1' : '0'}
+                    onChange={(v) =>
+                      setStructForm((f) => ({ ...f, is_active: v === '1' }))
+                    }
+                    options={[
+                      { value: '1', label: 'Active' },
+                      { value: '0', label: 'Inactive' },
+                    ]}
+                  />
+                </FormField>
+                {categories.length === 0 ? (
+                  <p className="text-[11px] text-amber-700">
+                    Create at least one fee category before adding structure
+                    lines.
+                  </p>
+                ) : null}
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  variant="light"
+                  onPress={() => {
+                    resetStructForm()
+                    onClose()
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  className="bg-[#0B3D2E]"
+                  isLoading={structMut.isPending}
+                  isDisabled={categories.length === 0}
+                  startContent={
+                    structMut.isPending ? null : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )
+                  }
+                  onPress={submitStructure}
+                >
+                  {editingId ? 'Save changes' : 'Add structure line'}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Category form modal */}
+      <Modal
+        isOpen={categoryModal.isOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            categoryModal.onOpen()
+          } else {
+            categoryModal.onClose()
+            setCatError('')
+            resetCatForm()
+          }
+        }}
+        placement="center"
+        size="md"
+        classNames={{
+          base: 'border border-slate-200',
+          header: 'border-b border-slate-100',
+          footer: 'border-t border-slate-100',
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-0.5">
+                <span className="text-base font-semibold text-slate-900">
+                  New fee category
+                </span>
+                <span className="text-xs font-normal text-slate-500">
+                  Categories group fee lines (e.g. Tuition, Transport)
+                </span>
+              </ModalHeader>
+              <ModalBody className="gap-3 py-4">
+                {catError ? (
+                  <p className="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                    {catError}
+                  </p>
+                ) : null}
+                <FormField label="Category name" required>
+                  <FormInput
+                    autoFocus
+                    placeholder="e.g. Tuition"
+                    value={catForm.name}
+                    onValueChange={(v) =>
+                      setCatForm((f) => ({ ...f, name: v }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        submitCategory()
+                      }
+                    }}
+                  />
+                </FormField>
+                <FormField label="Code">
+                  <FormInput
+                    placeholder="Optional short code (e.g. TUI)"
+                    value={catForm.code}
+                    onValueChange={(v) =>
+                      setCatForm((f) => ({ ...f, code: v }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        submitCategory()
+                      }
+                    }}
+                  />
+                </FormField>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  variant="light"
+                  onPress={() => {
+                    setCatError('')
+                    resetCatForm()
+                    onClose()
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  className="bg-[#0B3D2E]"
+                  isLoading={catMut.isPending}
+                  startContent={
+                    catMut.isPending ? null : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )
+                  }
+                  onPress={submitCategory}
+                >
+                  Save category
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   )
 }
@@ -644,6 +1155,7 @@ function BillingPanel() {
         per_page: 100,
         status: statusFilter || undefined,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const years = yearsQ.data?.academic_years || []
@@ -803,42 +1315,31 @@ function BillingPanel() {
         </Card>
 
         <Card className="border border-slate-200 shadow-none lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between gap-2">
-            <span className="font-semibold">Recent invoices</span>
-            <div className="flex items-center gap-2">
-              <FormSelect
-                label="Status"
-                placeholder="All statuses"
-                value={statusFilter}
-                onChange={setStatusFilter}
-                options={[
-                  { value: '', label: 'All statuses' },
-                  { value: 'unpaid', label: 'Unpaid' },
-                  { value: 'partial', label: 'Partial' },
-                  { value: 'paid', label: 'Paid' },
-                ]}
-              />
-              <button
-                type="button"
-                className="rounded-md border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
-                onClick={() => invQ.refetch()}
-                title="Refresh"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </button>
-            </div>
-          </CardHeader>
+          <CardHeader className="font-semibold">Recent invoices</CardHeader>
           <CardBody>
-            {invQ.isLoading ? (
-              <Spinner color="primary" />
-            ) : (
-              <DataTable
-                columns={columns}
-                data={invoices}
-                enableRowSelection={false}
-                emptyMessage="No invoices yet — run a billing cycle"
-              />
-            )}
+            <DataTable
+              columns={columns}
+              data={invoices}
+              isLoading={invQ.isLoading}
+              enableRowSelection={false}
+              emptyMessage="No invoices yet — run a billing cycle"
+              searchPlaceholder="Search invoice or student…"
+              filters={[
+                  {
+                    key: 'status',
+                    label: 'Status',
+                    value: statusFilter,
+                    onChange: setStatusFilter,
+                    options: [
+                      { value: 'unpaid', label: 'Unpaid' },
+                      { value: 'partial', label: 'Partial' },
+                      { value: 'paid', label: 'Paid' },
+                    ],
+                  },
+                ]}
+              onRefresh={() => invQ.refetch()}
+              isRefreshing={invQ.isFetching}
+            />
           </CardBody>
         </Card>
       </div>
@@ -1107,22 +1608,69 @@ function MethodsPanel() {
   )
 }
 
+function feeStatusLabel(s) {
+  if (s === 'paid') return 'Paid'
+  if (s === 'partial') return 'Partial'
+  if (s === 'unpaid') return 'Unpaid'
+  if (s === 'none') return 'No fees'
+  return s || '—'
+}
+
+function FeeStatusChip({ status }) {
+  const map = {
+    paid: { color: 'success', className: 'bg-emerald-50 text-emerald-800' },
+    partial: { color: 'warning', className: 'bg-amber-50 text-amber-800' },
+    unpaid: { color: 'danger', className: 'bg-rose-50 text-rose-800' },
+    none: { color: 'default', className: '' },
+  }
+  const m = map[status] || map.none
+  return (
+    <Chip size="sm" variant="flat" color={m.color} className={`h-5 capitalize ${m.className}`}>
+      {feeStatusLabel(status)}
+    </Chip>
+  )
+}
+
 function StudentFeesPanel() {
   const navigate = useNavigate()
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
+  const [yearId, setYearId] = useState('')
+  const [termId, setTermId] = useState('') // '' = All (whole year)
+  const [classId, setClassId] = useState('')
+
+  const yearsQ = useQuery({ queryKey: ['academic', 'years'], queryFn: listYears })
+  const classesQ = useQuery({ queryKey: ['academic', 'classes'], queryFn: listClasses })
+  const years = yearsQ.data?.academic_years || yearsQ.data?.years || []
+  const classes = classesQ.data?.classes || []
+
+  // Default year once loaded
+  useEffect(() => {
+    if (!yearId && years.length) {
+      const current = years.find((y) => y.is_current) || years[0]
+      if (current) setYearId(String(current.id))
+    }
+  }, [years, yearId])
 
   const listQ = useQuery({
-    queryKey: ['finance', 'student-fees', q, status],
+    queryKey: ['finance', 'student-fees', q, status, yearId, termId, classId],
     queryFn: () =>
       listStudentFees({
         q: q || undefined,
         status: status || undefined,
+        academic_year_id: yearId || undefined,
+        // only send term_id when a specific term is chosen; omit for All
+        term_id: termId || undefined,
+        classroom_id: classId || undefined,
       }),
+    enabled: Boolean(yearId) || years.length === 0,
   })
 
   const rows = listQ.data?.student_fees || []
   const summary = listQ.data?.summary || {}
+  const terms = listQ.data?.terms || []
+  const byTerm = listQ.data?.by_term || []
+  const yearName = listQ.data?.filters?.academic_year?.name || ''
 
   const columns = useMemo(
     () => [
@@ -1136,60 +1684,62 @@ function StudentFeesPanel() {
             </div>
             <div className="font-mono text-[10px] text-zinc-400">
               {row.original.admission_number || '—'}
+              {row.original.classroom?.name
+                ? ` · ${row.original.classroom.name}`
+                : ''}
             </div>
           </div>
         ),
       },
       {
         accessorKey: 'total_billed',
-        header: 'Billed',
-        Cell: ({ row }) => money(row.original.total_billed),
-      },
-      {
-        accessorKey: 'total_paid',
-        header: 'Paid',
-        Cell: ({ row }) => money(row.original.total_paid),
-      },
-      {
-        accessorKey: 'total_balance',
-        header: 'Balance',
+        header: 'Total fees',
         Cell: ({ row }) => (
-          <span
-            className={
-              Number(row.original.total_balance) > 0
-                ? 'font-medium text-amber-700'
-                : 'text-zinc-700'
-            }
-          >
-            {money(row.original.total_balance)}
+          <span className="tabular-nums text-zinc-800">
+            {money(row.original.total_billed)}
           </span>
         ),
       },
       {
-        accessorKey: 'payment_count',
-        header: 'Payments',
-        size: 80,
+        accessorKey: 'total_paid',
+        header: 'Paid',
+        Cell: ({ row }) => (
+          <span
+            className={`tabular-nums font-medium ${
+              Number(row.original.total_paid) > 0
+                ? 'text-emerald-700'
+                : 'text-zinc-400'
+            }`}
+          >
+            {money(row.original.total_paid)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'total_balance',
+        header: 'Remaining',
+        Cell: ({ row }) => {
+          const bal = Number(row.original.total_balance || row.original.remaining || 0)
+          return (
+            <span
+              className={`tabular-nums font-semibold ${
+                bal > 0.009 ? 'text-rose-700' : 'text-emerald-700'
+              }`}
+            >
+              {money(bal)}
+            </span>
+          )
+        },
       },
       {
         accessorKey: 'fee_status',
         header: 'Status',
-        Cell: ({ row }) => (
-          <Chip
-            size="sm"
-            variant="flat"
-            color={statusColor[row.original.fee_status] || 'default'}
-            className="capitalize"
-          >
-            {row.original.fee_status === 'none'
-              ? 'No invoices'
-              : row.original.fee_status}
-          </Chip>
-        ),
+        Cell: ({ row }) => <FeeStatusChip status={row.original.fee_status} />,
       },
       {
         id: 'open',
         header: '',
-        size: 90,
+        size: 96,
         Cell: ({ row }) => (
           <button
             type="button"
@@ -1208,75 +1758,214 @@ function StudentFeesPanel() {
 
   return (
     <div className="flex flex-col gap-4">
-  <div className="grid gap-3 sm:grid-cols-3">
-    <Card className="border border-slate-200 shadow-none">
-      <CardBody className="py-3">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          Total billed
-        </p>
-        <p className="text-lg font-semibold text-slate-900">
-          {money(summary.total_billed)}{' '}
-          <span className="text-xs font-normal text-slate-400">TZS</span>
-        </p>
-      </CardBody>
-    </Card>
-    <Card className="border border-slate-200 shadow-none">
-      <CardBody className="py-3">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          Total paid
-        </p>
-        <p className="text-lg font-semibold text-emerald-700">
-          {money(summary.total_paid)}{' '}
-          <span className="text-xs font-normal text-slate-400">TZS</span>
-        </p>
-      </CardBody>
-    </Card>
-    <Card className="border border-slate-200 shadow-none">
-      <CardBody className="py-3">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          Outstanding
-        </p>
-        <p className="text-lg font-semibold text-amber-700">
-          {money(summary.total_balance)}{' '}
-          <span className="text-xs font-normal text-slate-400">TZS</span>
-        </p>
-      </CardBody>
-    </Card>
-  </div>
+      {/* Scope: year + term tabs */}
+      <Card className="border border-slate-200 shadow-none">
+        <CardBody className="flex flex-col gap-3 py-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <FormField label="Academic year">
+              <FormSelect
+                value={yearId}
+                onChange={(v) => {
+                  setYearId(v)
+                  setTermId('') // reset to All when year changes
+                }}
+                options={[
+                  { value: '', label: 'Select year' },
+                  ...years.map((y) => ({ value: String(y.id), label: y.name })),
+                ]}
+              />
+            </FormField>
+            <FormField label="Class">
+              <FormSelect
+                value={classId}
+                onChange={setClassId}
+                options={[
+                  { value: '', label: 'All classes' },
+                  ...classes.map((c) => ({ value: String(c.id), label: c.name })),
+                ]}
+              />
+            </FormField>
+            <FormField label="Payment status">
+              <FormSelect
+                value={status}
+                onChange={setStatus}
+                options={[
+                  { value: '', label: 'All statuses' },
+                  { value: 'paid', label: 'Paid' },
+                  { value: 'partial', label: 'Partial' },
+                  { value: 'unpaid', label: 'Unpaid' },
+                  { value: 'none', label: 'No fees' },
+                ]}
+              />
+            </FormField>
+            <FormField label="Search">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <input
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
+                  placeholder="Name or admission no."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </div>
+            </FormField>
+          </div>
 
-  {/* Search and Filter Row */}
-  <div className="flex items-center gap-3">
-    {/* Search - 80% */}
-    <div className="relative flex-[8] min-w-[200px]">
-      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-      <input
-        className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
-        placeholder="Search student name or admission no."
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
-    </div>
-    
-    {/* Filter - 20% */}
-    <div className="flex-[2] min-w-[140px]">
-      <FormSelect
-        label="Status"
-        placeholder="All"
-        value={status}
-        onChange={setStatus}
-        options={[
-          { value: '', label: 'All statuses' },
-          { value: 'unpaid', label: 'Unpaid' },
-          { value: 'partial', label: 'Partial' },
-          { value: 'paid', label: 'Paid' },
-          { value: 'none', label: 'No invoices' },
-        ]}
-      />
-    </div>
-  </div>
+          <div>
+            <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+              Term breakdown {yearName ? `· ${yearName}` : ''}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setTermId('')}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  termId === ''
+                    ? 'bg-[#0B3D2E] text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                All (whole year)
+              </button>
+              {terms.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTermId(String(t.id))}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    termId === String(t.id)
+                      ? 'bg-[#0B3D2E] text-white'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {t.name}
+                </button>
+              ))}
+              {!terms.length && yearId ? (
+                <span className="text-[11px] text-slate-400">
+                  No terms for this year — showing whole year totals
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Summary cards */}
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <Card className="border border-slate-200 shadow-none">
+          <CardBody className="py-2.5 px-3">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+              Students
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-slate-900">
+              {listQ.isLoading ? '…' : summary.students ?? rows.length}
+            </p>
+          </CardBody>
+        </Card>
+        <Card className="border border-slate-200 shadow-none">
+          <CardBody className="py-2.5 px-3">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+              Total fees
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-slate-900">
+              {money(summary.total_billed)}
+            </p>
+          </CardBody>
+        </Card>
+        <Card className="border border-emerald-100 bg-emerald-50/40 shadow-none">
+          <CardBody className="py-2.5 px-3">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-emerald-700/80">
+              Paid
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-emerald-700">
+              {money(summary.total_paid)}
+            </p>
+            <p className="text-[10px] text-emerald-800/70">
+              {summary.paid_count ?? 0} fully paid
+            </p>
+          </CardBody>
+        </Card>
+        <Card className="border border-rose-100 bg-rose-50/40 shadow-none">
+          <CardBody className="py-2.5 px-3">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-rose-700/80">
+              Remaining
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-rose-700">
+              {money(summary.total_balance)}
+            </p>
+            <p className="text-[10px] text-rose-800/70">
+              {(summary.unpaid_count ?? 0) + (summary.partial_count ?? 0)} with balance
+            </p>
+          </CardBody>
+        </Card>
+        <Card className="border border-amber-100 bg-amber-50/30 shadow-none">
+          <CardBody className="py-2.5 px-3">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-amber-800/80">
+              Partial
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-amber-800">
+              {listQ.isLoading ? '…' : summary.partial_count ?? 0}
+            </p>
+            <p className="text-[10px] text-amber-900/60">students</p>
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* Per-term snapshot when viewing All */}
+      {termId === '' && byTerm.length > 0 ? (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {byTerm.map((t) => (
+            <button
+              key={t.term_id}
+              type="button"
+              onClick={() => setTermId(String(t.term_id))}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-[#0B3D2E]/40"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-slate-800">{t.term}</p>
+                <span className="text-[10px] text-slate-400">View →</span>
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
+                <span className="text-slate-600">
+                  Fees {money(t.total_billed)}
+                </span>
+                <span className="font-medium text-emerald-700">
+                  Paid {money(t.total_paid)}
+                </span>
+                <span className="font-medium text-rose-700">
+                  Due {money(t.total_balance)}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-slate-500">
+          {termId
+            ? `Showing ${terms.find((t) => String(t.id) === termId)?.name || 'term'} fees`
+            : 'Showing whole-year fees (all terms)'}
+          {classId
+            ? ` · ${classes.find((c) => String(c.id) === classId)?.name || 'class'}`
+            : ''}
+        </p>
+        <Button
+          size="sm"
+          variant="bordered"
+          className="border-slate-200"
+          startContent={<RefreshCw className="h-3.5 w-3.5" />}
+          onPress={() => listQ.refetch()}
+        >
+          Refresh
+        </Button>
+      </div>
 
       {listQ.isLoading ? (
-        <Spinner color="primary" />
+        <div className="flex justify-center py-10">
+          <Spinner color="primary" />
+        </div>
       ) : listQ.error ? (
         <p className="text-sm text-red-600">{listQ.error.message}</p>
       ) : (
@@ -1284,7 +1973,8 @@ function StudentFeesPanel() {
           columns={columns}
           data={rows}
           enableRowSelection={false}
-          emptyMessage="No student fee records"
+          emptyMessage="No students found for this year / filters. Ensure enrollments and fee invoices exist."
+          getRowId={(r) => String(r.student_id)}
         />
       )}
     </div>
@@ -1301,6 +1991,8 @@ function StudentFeeDetailPanel({ studentId }) {
 
   const student = detailQ.data?.student
   const summary = detailQ.data?.summary || {}
+  const byTerm = detailQ.data?.by_term || []
+  const yearName = detailQ.data?.academic_year?.name
   const invoices = detailQ.data?.invoices || []
   const payments = detailQ.data?.payments || []
 
@@ -1314,27 +2006,48 @@ function StudentFeeDetailPanel({ studentId }) {
         ),
       },
       {
+        id: 'term',
+        header: 'Term',
+        Cell: ({ row }) => row.original.term?.name || 'All / year',
+      },
+      {
         accessorKey: 'total_amount',
         header: 'Total',
-        Cell: ({ row }) => money(row.original.total_amount),
+        Cell: ({ row }) => (
+          <span className="tabular-nums">{money(row.original.total_amount)}</span>
+        ),
       },
       {
         accessorKey: 'balance_amount',
-        header: 'Balance',
-        Cell: ({ row }) => money(row.original.balance_amount),
+        header: 'Remaining',
+        Cell: ({ row }) => {
+          const bal = Number(row.original.balance_amount || 0)
+          return (
+            <span
+              className={`tabular-nums font-semibold ${
+                bal > 0.009 ? 'text-rose-700' : 'text-emerald-700'
+              }`}
+            >
+              {money(bal)}
+            </span>
+          )
+        },
       },
       {
         accessorKey: 'status',
         header: 'Status',
         Cell: ({ row }) => (
-          <Chip
-            size="sm"
-            variant="flat"
-            color={statusColor[row.original.status] || 'default'}
-            className="capitalize"
-          >
-            {row.original.status}
-          </Chip>
+          <FeeStatusChip
+            status={
+              row.original.status === 'paid'
+                ? 'paid'
+                : row.original.status === 'partial'
+                  ? 'partial'
+                  : row.original.status === 'unpaid'
+                    ? 'unpaid'
+                    : row.original.status
+            }
+          />
         ),
       },
       {
@@ -1435,7 +2148,13 @@ function StudentFeeDetailPanel({ studentId }) {
           <p className="text-sm text-slate-500">
             {student?.admission_number || 'No admission number'} ·{' '}
             <span className="capitalize">{student?.status}</span>
+            {yearName ? ` · ${yearName}` : ''}
           </p>
+          {summary.fee_status ? (
+            <div className="mt-1.5">
+              <FeeStatusChip status={summary.fee_status} />
+            </div>
+          ) : null}
         </div>
         <FormButton
           variant="bordered"
@@ -1451,32 +2170,81 @@ function StudentFeeDetailPanel({ studentId }) {
         <Card className="border border-slate-200 shadow-none">
           <CardBody className="py-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">
-              Billed
+              Total fees (year)
             </p>
-            <p className="text-lg font-semibold">{money(summary.total_billed)}</p>
+            <p className="text-lg font-semibold tabular-nums">{money(summary.total_billed)}</p>
           </CardBody>
         </Card>
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="border border-emerald-100 bg-emerald-50/40 shadow-none">
           <CardBody className="py-3">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] uppercase tracking-wide text-emerald-700/80">
               Paid
             </p>
-            <p className="text-lg font-semibold text-emerald-700">
+            <p className="text-lg font-semibold tabular-nums text-emerald-700">
               {money(summary.total_paid)}
             </p>
           </CardBody>
         </Card>
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="border border-rose-100 bg-rose-50/40 shadow-none">
           <CardBody className="py-3">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
-              Balance
+            <p className="text-[11px] uppercase tracking-wide text-rose-700/80">
+              Remaining
             </p>
-            <p className="text-lg font-semibold text-amber-700">
+            <p
+              className={`text-lg font-semibold tabular-nums ${
+                Number(summary.total_balance) > 0.009
+                  ? 'text-rose-700'
+                  : 'text-emerald-700'
+              }`}
+            >
               {money(summary.total_balance)}
             </p>
           </CardBody>
         </Card>
       </div>
+
+      {byTerm.length > 0 ? (
+        <Card className="border border-slate-200 shadow-none">
+          <CardHeader className="pb-1">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">By term</p>
+              <p className="text-xs text-slate-500">
+                Fee status for each term in {yearName || 'this year'}
+              </p>
+            </div>
+          </CardHeader>
+          <CardBody className="pt-2">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {byTerm.map((t) => (
+                <div
+                  key={t.term_id}
+                  className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2.5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-slate-800">{t.term}</p>
+                    <FeeStatusChip status={t.fee_status} />
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px]">
+                    <span className="text-slate-600">Fees {money(t.total_billed)}</span>
+                    <span className="font-medium text-emerald-700">
+                      Paid {money(t.total_paid)}
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        Number(t.total_balance) > 0.009
+                          ? 'text-rose-700'
+                          : 'text-emerald-700'
+                      }`}
+                    >
+                      Due {money(t.total_balance)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      ) : null}
 
       <Card className="border border-slate-200 shadow-none">
         <CardHeader className="font-semibold">
@@ -1518,6 +2286,7 @@ function InvoicesPanel() {
         per_page: 100,
         status: statusFilter || undefined,
       }),
+    placeholderData: (prev) => prev,
   })
   const invoices = invQ.data?.invoices || []
 
@@ -1584,30 +2353,29 @@ function InvoicesPanel() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
-        <FormSelect
-          label="Status"
-          placeholder="All"
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={[
-            { value: '', label: 'All statuses' },
-            { value: 'unpaid', label: 'Unpaid' },
-            { value: 'partial', label: 'Partial' },
-            { value: 'paid', label: 'Paid' },
+      <DataTable
+        columns={columns}
+        data={invoices}
+        isLoading={invQ.isLoading}
+        enableRowSelection={false}
+        emptyMessage="No invoices"
+        searchPlaceholder="Search invoice or student…"
+        filters={[
+            {
+              key: 'status',
+              label: 'Status',
+              value: statusFilter,
+              onChange: setStatusFilter,
+              options: [
+                { value: 'unpaid', label: 'Unpaid' },
+                { value: 'partial', label: 'Partial' },
+                { value: 'paid', label: 'Paid' },
+              ],
+            },
           ]}
-        />
-      </div>
-      {invQ.isLoading ? (
-        <Spinner color="primary" />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={invoices}
-          enableRowSelection={false}
-          emptyMessage="No invoices"
-        />
-      )}
+        onRefresh={() => invQ.refetch()}
+        isRefreshing={invQ.isFetching}
+      />
     </div>
   )
 }
@@ -1869,13 +2637,56 @@ function FeeWorkspace() {
   const location = useLocation()
   const { id: studentIdParam } = useParams()
   const meta = resolveSection(location.pathname)
+  const structureActionsRef = useRef(null)
+  const [financeYearId, setFinanceYearId] = useState('')
+
+  const yearsQ = useQuery({
+    queryKey: ['academic', 'years'],
+    queryFn: listYears,
+    staleTime: 60_000,
+  })
+  const years = yearsQ.data?.academic_years || yearsQ.data?.years || []
+
+  // Default to current academic year once years load
+  useEffect(() => {
+    if (financeYearId || !years.length) return
+    const current = years.find((y) => y.is_current) || years[0]
+    if (current) setFinanceYearId(String(current.id))
+  }, [years, financeYearId])
+
+  const selectedYear = years.find((y) => String(y.id) === String(financeYearId))
+  const yearLabel = selectedYear?.name || 'Academic year'
+
+  const registerStructureActions = useCallback((actions) => {
+    structureActionsRef.current = actions
+  }, [])
+
+  const yearFilter = (
+    <div className="flex min-w-[160px] max-w-[220px] flex-col gap-0.5">
+      <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+        Academic year
+      </span>
+      <FormSelect
+        label="Academic year"
+        placeholder="Select year"
+        value={financeYearId}
+        onChange={setFinanceYearId}
+        options={years.map((y) => ({
+          value: String(y.id),
+          label: y.is_current ? `${y.name} (current)` : y.name,
+        }))}
+      />
+    </div>
+  )
 
   const body = (() => {
     switch (meta.section) {
       case 'overview':
-        return <OverviewPanel />
+        return <OverviewPanel academicYearId={financeYearId} />
       case 'structures':
-        return <StructuresPanel />
+        return (
+          <StructuresPanel onRegisterActions={registerStructureActions} />
+        )
       case 'billing':
         return <BillingPanel />
       case 'methods':
@@ -1902,6 +2713,32 @@ function FeeWorkspace() {
     }
   })()
 
+  const pageActions =
+    meta.section === 'overview' ? (
+      <div className="flex flex-wrap items-end gap-2">{yearFilter}</div>
+    ) : meta.section === 'structures' ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          variant="bordered"
+          className="border-slate-200"
+          startContent={<RefreshCw className="h-3.5 w-3.5" />}
+          onPress={() => structureActionsRef.current?.refresh?.()}
+        >
+          Refresh
+        </Button>
+        <Button
+          size="sm"
+          color="primary"
+          className="bg-[#0B3D2E]"
+          startContent={<FolderPlus className="h-3.5 w-3.5" />}
+          onPress={() => structureActionsRef.current?.openCategoryModal?.()}
+        >
+          Add category
+        </Button>
+      </div>
+    ) : null
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4">
@@ -1910,8 +2747,16 @@ function FeeWorkspace() {
           breadcrumbs={[
             { label: 'Finance', href: '/finance' },
             { label: meta.title },
+            ...(meta.section === 'overview' && yearLabel
+              ? [{ label: yearLabel }]
+              : []),
           ]}
-          description={meta.description}
+          description={
+            meta.section === 'overview'
+              ? `${meta.description}${yearLabel ? ` · ${yearLabel}` : ''}`
+              : meta.description
+          }
+          actions={pageActions}
         />
         {body}
       </div>

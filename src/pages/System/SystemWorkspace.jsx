@@ -7,7 +7,6 @@ import {
   Download,
   KeyRound,
   Plus,
-  RefreshCw,
   Search,
   Shield,
   Users,
@@ -352,6 +351,7 @@ function UsersList() {
   const listQ = useQuery({
     queryKey: ['school', 'users', q],
     queryFn: () => listSchoolUsers({ q: q || undefined, per_page: 50 }),
+    placeholderData: (prev) => prev,
   })
   const [form, setForm] = useState({
     id: null, name: '', email: '', phone: '', role_id: '', password: '',
@@ -410,36 +410,27 @@ function UsersList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm"
-            placeholder="Search users…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>
-          Refresh
-        </FormButton>
-        <FormButton
-          className="bg-[#0B3D2E]"
-          color="primary"
-          startContent={<Plus className="h-4 w-4" />}
-          onPress={() => {
-            setForm({ id: null, name: '', email: '', phone: '', role_id: '', password: '' })
-            sheet.onOpen()
-          }}
-        >
-          Add user
-        </FormButton>
-      </div>
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
-      ) : (
-        <DataTable columns={columns} data={listQ.data?.users || []} emptyMessage="No school users yet." />
-      )}
+      <DataTable
+        isLoading={listQ.isLoading} columns={columns} data={listQ.data?.users || []} emptyMessage="No school users yet."
+        searchPlaceholder="Search users…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton
+            className="h-8 min-h-8 bg-[#0B3D2E]"
+            color="primary"
+            startContent={<Plus className="h-4 w-4" />}
+            onPress={() => {
+              setForm({ id: null, name: '', email: '', phone: '', role_id: '', password: '' })
+              sheet.onOpen()
+            }}
+          >
+            Add user
+          </FormButton>
+        }
+      />
       <SideSheet isOpen={sheet.isOpen} onOpenChange={sheet.onOpenChange} title={form.id ? 'Edit user' : 'Add user'} size="md">
         <div className="space-y-3">
           <FormField label="Name" required>

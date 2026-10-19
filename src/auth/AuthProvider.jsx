@@ -23,6 +23,7 @@ import {
   isPlatformSession,
   isSchoolSession,
 } from './sessionStorage.js'
+import { canAccess, canAccessPath } from './permissions.js'
 
 const AuthContext = createContext(null)
 
@@ -208,6 +209,9 @@ export function AuthProvider({ children }) {
       isSchool: isSchoolSession(session),
       audience,
       school: session?.school || user?.school || null,
+      permissions: user?.permissions || null,
+      can: (area, mode = 'read') => canAccess(user?.permissions, area, mode),
+      canPath: (pathname) => canAccessPath(user?.permissions, pathname),
       login,
       logout,
       registerSchool,

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, Spinner, useDisclosure } from '@heroui/react'
-import { Plus, RefreshCw, Search } from 'lucide-react'
+import { Chip, useDisclosure } from '@heroui/react'
+import { Plus, Search } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
@@ -93,6 +93,7 @@ function TransfersSection() {
         direction: direction || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -288,64 +289,49 @@ function TransfersSection() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[180px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search student or school…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-36"
-          placeholder="Status"
-          value={status || 'all'}
-          onChange={(v) => setStatus(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All statuses' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'cancelled', label: 'Cancelled' },
-          ]}
-        />
-        <FormSelect
-          className="w-36"
-          placeholder="Direction"
-          value={direction || 'all'}
-          onChange={(v) => setDirection(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All directions' },
-            { value: 'outgoing', label: 'Outgoing' },
-            { value: 'incoming', label: 'Incoming' },
-          ]}
-        />
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-        <FormButton onPress={openCreate}>
-          <Plus className="mr-1 h-3.5 w-3.5" />
-          New transfer
-        </FormButton>
-      </div>
-
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner color="success" />
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={listQ.data?.transfers || []}
-          emptyMessage="No transfer records"
-          enableRowSelection={false}
-          hideTopToolbar
-          maxHeight="min(55vh, 480px)"
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={listQ.data?.transfers || []}
+        isLoading={listQ.isLoading}
+        emptyMessage="No transfer records"
+        enableRowSelection={false}
+        maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search student or school…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'status',
+            label: 'Status',
+            value: status,
+            onChange: setStatus,
+            options: [
+              { value: 'pending', label: 'Pending' },
+              { value: 'approved', label: 'Approved' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'cancelled', label: 'Cancelled' },
+            ],
+          },
+          {
+            key: 'direction',
+            label: 'Direction',
+            value: direction,
+            onChange: setDirection,
+            options: [
+              { value: 'outgoing', label: 'Outgoing' },
+              { value: 'incoming', label: 'Incoming' },
+            ],
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton className="h-8 min-h-8" onPress={openCreate}>
+            <Plus className="mr-1 h-3.5 w-3.5" />
+            New transfer
+          </FormButton>
+        }
+      />
 
       <SideSheet
         isOpen={sheet.isOpen}
@@ -511,6 +497,7 @@ function GraduationSection() {
         q: q || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -683,37 +670,29 @@ function GraduationSection() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[180px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search graduate…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-        <FormButton appearance="bordered" onPress={() => bulkSheet.onOpen()}>
-          Bulk graduate
-        </FormButton>
-        <FormButton onPress={openCreate}>
-          <Plus className="mr-1 h-3.5 w-3.5" />
-          Graduate student
-        </FormButton>
-      </div>
-
       <DataTable
         columns={columns}
         data={listQ.data?.graduations || []}
         isLoading={listQ.isLoading}
         emptyMessage="No graduation records yet"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search graduate…"
+        search={q}
+        onSearchChange={setQ}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <>
+            <FormButton className="h-8 min-h-8" appearance="bordered" onPress={() => bulkSheet.onOpen()}>
+              Bulk graduate
+            </FormButton>
+            <FormButton className="h-8 min-h-8" onPress={openCreate}>
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              Graduate student
+            </FormButton>
+          </>
+        }
       />
 
       <SideSheet
@@ -938,6 +917,7 @@ function AlumniSection() {
         alumni_year: year || undefined,
         per_page: 50,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -1054,32 +1034,6 @@ function AlumniSection() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-[180px] flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          <FormInput
-            value={q}
-            onValueChange={setQ}
-            placeholder="Search alumni…"
-            classNames={{ inputWrapper: 'pl-8' }}
-          />
-        </div>
-        <FormSelect
-          className="w-36"
-          placeholder="Year"
-          value={year || 'all'}
-          onChange={(v) => setYear(v === 'all' ? '' : v)}
-          options={[
-            { value: 'all', label: 'All years' },
-            ...years.map((y) => ({ value: String(y), label: String(y) })),
-          ]}
-        />
-        <FormButton appearance="bordered" onPress={() => listQ.refetch()}>
-          <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Refresh
-        </FormButton>
-      </div>
-
       <p className="text-[12px] text-zinc-500">
         Alumni are students with status <strong>graduated</strong>. Graduate
         learners from the Graduation page first.
@@ -1091,8 +1045,23 @@ function AlumniSection() {
         isLoading={listQ.isLoading}
         emptyMessage="No alumni yet — graduate students to build the list"
         enableRowSelection={false}
-        hideTopToolbar
         maxHeight="min(55vh, 480px)"
+        searchPlaceholder="Search alumni…"
+        search={q}
+        onSearchChange={setQ}
+        filters={[
+          {
+            key: 'year',
+            label: 'Year',
+            value: year,
+            onChange: setYear,
+            options: [
+              ...years.map((y) => ({ value: String(y), label: String(y) })),
+            ],
+          },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
       />
 
       <SideSheet

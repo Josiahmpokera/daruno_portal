@@ -21,7 +21,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
-import { FormButton, FormInput, FormSelect } from '../../components/Form'
+import { FormButton } from '../../components/Form'
 import DataTable from '../../components/Tables/DataTable.jsx'
 import { toastError, toastSuccess } from '../../components/Toast'
 import {
@@ -295,7 +295,9 @@ export default function TanzaniaSchoolsImport() {
   const listQ = useQuery({
     queryKey: [...TZ_LIST_KEY, listParams],
     queryFn: () => platformSchools(listParams),
-    // No placeholderData — avoids shimmer + stale rows at the same time.
+    // Keep the previous page visible (dimmed with the "Updating…" overlay) while a
+    // new search / filter loads, so the table and its search box stay mounted.
+    placeholderData: (prev) => prev,
   })
 
   // Pending for this key (first load or filter/page change) vs soft refresh.
@@ -607,15 +609,6 @@ export default function TanzaniaSchoolsImport() {
     [preview],
   )
 
-  const clearFilters = () => {
-    setQ('')
-    setQDebounced('')
-    setRegion('')
-    setDistrict('')
-    setStatus('')
-    setPage(1)
-  }
-
   const hasFilters = Boolean(q || region || district || status)
 
   return (
@@ -663,59 +656,6 @@ export default function TanzaniaSchoolsImport() {
           </div>
         )}
 
-        <div
-          className={`grid gap-2 border-b border-zinc-100 px-4 py-3 sm:grid-cols-2 lg:grid-cols-5 ${
-            isListPending ? 'pointer-events-none opacity-60' : ''
-          }`}
-        >
-          <div className="relative lg:col-span-2">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-            <FormInput
-              value={q}
-              onValueChange={setQ}
-              placeholder="Search name, code, region, district…"
-              isDisabled={isListPending && !hasListData}
-              classNames={{
-                inputWrapper: 'pl-8',
-              }}
-            />
-          </div>
-          <FormSelect
-            placeholder="Region"
-            value={region || 'all'}
-            onChange={(v) => setRegion(v === 'all' ? '' : v)}
-            options={regionOptions}
-            isDisabled={isListPending && !filterOptions.regions?.length}
-          />
-          <FormSelect
-            placeholder="District"
-            value={district || 'all'}
-            onChange={(v) => setDistrict(v === 'all' ? '' : v)}
-            options={districtOptions}
-            isDisabled={isListPending && !filterOptions.districts?.length}
-          />
-          <div className="flex items-center gap-2">
-            <FormSelect
-              placeholder="Status"
-              value={status || 'all'}
-              onChange={(v) => setStatus(v === 'all' ? '' : v)}
-              options={statusOptions}
-              className="flex-1"
-              isDisabled={isListPending && !filterOptions.statuses?.length}
-            />
-            {hasFilters && (
-              <FormButton
-                type="button"
-                appearance="light"
-                isDisabled={isListPending}
-                onPress={clearFilters}
-              >
-                Clear
-              </FormButton>
-            )}
-          </div>
-        </div>
-
         <div className="relative p-2 sm:p-3">
           {listQ.isError && !isListPending ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-[13px] text-red-700">
@@ -749,6 +689,14 @@ export default function TanzaniaSchoolsImport() {
                 }
                 enableRowSelection={false}
                 getRowId={(row) => String(row.id)}
+                searchPlaceholder="Search name, code, region, district…"
+                search={q}
+                onSearchChange={setQ}
+                filters={[
+                  { key: 'region', label: 'Region', value: region, onChange: setRegion, options: regionOptions.filter((o) => o.value !== 'all') },
+                  { key: 'district', label: 'District', value: district, onChange: setDistrict, options: districtOptions.filter((o) => o.value !== 'all') },
+                  { key: 'status', label: 'Status', value: status, onChange: setStatus, options: statusOptions.filter((o) => o.value !== 'all') },
+                ]}
                 initialState={{
                   density: 'xs',
                   pagination: { pageSize: perPage, pageIndex: 0 },
@@ -756,7 +704,6 @@ export default function TanzaniaSchoolsImport() {
                 tableOptions={{
                   enablePagination: false,
                   enableBottomToolbar: false,
-                  enableTopToolbar: false,
                   mantineTableContainerProps: {
                     style: { maxHeight: 'min(60vh, 560px)' },
                   },

@@ -201,6 +201,7 @@ function CoaSection() {
       listChartOfAccounts({
         type: typeFilter || undefined,
       }),
+    placeholderData: (prev) => prev,
   })
 
   const saveMut = useMutation({
@@ -290,42 +291,28 @@ function CoaSection() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <FormSelect
-          className="w-44"
-          options={[{ value: '', label: 'All types' }, ...ACCOUNT_TYPES]}
-          value={typeFilter}
-          onChange={setTypeFilter}
-        />
-        <div className="flex-1" />
-        <FormButton
-          appearance="bordered"
-          startContent={<RefreshCw className="h-4 w-4" />}
-          onPress={() => listQ.refetch()}
-        >
-          Refresh
-        </FormButton>
-        <FormButton
-          color="primary"
-          className="bg-[#0B3D2E]"
-          startContent={<Plus className="h-4 w-4" />}
-          onPress={openCreate}
-        >
-          Add account
-        </FormButton>
-      </div>
-
-      {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={listQ.data?.accounts || []}
-          emptyMessage="No accounts. Defaults are created on first open."
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={listQ.data?.accounts || []}
+        isLoading={listQ.isLoading}
+        emptyMessage="No accounts. Defaults are created on first open."
+        searchPlaceholder="Search code or account…"
+        filters={[
+          { key: 'type', label: 'Type', value: typeFilter, onChange: setTypeFilter, options: ACCOUNT_TYPES },
+        ]}
+        onRefresh={() => listQ.refetch()}
+        isRefreshing={listQ.isFetching}
+        toolbarActions={
+          <FormButton
+            color="primary"
+            className="h-8 min-h-8 bg-[#0B3D2E]"
+            startContent={<Plus className="h-4 w-4" />}
+            onPress={openCreate}
+          >
+            Add account
+          </FormButton>
+        }
+      />
 
       <SideSheet
         isOpen={sheet.isOpen}

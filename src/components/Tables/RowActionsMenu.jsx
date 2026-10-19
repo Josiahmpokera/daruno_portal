@@ -6,6 +6,7 @@ import {
   DropdownItem,
 } from '@heroui/react'
 import { MoreHorizontal } from 'lucide-react'
+import { POPOVER_MOTION } from '../motion.js'
 
 /**
  * Compact row actions dropdown for tables.
@@ -25,7 +26,7 @@ function RowActionsMenu({
   }
 
   return (
-    <Dropdown placement="bottom-end">
+    <Dropdown placement="bottom-end" motionProps={POPOVER_MOTION}>
       <DropdownTrigger>
         <Button
           size={size}
