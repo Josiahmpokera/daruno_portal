@@ -43,9 +43,12 @@ function syncQuerySession(queryClient, session) {
  */
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient()
-  const [session, setSession] = useState(() => getStoredAuth())
+  // Back from Sign in with Shengena with a one-time code (read now, before the login page
+  // drops it from the address): that sign-in replaces whatever session this tab had.
+  const [ssoReturn] = useState(() => /(^|[#&])sso_code=/.test(window.location.hash))
+  const [session, setSession] = useState(() => (ssoReturn ? null : getStoredAuth()))
   const [status, setStatus] = useState(() =>
-    getStoredAuth()?.access_token ? 'hydrating' : 'unauthenticated',
+    !ssoReturn && getStoredAuth()?.access_token ? 'hydrating' : 'unauthenticated',
   )
   const [error, setError] = useState(null)
 
@@ -73,6 +76,10 @@ export function AuthProvider({ children }) {
     let cancelled = false
 
     async function boot() {
+      // Do not revalidate the old session: it could finish after the new sign-in and bring
+      // the previous account back. The login page signs in with the code.
+      if (ssoReturn) return
+
       const stored = getStoredAuth()
       if (!stored?.access_token) {
         if (!cancelled) {

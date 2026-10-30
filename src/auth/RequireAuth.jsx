@@ -95,11 +95,13 @@ export function RedirectIfAuthenticated({ children }) {
     back.has('sso_code') ||
     back.has('sso_error')
 
+  if (ssoHandoff) return children
+
   if (isHydrating || status === 'hydrating') {
     return <AuthLoading />
   }
 
-  if (isAuthenticated && !ssoHandoff) {
+  if (isAuthenticated) {
     return (
       <Navigate
         to={isPlatform ? '/platform' : '/dashboard'}

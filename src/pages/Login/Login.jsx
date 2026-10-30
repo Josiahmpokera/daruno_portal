@@ -146,6 +146,13 @@ function Login() {
 
   const [ssoEnabled, setSsoEnabled] = useState(false)
   const handledSsoReturn = useRef(false)
+  // While this page hands over to Shengena ID (or finishes signing in with its code), show a
+  // short "signing you in" screen, not the form: people arriving from another Shengena system
+  // are already signed in and should never see a password field. /login?local=1 and a failed
+  // attempt show the form.
+  const [handingOff, setHandingOff] = useState(
+    () => new URLSearchParams(window.location.search).get('local') !== '1' && !ssoReturn.error,
+  )
 
   useEffect(() => {
     let active = true
@@ -158,6 +165,8 @@ function Login() {
       const local = new URLSearchParams(window.location.search).get('local') === '1'
       if (enabled && !local && !ssoReturn.code && !ssoReturn.error) {
         window.location.assign(ssoStartUrl())
+      } else if (!ssoReturn.code) {
+        setHandingOff(false)
       }
     })
     return () => {
@@ -198,6 +207,19 @@ function Login() {
   }
 
   const year = new Date().getFullYear()
+
+  // A failed code exchange or a blocked school shows the form with the reason.
+  if (handingOff && !loginMutation.isError && !blockedMessage) {
+    return (
+      <div
+        className="flex min-h-screen flex-col items-center justify-center gap-3 bg-zinc-50"
+        role="status"
+      >
+        <Spinner color="primary" />
+        <p className="text-sm text-zinc-500">Signing you in with Shengena…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0B3D2E] via-[#0a3628] to-[#06271c]">

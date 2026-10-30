@@ -525,6 +525,12 @@ function DashboardLayout({ children }) {
 
   // Other Shengena systems this person may open (from Sign in with Shengena).
   const [ssoApps] = useState(getSsoApps)
+  // Signed in with Shengena and allowed into ERP or HR: the logo goes back to the Shengena
+  // desk, where every system this person has is a tile (ERP and HR share that desk).
+  const [deskUrl] = useState(() => {
+    const app = ssoApps.find((a) => a.key === 'erp') || ssoApps.find((a) => a.key === 'hr')
+    return app ? new URL(app.url).origin + '/desk' : ''
+  })
 
   const logoutMutation = useMutation({
     mutationFn: () => authLogout(),
@@ -628,12 +634,16 @@ function DashboardLayout({ children }) {
           <button
             type="button"
             onClick={() => {
+              if (deskUrl) {
+                window.location.assign(deskUrl)
+                return
+              }
               closePanelAnimated()
               navigate(isSuperAdmin ? '/platform' : '/dashboard')
             }}
             className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white p-1.5 transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-            title="Shengena home"
-            aria-label="Shengena home"
+            title={deskUrl ? 'Shengena desk' : 'Shengena home'}
+            aria-label={deskUrl ? 'Shengena desk' : 'Shengena home'}
           >
             <ShengenaLogo
               variant="icon"
