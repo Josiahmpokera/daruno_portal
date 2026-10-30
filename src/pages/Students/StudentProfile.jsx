@@ -1,12 +1,13 @@
 import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Chip, Spinner } from '@heroui/react'
+import { Chip } from '@heroui/react'
 import { ArrowLeft, User } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
 import { FormButton } from '../../components/Form'
 import { getStudent } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const statusColorMap = {
   active: 'success',
@@ -100,9 +101,7 @@ function StudentProfile() {
         />
 
         {studentQ.isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner color="primary" />
-          </div>
+          <SectionSkeleton />
         ) : studentQ.isError ? (
           <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-6 text-center">
             <p className="text-sm text-rose-700">
@@ -119,7 +118,7 @@ function StudentProfile() {
         ) : student ? (
           <>
             <div className="flex flex-wrap items-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#0B3D2E]/10 text-[#0B3D2E]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#12544f]/10 text-[#12544f]">
                 <User className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
@@ -305,7 +304,7 @@ function StudentProfile() {
               Need to update details? Use{' '}
               <Link
                 to="/students/registration"
-                className="text-[#0B3D2E] underline-offset-2 hover:underline"
+                className="text-[#12544f] underline-offset-2 hover:underline"
               >
                 registration
               </Link>{' '}

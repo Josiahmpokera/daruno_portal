@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner } from '@heroui/react'
+import { Card, CardBody, Chip } from '@heroui/react'
 import {
   Check,
   IdCard,
@@ -30,6 +30,7 @@ import {
 } from '../../api/domain.js'
 import { code128Svg } from '../../utils/barcode128.js'
 import { qrDataUrl } from '../../utils/qrcode.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const META = {
   '/students/qr': {
@@ -47,11 +48,11 @@ const META = {
 const TEMPLATE_STYLES = {
   classic_green: {
     shell: 'bg-white text-slate-900 border border-slate-200',
-    header: 'bg-[#0B3D2E] text-white',
-    accent: 'text-[#0B3D2E]',
-    stripe: 'bg-[#0B3D2E]',
+    header: 'bg-[#12544f] text-white',
+    accent: 'text-[#12544f]',
+    stripe: 'bg-[#12544f]',
     chip: 'bg-emerald-50 text-emerald-800',
-    photo: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+    photo: 'bg-[#12544f]/10 text-[#12544f]',
     footer: 'bg-slate-50 text-slate-500',
   },
   modern_navy: {
@@ -66,7 +67,7 @@ const TEMPLATE_STYLES = {
   tanzania_pride: {
     shell: 'bg-white text-slate-900 border border-slate-200',
     header: 'bg-gradient-to-r from-[#1EB53A] via-[#FCD116] to-[#00A3DD] text-slate-900',
-    accent: 'text-[#0B3D2E]',
+    accent: 'text-[#12544f]',
     stripe: 'bg-[#1EB53A]',
     chip: 'bg-amber-50 text-amber-900',
     photo: 'bg-emerald-50 text-emerald-800',
@@ -246,7 +247,7 @@ function TemplatePicker({ templates, value, onChange }) {
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {(templates || []).map((t) => {
         const selected = value === t.key
-        const colors = t.preview_colors || ['#0B3D2E', '#fff', '#e5e5e5']
+        const colors = t.preview_colors || ['#12544f', '#fff', '#e5e5e5']
         return (
           <button
             key={t.key}
@@ -254,7 +255,7 @@ function TemplatePicker({ templates, value, onChange }) {
             onClick={() => onChange(t.key)}
             className={`rounded-xl border p-3 text-left transition-all ${
               selected
-                ? 'border-[#0B3D2E] ring-2 ring-[#0B3D2E]/25 shadow-sm'
+                ? 'border-[#12544f] ring-2 ring-[#12544f]/25 shadow-sm'
                 : 'border-slate-200 hover:border-slate-300'
             }`}
           >
@@ -271,7 +272,7 @@ function TemplatePicker({ templates, value, onChange }) {
                 </p>
               </div>
               {selected ? (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] text-white">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#12544f] text-white">
                   <Check className="h-3 w-3" />
                 </span>
               ) : null}
@@ -436,14 +437,14 @@ function IdentityPage({ mode }) {
         ].map((x) => {
           const Icon = x.icon
           return (
-            <Card key={x.l} className="border border-slate-200 shadow-none">
+            <Card key={x.l} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                   <Icon className="h-3.5 w-3.5" />
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wide text-slate-400">{x.l}</p>
-                  <p className="text-base font-semibold tabular-nums">{rosterQ.isLoading ? '…' : x.v}</p>
+                  <p className="text-base font-semibold tabular-nums">{rosterQ.isLoading ? <ValueSkeleton /> : x.v}</p>
                 </div>
               </CardBody>
             </Card>
@@ -522,7 +523,7 @@ function IdentityPage({ mode }) {
           {selected.size === students.length && students.length ? 'Clear' : 'Select page'}
         </FormButton>
         <FormButton
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           color="primary"
           isLoading={issueMut.isPending}
           onPress={() => issueSelected(false)}
@@ -547,9 +548,7 @@ function IdentityPage({ mode }) {
       </div>
 
       {rosterQ.isLoading ? (
-        <div className="flex justify-center py-16 print:hidden">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : students.length === 0 ? (
         <p className="text-sm text-slate-500 print:hidden">
           No active students match this filter.
@@ -571,7 +570,7 @@ function IdentityPage({ mode }) {
                   key={row.student_id}
                   className={`flex flex-col gap-3 rounded-xl border p-3 transition-colors ${
                     isOn
-                      ? 'border-[#0B3D2E]/40 bg-[#0B3D2E]/[0.03]'
+                      ? 'border-[#12544f]/40 bg-[#12544f]/[0.03]'
                       : 'border-slate-200 bg-white'
                   }`}
                 >

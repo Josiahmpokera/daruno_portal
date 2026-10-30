@@ -49,8 +49,8 @@ export default function EducationStagesPicker({
                 onClick={() => toggle(stage.value)}
                 className={`rounded-full border px-3.5 py-1.5 text-[12px] font-semibold transition-colors ${
                   checked
-                    ? 'border-[#0B3D2E] bg-[#0B3D2E] text-white shadow-sm'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-[#0B3D2E]/40 hover:text-[#0B3D2E]'
+                    ? 'border-[#12544f] bg-[#12544f] text-white shadow-sm'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-[#12544f]/40 hover:text-[#12544f]'
                 } ${disabled ? 'opacity-60' : ''}`}
               >
                 {stage.shortLabel || stage.label}
@@ -70,14 +70,14 @@ export default function EducationStagesPicker({
                 onClick={() => toggle(stage.value)}
                 className={`flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-colors ${
                   checked
-                    ? 'border-[#0B3D2E] bg-[#0B3D2E]/[0.06]'
+                    ? 'border-[#12544f] bg-[#12544f]/[0.06]'
                     : 'border-zinc-200 bg-white hover:border-zinc-300'
                 } ${disabled ? 'opacity-60' : ''}`}
               >
                 <span
                   className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
                     checked
-                      ? 'border-[#0B3D2E] bg-[#0B3D2E] text-white'
+                      ? 'border-[#12544f] bg-[#12544f] text-white'
                       : 'border-zinc-300 bg-white text-transparent'
                   }`}
                   aria-hidden

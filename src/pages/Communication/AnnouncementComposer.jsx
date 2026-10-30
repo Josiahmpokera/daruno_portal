@@ -218,7 +218,7 @@ export default function AnnouncementComposer({ kind = 'announcement', isOpen, on
                     aria-checked={active}
                     onClick={() => set('audience')(a.value)}
                     className={`rounded-lg border px-3 py-2 text-left transition-colors ${
-                      active ? 'border-[#0B3D2E] bg-[#0B3D2E]/[0.05] ring-1 ring-[#0B3D2E]/30' : 'border-zinc-200 hover:border-zinc-300'
+                      active ? 'border-[#12544f] bg-[#12544f]/[0.05] ring-1 ring-[#12544f]/30' : 'border-zinc-200 hover:border-zinc-300'
                     }`}
                   >
                     <span className="block text-[13px] font-medium text-zinc-900">{a.label}</span>

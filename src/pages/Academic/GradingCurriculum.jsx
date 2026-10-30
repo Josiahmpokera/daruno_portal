@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, useDisclosure } from '@heroui/react'
 import { Award, BookMarked, Plus, RefreshCw } from 'lucide-react'
 import SideSheet from '../../components/Layout/SideSheet.jsx'
 import DataTable from '../../components/Tables/DataTable.jsx'
@@ -30,6 +30,7 @@ import {
   updateCurriculum,
   updateGradingSystem,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const STAGE_OPTS = [
   { value: 'all', label: 'All stages' },
@@ -287,7 +288,7 @@ export function GradingPanel() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="space-y-1 p-3.5">
           <p className="text-sm font-semibold text-slate-900">TAMISEMI / NECTA grading</p>
           <p className="text-xs text-slate-500">
@@ -299,7 +300,7 @@ export function GradingPanel() {
       </Card>
 
       <div className="grid gap-3 lg:grid-cols-3">
-        <Card className="border border-slate-200 shadow-none lg:col-span-2">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-2">
           <CardBody className="flex flex-row flex-wrap items-center justify-between gap-2 p-3">
             <div>
               <p className="text-sm font-semibold">Grading systems</p>
@@ -322,7 +323,7 @@ export function GradingPanel() {
           </CardBody>
         </Card>
 
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="space-y-2 p-3">
             <p className="text-xs font-semibold text-slate-800">Preview grade</p>
             <div className="flex gap-2">
@@ -349,7 +350,7 @@ export function GradingPanel() {
             </div>
             {previewResult ? (
               <div className="rounded-lg bg-slate-50 px-2.5 py-2 text-xs">
-                <span className="font-semibold text-[#0B3D2E]">{previewResult.grade}</span>
+                <span className="font-semibold text-[#12544f]">{previewResult.grade}</span>
                 {' · '}
                 {previewResult.points} pts · {previewResult.remark}
                 {previewResult.pass != null ? (
@@ -365,9 +366,7 @@ export function GradingPanel() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -783,7 +782,7 @@ export function CurriculumPanel() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="space-y-1 p-3.5">
           <p className="text-sm font-semibold text-slate-900">TAMISEMI curriculum frameworks</p>
           <p className="text-xs text-slate-500">
@@ -813,9 +812,7 @@ export function CurriculumPanel() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -960,9 +957,7 @@ export function CurriculumPanel() {
         size="lg"
       >
         {detailQ.isLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner />
-          </div>
+          <SectionSkeleton />
         ) : detail ? (
           <div className="space-y-4">
             <div className="text-xs text-slate-500">

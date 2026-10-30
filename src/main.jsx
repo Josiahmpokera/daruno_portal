@@ -7,6 +7,7 @@ import { ToastProvider } from '@heroui/toast'
 import { MantineProvider } from '@mantine/core'
 import { AuthProvider } from './auth'
 import { shengenaMantineTheme } from './theme/mantine.js'
+import '@fontsource-variable/inter'
 import './index.css'
 import App from './App.jsx'
 

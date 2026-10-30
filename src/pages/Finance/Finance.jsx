@@ -51,7 +51,7 @@ function Finance() {
             onSelectionChange={onTabChange}
             color="primary"
             classNames={{
-              cursor: 'bg-[#0B3D2E]',
+              cursor: 'bg-[#12544f]',
               tabContent: 'group-data-[selected=true]:text-white',
             }}
           >

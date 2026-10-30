@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, useDisclosure } from '@heroui/react'
 import {
   Briefcase,
   Building2,
@@ -57,6 +57,7 @@ import {
   updateStaffContract,
   updateStaffPosition,
 } from '../../api/domain.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const statusColor = {
   active: 'success',
@@ -116,7 +117,7 @@ function StatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -434,12 +435,12 @@ function StaffDirectory() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-6">
-        <StatCard label="Total" value={overviewQ.isLoading ? '…' : String(s.total ?? 0)} icon={Users} tone="bg-slate-100 text-slate-700" />
-        <StatCard label="Active" value={overviewQ.isLoading ? '…' : String(s.active ?? 0)} icon={Users} tone="bg-emerald-50 text-emerald-700" onPress={() => setStatusFilter('active')} />
-        <StatCard label="On leave" value={overviewQ.isLoading ? '…' : String(s.on_leave ?? 0)} icon={CalendarCheck} tone="bg-amber-50 text-amber-800" />
-        <StatCard label="Contracts" value={overviewQ.isLoading ? '…' : String(s.active_contracts ?? 0)} hint={s.expiring_contracts ? `${s.expiring_contracts} expiring` : undefined} icon={Briefcase} tone="bg-indigo-50 text-indigo-700" onPress={() => navigate('/staff/contracts')} />
-        <StatCard label="Pending leave" value={overviewQ.isLoading ? '…' : String(s.pending_leave ?? 0)} icon={ClipboardList} tone="bg-violet-50 text-violet-700" onPress={() => navigate('/staff/leave')} />
-        <StatCard label="Present today" value={overviewQ.isLoading ? '…' : String(s.present_today ?? 0)} icon={CalendarCheck} tone="bg-sky-50 text-sky-700" onPress={() => navigate('/staff/attendance')} />
+        <StatCard label="Total" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.total ?? 0)} icon={Users} tone="bg-slate-100 text-slate-700" />
+        <StatCard label="Active" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.active ?? 0)} icon={Users} tone="bg-emerald-50 text-emerald-700" onPress={() => setStatusFilter('active')} />
+        <StatCard label="On leave" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.on_leave ?? 0)} icon={CalendarCheck} tone="bg-amber-50 text-amber-800" />
+        <StatCard label="Contracts" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.active_contracts ?? 0)} hint={s.expiring_contracts ? `${s.expiring_contracts} expiring` : undefined} icon={Briefcase} tone="bg-indigo-50 text-indigo-700" onPress={() => navigate('/staff/contracts')} />
+        <StatCard label="Pending leave" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.pending_leave ?? 0)} icon={ClipboardList} tone="bg-violet-50 text-violet-700" onPress={() => navigate('/staff/leave')} />
+        <StatCard label="Present today" value={overviewQ.isLoading ? <ValueSkeleton /> : String(s.present_today ?? 0)} icon={CalendarCheck} tone="bg-sky-50 text-sky-700" onPress={() => navigate('/staff/attendance')} />
       </div>
 
       {staffQ.isError && !staffQ.data ? (
@@ -736,7 +737,7 @@ function NamedCatalog({ kind }) {
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={rows} emptyMessage={`No ${entityLabel.toLowerCase()}s yet.`} enableRowSelection={false} />
       )}
@@ -896,7 +897,7 @@ function ContractsSection() {
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.contracts || []} emptyMessage="No contracts yet." enableRowSelection={false} />
       )}
@@ -1017,7 +1018,7 @@ function DocumentsSection() {
         header: 'Link',
         Cell: ({ row }) =>
           row.original.external_url ? (
-            <a href={row.original.external_url} target="_blank" rel="noreferrer" className="text-[#0B3D2E] underline text-[11px]">
+            <a href={row.original.external_url} target="_blank" rel="noreferrer" className="text-[#12544f] underline text-[11px]">
               Open
             </a>
           ) : (
@@ -1056,7 +1057,7 @@ function DocumentsSection() {
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.documents || []} emptyMessage="No HR documents yet." enableRowSelection={false} />
       )}
@@ -1232,7 +1233,7 @@ function LeaveSection() {
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.leave_requests || []} emptyMessage="No leave requests." enableRowSelection={false} />
       )}
@@ -1387,7 +1388,7 @@ function AttendanceSection() {
         </FormButton>
       </div>
       {rosterQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -1457,17 +1458,17 @@ function PayrollSection() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <StatCard label="Active staff" value={q.isLoading ? '…' : String(summary.active_staff ?? 0)} icon={Users} tone="bg-slate-100 text-slate-700" />
-        <StatCard label="With salary" value={q.isLoading ? '…' : String(summary.with_salary ?? 0)} icon={Wallet} tone="bg-emerald-50 text-emerald-700" />
-        <StatCard label="Payroll ready" value={q.isLoading ? '…' : String(summary.payroll_ready ?? 0)} hint="Contract + bank" icon={Briefcase} tone="bg-indigo-50 text-indigo-700" />
-        <StatCard label="Missing bank" value={q.isLoading ? '…' : String(summary.missing_bank ?? 0)} icon={Building2} tone="bg-amber-50 text-amber-800" />
+        <StatCard label="Active staff" value={q.isLoading ? <ValueSkeleton /> : String(summary.active_staff ?? 0)} icon={Users} tone="bg-slate-100 text-slate-700" />
+        <StatCard label="With salary" value={q.isLoading ? <ValueSkeleton /> : String(summary.with_salary ?? 0)} icon={Wallet} tone="bg-emerald-50 text-emerald-700" />
+        <StatCard label="Payroll ready" value={q.isLoading ? <ValueSkeleton /> : String(summary.payroll_ready ?? 0)} hint="Contract + bank" icon={Briefcase} tone="bg-indigo-50 text-indigo-700" />
+        <StatCard label="Missing bank" value={q.isLoading ? <ValueSkeleton /> : String(summary.missing_bank ?? 0)} icon={Building2} tone="bg-amber-50 text-amber-800" />
       </div>
       <p className="text-xs text-slate-500">
         Payroll integration exports employment and bank data for your payroll processor. Complete
         contracts (with basic salary) and bank details to mark staff as payroll-ready.
       </p>
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={rows} emptyMessage="No active staff." enableRowSelection={false} getRowId={(r) => String(r.staff_id)} />
       )}

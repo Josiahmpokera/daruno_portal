@@ -28,35 +28,35 @@ function FinancialReporting() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="statements" title="Financial Statements">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Financial Statements</h3>
                 <p className="text-sm text-slate-500">Balance Sheets, Profit & Loss, Trial Balances</p>
               </div>
-              <Button color="primary" startContent={<Download className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Download className="h-4 w-4" />} className="bg-[#12544f]">
                 Download Report
               </Button>
             </CardHeader>
             <CardBody>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
+                  <div className="p-6 border rounded-lg hover:border-[#12544f] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Balance Sheet</h4>
                       <p className="text-sm text-slate-500">Assets, liabilities, and equity.</p>
                   </div>
-                  <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
+                  <div className="p-6 border rounded-lg hover:border-[#12544f] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Profit & Loss</h4>
                       <p className="text-sm text-slate-500">Revenues, costs, and expenses.</p>
                   </div>
-                   <div className="p-6 border rounded-lg hover:border-[#0B3D2E] cursor-pointer transition-colors">
+                   <div className="p-6 border rounded-lg hover:border-[#12544f] cursor-pointer transition-colors">
                       <FileText className="h-8 w-8 text-slate-400 mb-2" />
                       <h4 className="font-semibold">Trial Balance</h4>
                       <p className="text-sm text-slate-500">Closing balances of ledgers.</p>
@@ -67,7 +67,7 @@ function FinancialReporting() {
         </Tab>
 
         <Tab key="dashboards" title="Real-Time Dashboards">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader>
                <div>
                 <h3 className="text-lg font-semibold">Financial Dashboards</h3>
@@ -86,7 +86,7 @@ function FinancialReporting() {
         </Tab>
 
         <Tab key="audit" title="Audit Trails">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Audit Trails</h3>

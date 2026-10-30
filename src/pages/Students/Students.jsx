@@ -229,7 +229,7 @@ function Students() {
             className="flex flex-col text-left hover:opacity-80"
             onClick={() => navigate(`/students/${row.original.id}`)}
           >
-            <span className="text-sm font-medium text-[#0B3D2E]">
+            <span className="text-sm font-medium text-[#12544f]">
               {row.original.full_name}
             </span>
             <span className="text-[11px] text-zinc-400">

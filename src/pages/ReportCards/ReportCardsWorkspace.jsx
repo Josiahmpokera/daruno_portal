@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardBody,
   Chip,
-  Spinner,
   Table,
   TableHeader,
   TableColumn,
@@ -626,9 +625,9 @@ function ReportCardsWorkspace() {
                 <button
                   type="button"
                   onClick={() => navigate(step.path)}
-                  className="rounded-md border border-zinc-100 px-2.5 py-1.5 text-left transition-colors hover:border-[#0B3D2E]/40 hover:bg-emerald-50/50"
+                  className="rounded-md border border-zinc-100 px-2.5 py-1.5 text-left transition-colors hover:border-[#12544f]/40 hover:bg-emerald-50/50"
                 >
-                  <div className="text-[11px] font-semibold text-[#0B3D2E]">
+                  <div className="text-[11px] font-semibold text-[#12544f]">
                     {step.label}
                   </div>
                   <div className="text-[10px] text-zinc-400">{step.hint}</div>
@@ -685,9 +684,9 @@ function ReportCardsWorkspace() {
               <Link
                 key={item.path}
                 to={item.path}
-                className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 transition-colors hover:border-[#0B3D2E]/40"
+                className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 transition-colors hover:border-[#12544f]/40"
               >
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                 <div>
                   <div className="text-[13px] font-medium text-zinc-900">
                     {item.label}
@@ -709,7 +708,7 @@ function ReportCardsWorkspace() {
                 <button
                   type="button"
                   onClick={() => navigate(`/report-cards/${k.value === 'transcript' ? 'transcripts' : k.value}`)}
-                  className="flex w-full flex-col rounded-md border border-zinc-100 px-3 py-2.5 text-left hover:border-[#0B3D2E]/30"
+                  className="flex w-full flex-col rounded-md border border-zinc-100 px-3 py-2.5 text-left hover:border-[#12544f]/30"
                 >
                   <span className="text-[13px] font-medium text-zinc-900">
                     {k.label}
@@ -851,7 +850,7 @@ function ReportCardsWorkspace() {
           </div>
         ) : null}
 
-        <Card className="border border-zinc-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="p-2">
             <Table shadow="none" aria-label="Positions">
               <TableHeader>

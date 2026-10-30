@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Spinner, Switch } from '@heroui/react'
+import { Switch } from '@heroui/react'
 import { Save } from 'lucide-react'
 import {
   FormButton,
@@ -11,6 +11,7 @@ import {
 } from '../../components/Form'
 import { toastError, toastSuccess } from '../../components/Toast'
 import { platformSettings, platformUpdateSettings } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const CURRENCY_OPTIONS = [
   { value: 'TZS', label: 'TZS — Tanzanian Shilling' },
@@ -209,9 +210,7 @@ export default function GeneralSettings({ onOpenTanzaniaSchools }) {
 
   if (settingsQ.isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white py-16">
-        <Spinner color="success" label="Loading settings…" />
-      </div>
+      <SectionSkeleton label="Loading settings" />
     )
   }
 

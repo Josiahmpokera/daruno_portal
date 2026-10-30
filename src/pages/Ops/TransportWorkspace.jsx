@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, CardHeader, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, useDisclosure } from '@heroui/react'
 import { Plus, RefreshCw } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -34,6 +34,7 @@ import {
   listVehicleMaintenance,
   listVehicles,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const money = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })
 const studentLabel = (s) =>
@@ -68,7 +69,7 @@ function Overview() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((c) => (
-        <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+        <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
           <CardHeader className="pb-1"><h3 className="text-sm font-semibold">{c.t}</h3></CardHeader>
           <CardBody className="pt-0"><p className="text-xs text-slate-500">{c.d}</p></CardBody>
         </Card>
@@ -113,7 +114,7 @@ function VehiclesSection() {
           <FormField label="Plate number" required><FormInput value={form.plate_number} onChange={(e) => setForm((f) => ({ ...f, plate_number: e.target.value }))} /></FormField>
           <FormField label="Capacity"><FormInput type="number" value={form.capacity} onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() => mut.mutate({ ...form, capacity: form.capacity ? Number(form.capacity) : null })}
@@ -161,7 +162,7 @@ function DriversSection() {
           <FormField label="Name" required><FormInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></FormField>
           <FormField label="Phone"><FormInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></FormField>
           <FormField label="License number"><FormInput value={form.license_number} onChange={(e) => setForm((f) => ({ ...f, license_number: e.target.value }))} /></FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
         </div>
       </SideSheet>
     </Shell>
@@ -198,7 +199,7 @@ function RoutesSection() {
         <div className="space-y-3">
           <FormField label="Name" required><FormInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></FormField>
           <FormField label="Code"><FormInput value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
         </div>
       </SideSheet>
     </Shell>
@@ -247,7 +248,7 @@ function StopsSection() {
           <FormField label="Pickup time"><FormInput type="time" value={form.pickup_time} onChange={(e) => setForm((f) => ({ ...f, pickup_time: e.target.value }))} /></FormField>
           <FormField label="Drop time"><FormInput type="time" value={form.drop_time} onChange={(e) => setForm((f) => ({ ...f, drop_time: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -353,7 +354,7 @@ function AllocationsSection() {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -434,7 +435,7 @@ function MaintenanceSection() {
           <FormField label="Vendor"><FormInput value={form.vendor} onChange={(e) => setForm((f) => ({ ...f, vendor: e.target.value }))} /></FormField>
           <FormField label="Next service"><FormInput type="date" value={form.next_service_on} onChange={(e) => setForm((f) => ({ ...f, next_service_on: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -514,7 +515,7 @@ function FeesSection() {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -552,9 +553,9 @@ function Shell({ children, onAdd, addLabel, loading, onRefresh }) {
     <div className="space-y-4">
       <div className="flex justify-end gap-2">
         {onRefresh && <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={onRefresh}>Refresh</FormButton>}
-        {onAdd && <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
+        {onAdd && <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
       </div>
-      {loading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : children}
+      {loading ? <SectionSkeleton /> : children}
     </div>
   )
 }

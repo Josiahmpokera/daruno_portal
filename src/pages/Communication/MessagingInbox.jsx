@@ -96,7 +96,7 @@ function ThreadList({ selectedId, onSelect, onNew, className = '' }) {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search parent, learner, subject…"
             aria-label="Search conversations"
-            className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-3 text-[12px] text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-[#0B3D2E] focus:ring-2 focus:ring-[#0B3D2E]/10"
+            className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-3 text-[12px] text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-[#12544f] focus:ring-2 focus:ring-[#12544f]/10"
           />
         </div>
         <div className="flex gap-1" role="tablist" aria-label="Filter conversations">
@@ -111,7 +111,7 @@ function ThreadList({ selectedId, onSelect, onNew, className = '' }) {
                 aria-selected={active}
                 onClick={() => setFilter(f.value)}
                 className={`inline-flex h-7 items-center gap-1 rounded-md px-2.5 text-[11px] font-medium transition-colors ${
-                  active ? 'bg-[#0B3D2E] text-white' : 'text-zinc-600 hover:bg-zinc-100'
+                  active ? 'bg-[#12544f] text-white' : 'text-zinc-600 hover:bg-zinc-100'
                 }`}
               >
                 {f.label}
@@ -158,10 +158,10 @@ function ThreadList({ selectedId, onSelect, onNew, className = '' }) {
                     onClick={() => onSelect(String(t.id))}
                     aria-current={active ? 'true' : undefined}
                     className={`flex w-full gap-3 rounded-lg p-2.5 text-left transition-colors ${
-                      active ? 'bg-[#0B3D2E]/[0.07]' : 'hover:bg-zinc-50'
+                      active ? 'bg-[#12544f]/[0.07]' : 'hover:bg-zinc-50'
                     }`}
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] text-[12px] font-semibold text-white">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#12544f] text-[12px] font-semibold text-white">
                       {initials(g.full_name)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -169,7 +169,7 @@ function ThreadList({ selectedId, onSelect, onNew, className = '' }) {
                         <p className={`truncate text-[13px] ${unread ? 'font-semibold text-zinc-900' : 'font-medium text-zinc-800'}`}>
                           {g.full_name || 'Guardian'}
                         </p>
-                        <span className={`shrink-0 text-[10px] tabular-nums ${unread ? 'font-semibold text-[#0B3D2E]' : 'text-zinc-400'}`}>
+                        <span className={`shrink-0 text-[10px] tabular-nums ${unread ? 'font-semibold text-[#12544f]' : 'text-zinc-400'}`}>
                           {shortTime(t.last_message_at)}
                         </span>
                       </div>
@@ -189,7 +189,7 @@ function ThreadList({ selectedId, onSelect, onNew, className = '' }) {
                           ) : null}
                         </p>
                         {unread ? (
-                          <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] px-1 text-[10px] font-semibold text-white">
+                          <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#12544f] px-1 text-[10px] font-semibold text-white">
                             {t.unread_count}
                           </span>
                         ) : null}
@@ -309,7 +309,7 @@ function Conversation({ threadId, onBack }) {
               <ArrowLeft className="h-4 w-4" />
             </button>
           ) : null}
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#12544f] text-sm font-semibold text-white">
             {initials(guardian?.full_name)}
           </div>
           <div className="min-w-0">
@@ -330,13 +330,13 @@ function Conversation({ threadId, onBack }) {
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
               {guardian?.phone ? (
-                <a href={`tel:${guardian.phone}`} className="inline-flex items-center gap-1 hover:text-[#0B3D2E]">
+                <a href={`tel:${guardian.phone}`} className="inline-flex items-center gap-1 hover:text-[#12544f]">
                   <Phone className="h-3 w-3" />
                   {guardian.phone}
                 </a>
               ) : null}
               {guardian?.email ? (
-                <a href={`mailto:${guardian.email}`} className="inline-flex items-center gap-1 hover:text-[#0B3D2E]">
+                <a href={`mailto:${guardian.email}`} className="inline-flex items-center gap-1 hover:text-[#12544f]">
                   <Mail className="h-3 w-3" />
                   {guardian.email}
                 </a>
@@ -386,7 +386,7 @@ function Conversation({ threadId, onBack }) {
                   <div
                     className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
                       out
-                        ? 'rounded-br-md bg-[#0B3D2E] text-white'
+                        ? 'rounded-br-md bg-[#12544f] text-white'
                         : 'rounded-bl-md border border-zinc-200 bg-white text-zinc-800'
                     }`}
                   >
@@ -431,7 +431,7 @@ function Conversation({ threadId, onBack }) {
           maxLength={5000}
           placeholder={`Message ${guardian?.full_name?.split(' ')[0] || 'the parent'}…`}
           aria-label="Message"
-          className="block w-full resize-none rounded-lg border border-zinc-200 px-3 py-2 text-[13px] text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-[#0B3D2E] focus:ring-2 focus:ring-[#0B3D2E]/10"
+          className="block w-full resize-none rounded-lg border border-zinc-200 px-3 py-2 text-[13px] text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-[#12544f] focus:ring-2 focus:ring-[#12544f]/10"
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <ChannelPicker value={channels} onChange={setChannels} channels={availability} disabledReasons={blocks} />
@@ -554,7 +554,7 @@ function NewConversationSheet({ isOpen, onOpenChange, onCreated }) {
     >
       <FormField label="To" required>
         {picked ? (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-[#0B3D2E]/30 bg-[#0B3D2E]/[0.04] px-3 py-2">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-[#12544f]/30 bg-[#12544f]/[0.04] px-3 py-2">
             <div className="min-w-0">
               <p className="truncate text-[13px] font-medium text-zinc-900">
                 {picked.full_name} <span className="font-normal capitalize text-zinc-500">· {picked.relationship}</span>
@@ -563,7 +563,7 @@ function NewConversationSheet({ isOpen, onOpenChange, onCreated }) {
                 {[picked.student?.full_name, picked.student?.classroom, picked.phone, picked.email].filter(Boolean).join(' · ')}
               </p>
             </div>
-            <button type="button" onClick={() => setPicked(null)} className="shrink-0 text-[12px] font-medium text-[#0B3D2E] hover:underline">
+            <button type="button" onClick={() => setPicked(null)} className="shrink-0 text-[12px] font-medium text-[#12544f] hover:underline">
               Change
             </button>
           </div>
@@ -638,7 +638,7 @@ export default function MessagingInbox() {
   }
 
   return (
-    <Card className="grid h-[calc(100dvh-15.5rem)] min-h-[460px] md:h-[calc(100vh-11.5rem)] md:min-h-[520px] overflow-hidden border border-zinc-200 shadow-none lg:grid-cols-[340px_minmax(0,1fr)]">
+    <Card className="grid h-[calc(100dvh-15.5rem)] min-h-[460px] md:h-[calc(100vh-11.5rem)] md:min-h-[520px] overflow-hidden rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:grid-cols-[340px_minmax(0,1fr)]">
       <ThreadList
         selectedId={selectedId}
         onSelect={select}

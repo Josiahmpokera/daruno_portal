@@ -27,6 +27,7 @@ import Announcements from './Announcements.jsx'
 import NoticeBoard from './NoticeBoard.jsx'
 import { CategoryPill, EmptyState } from './commComponents.jsx'
 import { fullTime, initials, shortTime } from './commConstants.js'
+import { ValueSkeleton } from '../../components/Loading'
 
 const META = {
   '/communication': { title: 'Communication', section: 'overview', desc: 'Parent messaging, announcements and the notice board' },
@@ -42,7 +43,7 @@ const META = {
 function Stat({ label, value, icon, tone, onPress, hint }) {
   const Icon = icon
   return (
-    <Card isPressable={Boolean(onPress)} onPress={onPress} className="h-full border border-zinc-200 shadow-none transition-colors hover:border-[#0B3D2E]/30">
+    <Card isPressable={Boolean(onPress)} onPress={onPress} className="h-full rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30">
       <CardBody className="flex h-full flex-row items-center gap-3 p-3">
         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}>
           <Icon className="h-4 w-4" strokeWidth={2} />
@@ -66,7 +67,7 @@ function ChannelStatus({ channels = {} }) {
     { key: 'whatsapp', icon: MessagesSquare, label: 'WhatsApp', available: false, note: 'Not integrated yet', setup: '/admin/whatsapp' },
   ]
   return (
-    <Card className="border border-zinc-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-0">
         <div className="border-b border-zinc-100 px-4 py-3">
           <h3 className="text-sm font-semibold text-zinc-900">Delivery channels</h3>
@@ -84,7 +85,7 @@ function ChannelStatus({ channels = {} }) {
                   <CheckCircle2 className="h-3.5 w-3.5" /> Ready
                 </span>
               ) : r.setup ? (
-                <button type="button" onClick={() => navigate(r.setup)} className="text-[11px] font-medium text-[#0B3D2E] hover:underline">
+                <button type="button" onClick={() => navigate(r.setup)} className="text-[11px] font-medium text-[#12544f] hover:underline">
                   Set up
                 </button>
               ) : (
@@ -108,7 +109,7 @@ function Overview() {
   const boardQ = useQuery({ queryKey: ['comm', 'board', '', ''], queryFn: () => getNoticeBoard({}) })
   const threadsQ = useQuery({ queryKey: ['comm', 'threads', '', ''], queryFn: () => listParentThreads({}), enabled: canMessage })
   const s = overviewQ.data?.summary || {}
-  const v = (x) => (overviewQ.isLoading ? '…' : String(x ?? 0))
+  const v = (x) => (overviewQ.isLoading ? <ValueSkeleton /> : String(x ?? 0))
 
   return (
     <div className="space-y-4">
@@ -125,11 +126,11 @@ function Overview() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         {canMessage ? (
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-0">
               <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
                 <h3 className="text-sm font-semibold text-zinc-900">Recent conversations</h3>
-                <button type="button" onClick={() => navigate('/communication/messages')} className="text-[11px] font-medium text-[#0B3D2E] hover:underline">
+                <button type="button" onClick={() => navigate('/communication/messages')} className="text-[11px] font-medium text-[#12544f] hover:underline">
                   Open inbox
                 </button>
               </div>
@@ -140,7 +141,7 @@ function Overview() {
                   {threadsQ.data.threads.slice(0, 6).map((t) => (
                     <li key={t.id}>
                       <button type="button" onClick={() => navigate(`/communication/messages?thread=${t.id}`)} className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] text-[11px] font-semibold text-white">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#12544f] text-[11px] font-semibold text-white">
                           {initials(t.guardian?.full_name)}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -157,11 +158,11 @@ function Overview() {
           </Card>
         ) : null}
 
-        <Card className="border border-zinc-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="p-0">
             <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
               <h3 className="text-sm font-semibold text-zinc-900">On the notice board</h3>
-              <button type="button" onClick={() => navigate('/communication/notice-board')} className="text-[11px] font-medium text-[#0B3D2E] hover:underline">
+              <button type="button" onClick={() => navigate('/communication/notice-board')} className="text-[11px] font-medium text-[#12544f] hover:underline">
                 View board
               </button>
             </div>
@@ -184,7 +185,7 @@ function Overview() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="space-y-2 p-4">
               <h3 className="text-sm font-semibold text-zinc-900">Quick actions</h3>
               {canMessage ? (
@@ -251,7 +252,7 @@ function ChannelPage({ channel }) {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-zinc-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${ready ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500'}`}>

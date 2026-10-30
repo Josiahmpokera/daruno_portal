@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, useDisclosure } from '@heroui/react'
 import {
   BookOpen,
   CalendarDays,
@@ -36,6 +36,7 @@ import {
   listYears,
   updateStaff,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const META = {
   '/teachers': { title: 'All Teachers', section: 'directory', desc: 'Teaching staff directory (TAMISEMI HR)' },
@@ -255,7 +256,7 @@ function DirectorySection({ defaultOpenCreate = false }) {
         onRefresh={() => listQ.refetch()}
         isRefreshing={listQ.isFetching}
         toolbarActions={
-          <FormButton className="h-8 min-h-8 bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={openCreate}>
+          <FormButton className="h-8 min-h-8 bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={openCreate}>
             Register teacher
           </FormButton>
         }
@@ -328,7 +329,7 @@ function DirectorySection({ defaultOpenCreate = false }) {
           </FormField>
           <div className="sm:col-span-2">
             <FormButton
-              className="w-full bg-[#0B3D2E]"
+              className="w-full bg-[#12544f]"
               color="primary"
               isLoading={saveMut.isPending}
               onPress={() =>
@@ -480,12 +481,12 @@ function AllocationsSection({ classTeacherOnly = false }) {
         <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>
           Refresh
         </FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           {classTeacherOnly ? 'Assign class teacher' : 'Add allocation'}
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -544,7 +545,7 @@ function AllocationsSection({ classTeacherOnly = false }) {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={createMut.isPending}
             onPress={() => {
@@ -594,7 +595,7 @@ function LeaveSection() {
     ],
     [],
   )
-  if (listQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (listQ.isLoading) return <SectionSkeleton />
   return (
     <DataTable
       columns={columns}
@@ -640,7 +641,7 @@ function EmploymentSection() {
     ],
     [],
   )
-  if (listQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (listQ.isLoading) return <SectionSkeleton />
   const data = (listQ.data?.staff || []).filter(isTeachingStaff)
   return (
     <DataTable
@@ -666,9 +667,9 @@ function PortalSection() {
       {cards.map((c) => {
         const Icon = c.icon
         return (
-          <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+          <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
             <CardBody className="flex flex-row items-start gap-3 p-3.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                 <Icon className="h-4 w-4" />
               </div>
               <div>
@@ -686,11 +687,11 @@ function PortalSection() {
 function InfoLink({ title, body, action, path }) {
   const navigate = useNavigate()
   return (
-    <Card className="max-w-xl border border-slate-200 shadow-none">
+    <Card className="max-w-xl rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <h3 className="text-sm font-semibold">{title}</h3>
         <p className="text-sm text-slate-600">{body}</p>
-        <FormButton className="bg-[#0B3D2E]" color="primary" onPress={() => navigate(path)}>
+        <FormButton className="bg-[#12544f]" color="primary" onPress={() => navigate(path)}>
           {action}
         </FormButton>
       </CardBody>

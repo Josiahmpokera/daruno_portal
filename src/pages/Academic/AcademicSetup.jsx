@@ -70,6 +70,7 @@ import {
   TeacherAllocationPanel,
 } from './SubjectManagement.jsx'
 import { CurriculumPanel, GradingPanel } from './GradingCurriculum.jsx'
+import { ValueSkeleton } from '../../components/Loading'
 
 const sectionMeta = {
   '/academic': {
@@ -1415,7 +1416,7 @@ function AcademicStatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -1492,7 +1493,7 @@ function OverviewPanel() {
   const stats = [
     {
       label: 'Academic years',
-      value: loading ? '…' : String(yearsQ.data?.academic_years?.length ?? 0),
+      value: loading ? <ValueSkeleton /> : String(yearsQ.data?.academic_years?.length ?? 0),
       hint: 'Configured years',
       icon: CalendarRange,
       tone: 'bg-emerald-50 text-emerald-700',
@@ -1500,7 +1501,7 @@ function OverviewPanel() {
     },
     {
       label: 'Terms',
-      value: loading ? '…' : String(termsQ.data?.terms?.length ?? 0),
+      value: loading ? <ValueSkeleton /> : String(termsQ.data?.terms?.length ?? 0),
       hint: 'Terms / semesters',
       icon: CalendarDays,
       tone: 'bg-sky-50 text-sky-700',
@@ -1508,7 +1509,7 @@ function OverviewPanel() {
     },
     {
       label: 'Classes',
-      value: loading ? '…' : String(classesQ.data?.classes?.length ?? 0),
+      value: loading ? <ValueSkeleton /> : String(classesQ.data?.classes?.length ?? 0),
       hint: 'Active classrooms',
       icon: School,
       tone: 'bg-violet-50 text-violet-700',
@@ -1516,7 +1517,7 @@ function OverviewPanel() {
     },
     {
       label: 'Subjects',
-      value: loading ? '…' : String(subjectsQ.data?.subjects?.length ?? 0),
+      value: loading ? <ValueSkeleton /> : String(subjectsQ.data?.subjects?.length ?? 0),
       hint: 'Curriculum subjects',
       icon: BookOpen,
       tone: 'bg-amber-50 text-amber-800',
@@ -1524,7 +1525,7 @@ function OverviewPanel() {
     },
     {
       label: 'Levels',
-      value: loading ? '…' : String(levelsQ.data?.levels?.length ?? 0),
+      value: loading ? <ValueSkeleton /> : String(levelsQ.data?.levels?.length ?? 0),
       hint: 'Education levels',
       icon: Layers,
       tone: 'bg-rose-50 text-rose-700',
@@ -1655,11 +1656,11 @@ function OverviewPanel() {
               <Card
                 key={c.p}
                 isPressable
-                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                 onPress={() => navigate(c.p)}
               >
                 <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">

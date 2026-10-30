@@ -30,13 +30,13 @@ function TimetableScheduling() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="class-timetables" title="Class Timetables">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Class Timetables</h3>
@@ -47,7 +47,7 @@ function TimetableScheduling() {
                   <SelectItem key="std1">Standard I</SelectItem>
                   <SelectItem key="std2">Standard II</SelectItem>
                 </Select>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                   Create Schedule
                 </Button>
               </div>
@@ -62,7 +62,7 @@ function TimetableScheduling() {
         </Tab>
 
         <Tab key="teacher-schedules" title="Teacher Schedules">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Teacher Schedules</h3>
@@ -83,13 +83,13 @@ function TimetableScheduling() {
         </Tab>
 
         <Tab key="resource-allocation" title="Resource Allocation">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Resource Allocation</h3>
                 <p className="text-sm text-slate-500">Track special rooms usage</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Book Resource
               </Button>
             </CardHeader>

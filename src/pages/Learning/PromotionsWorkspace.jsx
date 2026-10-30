@@ -46,6 +46,7 @@ import {
   runRepeatClass,
   updatePromotionRule,
 } from '../../api/domain.js'
+import { ValueSkeleton } from '../../components/Loading'
 
 const META = {
   '/promotions': {
@@ -84,7 +85,7 @@ function StatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -161,7 +162,7 @@ function OverviewSection() {
   const stats = [
     {
       label: 'Active rules',
-      value: loading ? '…' : String(s.active_rules ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.active_rules ?? 0),
       hint: `${s.total_rules ?? 0} total`,
       icon: Settings2,
       tone: 'bg-sky-50 text-sky-700',
@@ -169,7 +170,7 @@ function OverviewSection() {
     },
     {
       label: 'Promotion runs',
-      value: loading ? '…' : String(s.runs ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.runs ?? 0),
       hint: s.last_run_at ? `Last: ${new Date(s.last_run_at).toLocaleDateString()}` : 'No runs yet',
       icon: Play,
       tone: 'bg-indigo-50 text-indigo-700',
@@ -177,7 +178,7 @@ function OverviewSection() {
     },
     {
       label: 'Promoted',
-      value: loading ? '…' : String(s.promoted ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.promoted ?? 0),
       hint: 'All-time decisions',
       icon: CheckCircle2,
       tone: 'bg-emerald-50 text-emerald-700',
@@ -185,7 +186,7 @@ function OverviewSection() {
     },
     {
       label: 'Repeated',
-      value: loading ? '…' : String(s.repeated ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.repeated ?? 0),
       hint: 'Held back',
       icon: Repeat,
       tone: 'bg-amber-50 text-amber-800',
@@ -251,11 +252,11 @@ function OverviewSection() {
               <Card
                 key={c.p}
                 isPressable
-                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                 onPress={() => navigate(c.p)}
               >
                 <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
@@ -703,7 +704,7 @@ function AutomaticSection() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="space-y-3 p-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <FormField label="From academic year" required>
@@ -937,7 +938,7 @@ function ManualSection() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="space-y-3 p-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <FormField label="From academic year" required>
@@ -1130,7 +1131,7 @@ function RepeatSection() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="space-y-3 p-4">
           <p className="text-xs text-slate-500">
             Selected students keep the same classroom in the target academic year. Source
@@ -1368,19 +1369,19 @@ function ReportsSection() {
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         <StatCard
           label="Promoted"
-          value={reportsQ.isLoading ? '…' : String(totals.promoted ?? 0)}
+          value={reportsQ.isLoading ? <ValueSkeleton /> : String(totals.promoted ?? 0)}
           icon={CheckCircle2}
           tone="bg-emerald-50 text-emerald-700"
         />
         <StatCard
           label="Repeated"
-          value={reportsQ.isLoading ? '…' : String(totals.repeated ?? 0)}
+          value={reportsQ.isLoading ? <ValueSkeleton /> : String(totals.repeated ?? 0)}
           icon={Repeat}
           tone="bg-amber-50 text-amber-800"
         />
         <StatCard
           label="Skipped"
-          value={reportsQ.isLoading ? '…' : String(totals.skipped ?? 0)}
+          value={reportsQ.isLoading ? <ValueSkeleton /> : String(totals.skipped ?? 0)}
           icon={Layers}
           tone="bg-slate-100 text-slate-700"
         />

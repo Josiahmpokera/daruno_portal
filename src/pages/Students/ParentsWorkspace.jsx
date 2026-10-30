@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, useDisclosure } from '@heroui/react'
 import {
   BookOpen,
   ClipboardList,
@@ -34,6 +34,7 @@ import {
   studentStatusSummary,
   updateGuardian,
 } from '../../api/domain.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const META = {
   '/parents': {
@@ -99,7 +100,7 @@ function Stat({ label, value, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -320,7 +321,7 @@ function AccountsSection() {
             <FormTextarea value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={saveMut.isPending}
             onPress={() =>
@@ -362,7 +363,7 @@ function ChildrenSection() {
     return [...map.values()].filter((g) => g.children.length > 1)
   }, [listQ.data])
 
-  if (listQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (listQ.isLoading) return <SectionSkeleton />
   if (!groups.length) {
     return (
       <p className="text-sm text-slate-500">
@@ -373,7 +374,7 @@ function ChildrenSection() {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {groups.map((g) => (
-        <Card key={g.key} className="border border-slate-200 shadow-none">
+        <Card key={g.key} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="space-y-2 p-3.5">
             <div>
               <p className="text-sm font-semibold">{g.name}</p>
@@ -433,7 +434,7 @@ function FeesSection() {
     ],
     [],
   )
-  if (outstandingQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (outstandingQ.isLoading) return <SectionSkeleton />
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">
@@ -470,7 +471,7 @@ function HomeworkSection() {
     ],
     [],
   )
-  if (listQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (listQ.isLoading) return <SectionSkeleton />
   return (
     <DataTable
       columns={columns}
@@ -487,7 +488,7 @@ function PerformanceSection() {
     queryFn: () => listStudents({ per_page: 40, status: 'active' }),
   })
   const students = studentsQ.data?.students || []
-  if (studentsQ.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (studentsQ.isLoading) return <SectionSkeleton />
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">
@@ -498,7 +499,7 @@ function PerformanceSection() {
           <Card
             key={s.id}
             isPressable
-            className="border border-slate-200 shadow-none"
+            className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"
             onPress={() => navigate(`/students/${s.id}`)}
           >
             <CardBody className="p-3">
@@ -516,12 +517,12 @@ function PerformanceSection() {
 
 function InfoPanel({ title, body, actionLabel, onAction }) {
   return (
-    <Card className="border border-slate-200 shadow-none max-w-xl">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] max-w-xl">
       <CardBody className="space-y-3 p-4">
         <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
         <p className="text-sm text-slate-600">{body}</p>
         {actionLabel && onAction ? (
-          <FormButton className="bg-[#0B3D2E]" color="primary" onPress={onAction}>
+          <FormButton className="bg-[#12544f]" color="primary" onPress={onAction}>
             {actionLabel}
           </FormButton>
         ) : null}
@@ -552,8 +553,8 @@ function Overview() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5">
-        <Stat label="Guardians" value={guardiansQ.isLoading ? '…' : totalG} icon={UsersRound} tone="bg-violet-50 text-violet-700" onPress={() => navigate('/parents/accounts')} />
-        <Stat label="Active students" value={statusQ.isLoading ? '…' : activeStudents} icon={Users} tone="bg-emerald-50 text-emerald-700" onPress={() => navigate('/students/list')} />
+        <Stat label="Guardians" value={guardiansQ.isLoading ? <ValueSkeleton /> : totalG} icon={UsersRound} tone="bg-violet-50 text-violet-700" onPress={() => navigate('/parents/accounts')} />
+        <Stat label="Active students" value={statusQ.isLoading ? <ValueSkeleton /> : activeStudents} icon={Users} tone="bg-emerald-50 text-emerald-700" onPress={() => navigate('/students/list')} />
         <Stat label="Multi-child" value="—" icon={Users} tone="bg-sky-50 text-sky-700" onPress={() => navigate('/parents/children')} />
         <Stat label="Fee follow-up" value="Open" icon={Wallet} tone="bg-amber-50 text-amber-800" onPress={() => navigate('/parents/fees')} />
         <Stat label="Homework" value="Open" icon={BookOpen} tone="bg-rose-50 text-rose-700" onPress={() => navigate('/parents/homework')} />
@@ -562,9 +563,9 @@ function Overview() {
         {modules.map((m) => {
           const Icon = m.icon
           return (
-            <Card key={m.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(m.p)}>
+            <Card key={m.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(m.p)}>
               <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, CardHeader, CardBody, Chip, Spinner } from '@heroui/react'
+import { Card, CardHeader, CardBody, Chip } from '@heroui/react'
+import { TableSkeleton } from '../../components/Loading'
 import { useQuery } from '@tanstack/react-query'
 import {
   Users,
@@ -111,7 +112,7 @@ function FeeSetupBanner() {
       <div className="flex w-full shrink-0 items-center gap-1 pl-[2.375rem] sm:w-auto sm:pl-0">
         <Link
           to={cta}
-          className="inline-flex items-center gap-1 rounded-md bg-[#0B3D2E] px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-[#0B3D2E]/90"
+          className="inline-flex items-center gap-1 rounded-md bg-[#12544f] px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-[#12544f]/90"
         >
           Set up fees
           <ArrowRight className="h-3 w-3" />
@@ -136,7 +137,7 @@ const KPIS = [
     value: '968',
     hint: '+18 MoM',
     icon: Users,
-    tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+    tone: 'bg-[#12544f]/10 text-[#12544f]',
   },
   {
     label: 'Teachers',
@@ -255,7 +256,7 @@ function MiniTable({ columns, rows, keyField = 'id' }) {
 
 function StatCard({ label, value, hint, icon: Icon, tone }) {
   return (
-    <Card className="h-full border border-zinc-200 shadow-none">
+    <Card className="h-full rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="flex h-full flex-row items-center gap-3 p-3">
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}
@@ -332,7 +333,7 @@ function Dashboard() {
         {/* Three charts: fee vs expenses (left) · doughnut + fisheye performance (right) */}
         <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
           {/* Left — keep full size */}
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2.5 pb-0">
               <h2 className="text-sm font-medium text-zinc-900">
                 Fee payment trend vs Expenses
@@ -348,7 +349,7 @@ function Dashboard() {
 
           {/* Right — two stacked charts */}
           <div className="flex min-h-0 min-w-0 flex-col gap-3">
-            <Card className="border border-zinc-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2 pb-0">
                 <h2 className="text-sm font-medium text-zinc-900">
                   Fee collection breakdown
@@ -362,7 +363,7 @@ function Dashboard() {
               </CardBody>
             </Card>
 
-            <Card className="min-h-0 flex-1 border border-zinc-200 shadow-none">
+            <Card className="min-h-0 flex-1 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2 pb-0">
                 <h2 className="text-sm font-medium text-zinc-900">
                   School performance
@@ -384,7 +385,7 @@ function Dashboard() {
 
         {/* Budget + headcount */}
         <div className="grid gap-3 md:grid-cols-2 [&>*]:min-w-0">
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2.5 pb-0">
               <h2 className="text-sm font-medium text-zinc-900">
                 Budget variance
@@ -398,7 +399,7 @@ function Dashboard() {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex flex-col items-start gap-0.5 px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
                 Headcount by education level
@@ -410,9 +411,7 @@ function Dashboard() {
             </CardHeader>
             <CardBody className="px-1 pb-2 pt-0">
               {headcountQ.isLoading ? (
-                <div className="flex h-[200px] items-center justify-center">
-                  <Spinner size="sm" color="primary" />
-                </div>
+                <TableSkeleton columns={4} rows={5} label="Loading headcount" className="h-[200px]" />
               ) : headcountQ.isError ? (
                 <p className="px-3 py-8 text-center text-[12px] text-rose-600">
                   {headcountQ.error?.message || 'Could not load headcount'}
@@ -507,7 +506,7 @@ function Dashboard() {
 
         {/* Data tables grid */}
         <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4 [&>*]:min-w-0">
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
                 Top classes by size
@@ -528,7 +527,7 @@ function Dashboard() {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">Fee arrears</h2>
               <p className="text-[11px] text-zinc-400">Highest outstanding balances</p>
@@ -555,7 +554,7 @@ function Dashboard() {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
                 Recent assessments
@@ -576,7 +575,7 @@ function Dashboard() {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-3 py-2.5 pb-1">
               <h2 className="text-sm font-medium text-zinc-900">
                 Teacher workload
@@ -614,7 +613,7 @@ function Dashboard() {
 
         {/* Summary strip */}
         <div className="grid gap-3 sm:grid-cols-3 [&>*]:min-w-0">
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-3">
               <p className="text-[10px] uppercase tracking-wide text-zinc-400">
                 Collection rate
@@ -625,7 +624,7 @@ function Dashboard() {
               </p>
             </CardBody>
           </Card>
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-3">
               <p className="text-[10px] uppercase tracking-wide text-zinc-400">
                 Div. I–II rate
@@ -636,7 +635,7 @@ function Dashboard() {
               </p>
             </CardBody>
           </Card>
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-3">
               <p className="text-[10px] uppercase tracking-wide text-zinc-400">
                 Open support tickets

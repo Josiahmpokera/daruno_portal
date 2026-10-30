@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Card, CardBody, CardHeader, Chip, Spinner, Tabs, Tab } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, Tabs, Tab } from '@heroui/react'
 import {
   School,
   CheckCircle2,
@@ -33,6 +33,7 @@ import {
   newSchoolsPerMonthOption,
   loginTrendsOption,
 } from './platformOverviewCharts.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const DEMO = {
   schools: {
@@ -85,7 +86,7 @@ const DEMO = {
 
 function MiniStat({ label, value, icon: Icon, hint, tone = 'bg-zinc-100 text-zinc-700' }) {
   return (
-    <Card className="border border-zinc-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="flex flex-row items-center gap-2.5 p-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${tone}`}
@@ -178,9 +179,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-16">
-        <Spinner color="primary" />
-      </div>
+      <SectionSkeleton />
     )
   }
 
@@ -194,7 +193,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
       value: money(liveMrr ?? DEMO.revenue.mrr),
       hint: liveMrr != null ? 'From active plans (live)' : 'Monthly recurring',
       icon: DollarSign,
-      tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+      tone: 'bg-[#12544f]/10 text-[#12544f]',
     },
     {
       label: 'ARR',
@@ -247,7 +246,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
   const planTones = [
     'bg-sky-50 text-sky-700',
     'bg-violet-50 text-violet-700',
-    'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+    'bg-[#12544f]/10 text-[#12544f]',
     'bg-amber-50 text-amber-700',
     'bg-teal-50 text-teal-800',
     'bg-zinc-100 text-zinc-700',
@@ -293,7 +292,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
             value: DEMO.subscriptions.enterprise,
             hint: 'Active plan',
             icon: School,
-            tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+            tone: 'bg-[#12544f]/10 text-[#12544f]',
           },
         ]),
     {
@@ -346,7 +345,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
       value: live.schools ?? s.total,
       hint: 'Registered',
       icon: School,
-      tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+      tone: 'bg-[#12544f]/10 text-[#12544f]',
     },
     {
       label: 'Inactive',
@@ -363,7 +362,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
       value: DEMO.usage.dailyActiveSchools,
       hint: 'Schools today',
       icon: Activity,
-      tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+      tone: 'bg-[#12544f]/10 text-[#12544f]',
     },
     {
       label: 'Weekly active',
@@ -420,7 +419,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
       value: live.schools ?? s.total,
       hint: 'Registered',
       icon: School,
-      tone: 'bg-[#0B3D2E]/10 text-[#0B3D2E]',
+      tone: 'bg-[#12544f]/10 text-[#12544f]',
     },
     {
       label: 'Active',
@@ -496,7 +495,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
           <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
             MRR {liveMrr != null ? '(live)' : ''}
           </p>
-          <p className="text-lg font-semibold tabular-nums text-[#0B3D2E]">
+          <p className="text-lg font-semibold tabular-nums text-[#12544f]">
             {money(liveMrr ?? DEMO.revenue.mrr)}
           </p>
         </div>
@@ -548,10 +547,10 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
           base: 'w-fit max-w-full',
           tabList:
             'gap-1 w-fit max-w-full flex-wrap border-b border-zinc-200 pb-0',
-          cursor: 'bg-[#0B3D2E]',
+          cursor: 'bg-[#12544f]',
           tab: 'px-2.5 h-9 w-fit min-w-0',
           tabContent:
-            'group-data-[selected=true]:text-[#0B3D2E] group-data-[selected=true]:font-medium text-xs sm:text-sm text-zinc-500',
+            'group-data-[selected=true]:text-[#12544f] group-data-[selected=true]:font-medium text-xs sm:text-sm text-zinc-500',
           panel: 'w-full pt-0',
         }}
       >
@@ -653,7 +652,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Card className="border border-zinc-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader className="px-4 pb-1 pt-3">
                   <h3 className="text-sm font-medium text-zinc-800">
                     Dar es Salaam by level
@@ -672,7 +671,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
                   </p>
                 </CardBody>
               </Card>
-              <Card className="border border-zinc-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader className="px-4 pb-1 pt-3">
                   <h3 className="text-sm font-medium text-zinc-800">Top regions</h3>
                 </CardHeader>
@@ -753,7 +752,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Card className="border border-zinc-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader className="px-4 pb-1 pt-3">
                   <h3 className="text-sm font-medium text-zinc-800">
                     Dar es Salaam by level
@@ -769,7 +768,7 @@ function PlatformOverview({ liveStats, planMix = [], loading }) {
                   />
                 </CardBody>
               </Card>
-              <Card className="border border-zinc-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader className="px-4 pb-1 pt-3">
                   <h3 className="text-sm font-medium text-zinc-800">Top regions</h3>
                 </CardHeader>

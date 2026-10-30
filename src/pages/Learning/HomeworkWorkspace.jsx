@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, useDisclosure } from '@heroui/react'
 import {
   CalendarClock,
   ClipboardCheck,
@@ -34,6 +34,7 @@ import {
   listStudents,
   listSubjects,
 } from '../../api/domain.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const META = {
   '/homework': { title: 'Homework', section: 'overview', desc: 'Create homework, track submissions and feedback' },
@@ -69,10 +70,10 @@ function Overview() {
           { l: 'Submissions', v: s.submissions ?? 0 },
           { l: 'To grade', v: s.pending_grading ?? 0 },
         ].map((x) => (
-          <Card key={x.l} className="border border-slate-200 shadow-none">
+          <Card key={x.l} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-2.5">
               <p className="text-[10px] uppercase tracking-wide text-slate-400">{x.l}</p>
-              <p className="text-lg font-semibold tabular-nums">{q.isLoading ? '…' : x.v}</p>
+              <p className="text-lg font-semibold tabular-nums">{q.isLoading ? <ValueSkeleton /> : x.v}</p>
             </CardBody>
           </Card>
         ))}
@@ -81,9 +82,9 @@ function Overview() {
         {cards.map((c) => {
           const Icon = c.icon
           return (
-            <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+            <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
               <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
@@ -119,7 +120,7 @@ function CreateHomework() {
   })
 
   return (
-    <Card className="max-w-2xl border border-slate-200 shadow-none">
+    <Card className="max-w-2xl rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <FormField label="Title" required>
           <FormInput value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="Chapter 3 exercises" />
@@ -155,7 +156,7 @@ function CreateHomework() {
           <FormTextarea value={form.instructions} onChange={(e) => setForm((f) => ({ ...f, instructions: e.target.value }))} />
         </FormField>
         <FormButton
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           color="primary"
           isLoading={mut.isPending}
           onPress={() =>
@@ -232,12 +233,12 @@ function SubmissionsSection() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           Record submission
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.submissions || []} emptyMessage="No submissions yet." />
       )}
@@ -261,7 +262,7 @@ function SubmissionsSection() {
             <FormTextarea value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -307,13 +308,13 @@ function DueDatesSection() {
     <div className="space-y-5">
       <div>
         <h3 className="mb-2 text-sm font-semibold">Due within 7 days</h3>
-        {upcomingQ.isLoading ? <Spinner color="success" /> : (
+        {upcomingQ.isLoading ? <SectionSkeleton rows={3} /> : (
           <DataTable columns={columns} data={upcomingQ.data?.assignments || []} emptyMessage="Nothing due soon." />
         )}
       </div>
       <div>
         <h3 className="mb-2 text-sm font-semibold text-rose-700">Overdue</h3>
-        {overdueQ.isLoading ? <Spinner color="success" /> : (
+        {overdueQ.isLoading ? <SectionSkeleton rows={3} /> : (
           <DataTable columns={columns} data={overdueQ.data?.assignments || []} emptyMessage="No overdue homework." />
         )}
       </div>
@@ -370,7 +371,7 @@ function FeedbackSection() {
   return (
     <div className="space-y-4">
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.submissions || []} emptyMessage="No submissions waiting for feedback." />
       )}
@@ -386,7 +387,7 @@ function FeedbackSection() {
             <FormTextarea value={form.feedback} onChange={(e) => setForm((f) => ({ ...f, feedback: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -408,26 +409,26 @@ function FeedbackSection() {
 
 function ReportsSection() {
   const q = useQuery({ queryKey: ['homework', 'reports'], queryFn: getHomeworkReports })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const subs = q.data?.submissions || {}
   const byType = q.data?.assignments_by_type || []
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">Graded submissions</p>
             <p className="text-xl font-semibold">{subs.graded ?? 0}</p>
           </CardBody>
         </Card>
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">Average score</p>
             <p className="text-xl font-semibold">{subs.average_score ?? 0}</p>
           </CardBody>
         </Card>
       </div>
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody>
           <h3 className="mb-2 text-sm font-semibold">By assignment type</h3>
           {byType.length === 0 ? (

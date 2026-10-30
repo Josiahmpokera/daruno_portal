@@ -591,7 +591,7 @@ export function SubjectsPanel() {
           {' · '}
           <a
             href="/school-profile/levels"
-            className="text-[#0B3D2E] underline-offset-2 hover:underline"
+            className="text-[#12544f] underline-offset-2 hover:underline"
           >
             Change
           </a>
@@ -839,7 +839,7 @@ export function CombinationsPanel() {
         header: 'Code',
         size: 80,
         Cell: ({ cell }) => (
-          <span className="font-mono text-[12px] font-semibold text-[#0B3D2E]">
+          <span className="font-mono text-[12px] font-semibold text-[#12544f]">
             {cell.getValue()}
           </span>
         ),

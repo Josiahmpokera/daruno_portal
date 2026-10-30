@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, CardHeader, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, useDisclosure } from '@heroui/react'
 import { Plus, RefreshCw } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -35,6 +35,7 @@ import {
   updateBudget,
   updateChartOfAccount,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const money = (n) =>
   Number(n || 0).toLocaleString(undefined, {
@@ -164,7 +165,7 @@ function OverviewPanel() {
         <Card
           key={c.path}
           isPressable
-          className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+          className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
           onPress={() => navigate(c.path)}
         >
           <CardHeader className="pb-1">
@@ -305,7 +306,7 @@ function CoaSection() {
         toolbarActions={
           <FormButton
             color="primary"
-            className="h-8 min-h-8 bg-[#0B3D2E]"
+            className="h-8 min-h-8 bg-[#12544f]"
             startContent={<Plus className="h-4 w-4" />}
             onPress={openCreate}
           >
@@ -356,7 +357,7 @@ function CoaSection() {
           </FormField>
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={saveMut.isPending}
             onPress={() =>
               saveMut.mutate({
@@ -501,7 +502,7 @@ function BanksSection() {
         </FormButton>
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={openCreate}
         >
@@ -510,9 +511,7 @@ function BanksSection() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -571,7 +570,7 @@ function BanksSection() {
           </FormField>
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={saveMut.isPending}
             onPress={() =>
               saveMut.mutate({
@@ -722,7 +721,7 @@ function BudgetSection() {
       <div className="flex justify-end">
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={() => {
             setLines([])
@@ -734,9 +733,7 @@ function BudgetSection() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -829,7 +826,7 @@ function BudgetSection() {
 
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={createMut.isPending}
             onPress={() =>
               createMut.mutate({
@@ -990,7 +987,7 @@ function CashSection({ mode }) {
     <div className="space-y-4">
       {mode === 'cashbook' && (
         <div className="grid gap-3 sm:grid-cols-3">
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="py-3">
               <p className="text-xs text-slate-500">Total income</p>
               <p className="text-lg font-semibold text-emerald-700">
@@ -998,7 +995,7 @@ function CashSection({ mode }) {
               </p>
             </CardBody>
           </Card>
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="py-3">
               <p className="text-xs text-slate-500">Total expenses</p>
               <p className="text-lg font-semibold text-rose-700">
@@ -1006,7 +1003,7 @@ function CashSection({ mode }) {
               </p>
             </CardBody>
           </Card>
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="py-3">
               <p className="text-xs text-slate-500">Net cash</p>
               <p className="text-lg font-semibold text-slate-900">TZS {money(summary.net)}</p>
@@ -1025,7 +1022,7 @@ function CashSection({ mode }) {
         </FormButton>
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={() => {
             setForm((f) => ({
@@ -1040,9 +1037,7 @@ function CashSection({ mode }) {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -1124,7 +1119,7 @@ function CashSection({ mode }) {
           </FormField>
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={mut.isPending}
             onPress={() =>
               mut.mutate({
@@ -1259,7 +1254,7 @@ function JournalsSection() {
         </FormButton>
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={() => sheet.onOpen()}
         >
@@ -1268,9 +1263,7 @@ function JournalsSection() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -1387,7 +1380,7 @@ function JournalsSection() {
 
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={mut.isPending}
             isDisabled={!balanced}
             onPress={() =>
@@ -1495,9 +1488,7 @@ function LedgerSection() {
       {!coaId ? (
         <p className="text-sm text-slate-500">Select an account to view the general ledger.</p>
       ) : ledgerQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : ledgerQ.isError ? (
         <p className="text-sm text-rose-600">{ledgerQ.error?.message}</p>
       ) : (
@@ -1594,9 +1585,7 @@ function TrialBalanceSection() {
       </div>
 
       {q.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -1638,13 +1627,11 @@ function PnLSection() {
       </div>
 
       {q.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Total income</p>
                 <p className="text-xl font-semibold text-emerald-700">
@@ -1652,7 +1639,7 @@ function PnLSection() {
                 </p>
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Total expenses</p>
                 <p className="text-xl font-semibold text-rose-700">
@@ -1660,7 +1647,7 @@ function PnLSection() {
                 </p>
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Net profit / (loss)</p>
                 <p
@@ -1675,7 +1662,7 @@ function PnLSection() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader>
                 <h3 className="text-sm font-semibold">Income</h3>
               </CardHeader>
@@ -1683,7 +1670,7 @@ function PnLSection() {
                 <StatementLines rows={d.income || []} />
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader>
                 <h3 className="text-sm font-semibold">Expenses</h3>
               </CardHeader>
@@ -1748,25 +1735,23 @@ function BalanceSheetSection() {
       </div>
 
       {q.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Total assets</p>
                 <p className="text-xl font-semibold">TZS {money(t.assets)}</p>
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Total liabilities</p>
                 <p className="text-xl font-semibold">TZS {money(t.liabilities)}</p>
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="py-3">
                 <p className="text-xs text-slate-500">Equity</p>
                 <p className="text-xl font-semibold">TZS {money(t.equity)}</p>
@@ -1775,7 +1760,7 @@ function BalanceSheetSection() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader>
                 <h3 className="text-sm font-semibold">Assets</h3>
               </CardHeader>
@@ -1783,7 +1768,7 @@ function BalanceSheetSection() {
                 <StatementLines rows={d.assets || []} />
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader>
                 <h3 className="text-sm font-semibold">Liabilities</h3>
               </CardHeader>
@@ -1791,7 +1776,7 @@ function BalanceSheetSection() {
                 <StatementLines rows={d.liabilities || []} />
               </CardBody>
             </Card>
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader>
                 <h3 className="text-sm font-semibold">Equity</h3>
               </CardHeader>

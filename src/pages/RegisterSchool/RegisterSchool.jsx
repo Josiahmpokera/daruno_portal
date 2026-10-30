@@ -340,7 +340,7 @@ function RegisterSchool() {
       <div className="mx-auto flex w-full max-w-6xl flex-col md:min-h-[calc(100vh-3.5rem)] md:flex-row">
         {/* Steps — page sidebar, not a card */}
         <aside className="border-b border-zinc-100 bg-zinc-50/80 px-4 py-5 sm:px-6 md:w-64 md:shrink-0 md:border-b-0 md:border-r md:px-6 md:py-10 lg:w-72 lg:px-8">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#0B3D2E]/70">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#12544f]/70">
             School registration
           </p>
           <h1 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">
@@ -367,7 +367,7 @@ function RegisterSchool() {
                   className={[
                     'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
                     active
-                      ? 'bg-[#0B3D2E] text-white'
+                      ? 'bg-[#12544f] text-white'
                       : done
                         ? 'bg-emerald-100 text-emerald-800'
                         : 'bg-white text-zinc-500 ring-1 ring-zinc-200',
@@ -412,7 +412,7 @@ function RegisterSchool() {
                         done
                           ? 'bg-emerald-500 text-white'
                           : active
-                            ? 'bg-[#0B3D2E] text-white'
+                            ? 'bg-[#12544f] text-white'
                             : 'bg-white text-zinc-500 ring-1 ring-zinc-200',
                       ].join(' ')}
                     >
@@ -465,7 +465,7 @@ function RegisterSchool() {
                       }}
                       className={`rounded-lg border p-4 text-left transition-colors ${
                         mode === 'trial'
-                          ? 'border-[#0B3D2E] bg-[#0B3D2E]/[0.04] ring-1 ring-[#0B3D2E]/25'
+                          ? 'border-[#12544f] bg-[#12544f]/[0.04] ring-1 ring-[#12544f]/25'
                           : 'border-zinc-200 hover:border-zinc-300'
                       }`}
                     >
@@ -485,7 +485,7 @@ function RegisterSchool() {
                       onClick={() => setMode('paid')}
                       className={`rounded-lg border p-4 text-left transition-colors ${
                         mode === 'paid'
-                          ? 'border-[#0B3D2E] bg-[#0B3D2E]/[0.04] ring-1 ring-[#0B3D2E]/25'
+                          ? 'border-[#12544f] bg-[#12544f]/[0.04] ring-1 ring-[#12544f]/25'
                           : 'border-zinc-200 hover:border-zinc-300'
                       }`}
                     >
@@ -517,7 +517,7 @@ function RegisterSchool() {
                                 onClick={() => setPlanId(String(p.id))}
                                 className={`flex items-center justify-between rounded-lg border px-3.5 py-3 text-left transition-colors ${
                                   active
-                                    ? 'border-[#0B3D2E] bg-[#0B3D2E]/[0.04]'
+                                    ? 'border-[#12544f] bg-[#12544f]/[0.04]'
                                     : 'border-zinc-200 hover:border-zinc-300'
                                 }`}
                               >
@@ -529,7 +529,7 @@ function RegisterSchool() {
                                     {p.billing_cycle} billing
                                   </p>
                                 </div>
-                                <p className="text-sm font-bold tabular-nums text-[#0B3D2E]">
+                                <p className="text-sm font-bold tabular-nums text-[#12544f]">
                                   {formatPlanPrice(p)}
                                 </p>
                               </button>
@@ -619,10 +619,10 @@ function RegisterSchool() {
                             className={`flex w-full items-start gap-2.5 px-3 py-2.5 text-left ${
                               s.is_claimed
                                 ? 'cursor-not-allowed opacity-50'
-                                : 'hover:bg-[#0B3D2E]/5'
+                                : 'hover:bg-[#12544f]/5'
                             }`}
                           >
-                            <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                            <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium">
                                 {s.name}

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Button, Spinner } from '@heroui/react'
+import { Button } from '@heroui/react'
 import {
   BookOpen,
   Check,
@@ -14,6 +14,7 @@ import {
 import MarketingLayout from '../../components/Marketing/MarketingLayout.jsx'
 import { getPublicSite, publicPricingPlans } from '../../api/domain.js'
 import { formatPlanPrice } from '../../utils/money.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 function SectionDivider({ light = false }) {
   return (
@@ -81,7 +82,7 @@ function Home() {
       {/* Hero */}
       <section className="bg-white">
         <div className="mx-auto flex max-w-6xl flex-col items-center px-6 py-20 text-center md:py-28">
-          <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#0B3D2E]">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#12544f]">
             School management SaaS
           </p>
           <h1 className="mb-6 max-w-4xl text-4xl font-bold tracking-tighter text-zinc-900 leading-[1.1] md:text-6xl lg:text-7xl">
@@ -96,7 +97,7 @@ function Home() {
               color="primary"
               size="md"
               radius="full"
-              className="h-11 bg-[#0B3D2E] px-8 text-base font-bold text-white shadow-md"
+              className="h-11 bg-[#12544f] px-8 text-base font-bold text-white shadow-md"
               onPress={() => navigate('/register-school?mode=trial')}
             >
               Start 15-day free trial
@@ -105,7 +106,7 @@ function Home() {
               variant="bordered"
               size="md"
               radius="full"
-              className="h-11 border-[#0B3D2E]/30 px-8 text-base font-bold text-[#0B3D2E]"
+              className="h-11 border-[#12544f]/30 px-8 text-base font-bold text-[#12544f]"
               onPress={() => {
                 document
                   .getElementById('pricing')
@@ -125,7 +126,7 @@ function Home() {
       <SectionDivider />
 
       {/* Dark green band — value props */}
-      <section id="about" className="bg-[#0B3D2E] py-16 text-emerald-50 md:py-20">
+      <section id="about" className="bg-[#12544f] py-16 text-emerald-50 md:py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid gap-10 md:grid-cols-3">
             {[
@@ -166,7 +167,7 @@ function Home() {
       <section id="features-preview" className="bg-zinc-50 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D2E]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#12544f]">
               Product
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">
@@ -183,9 +184,9 @@ function Home() {
               return (
                 <div
                   key={card.title}
-                  className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:border-[#0B3D2E]/30 hover:shadow-md"
+                  className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:border-[#12544f]/30 hover:shadow-md"
                 >
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-5 w-5" strokeWidth={2} />
                   </div>
                   <h3 className="mb-2 text-xl font-bold text-zinc-900">{card.title}</h3>
@@ -197,7 +198,7 @@ function Home() {
           <div className="mt-10 text-center">
             <Button
               radius="full"
-              className="bg-[#0B3D2E] px-8 font-semibold text-white"
+              className="bg-[#12544f] px-8 font-semibold text-white"
               onPress={() => navigate('/features')}
             >
               View all features
@@ -212,7 +213,7 @@ function Home() {
       <section id="pricing" className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D2E]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#12544f]">
               Pricing
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl">
@@ -222,7 +223,7 @@ function Home() {
               Choose a package to register and pay, or start a{' '}
               <button
                 type="button"
-                className="font-semibold text-[#0B3D2E] hover:underline"
+                className="font-semibold text-[#12544f] hover:underline"
                 onClick={() => navigate('/register-school?mode=trial')}
               >
                 15-day free trial
@@ -232,9 +233,7 @@ function Home() {
           </div>
 
           {pricingQ.isLoading ? (
-            <div className="flex justify-center py-16">
-              <Spinner color="success" label="Loading plans…" />
-            </div>
+            <SectionSkeleton label="Loading plans" />
           ) : pricingQ.isError ? (
             <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">
               {pricingQ.error?.message || 'Could not load pricing. Please try again later.'}
@@ -260,12 +259,12 @@ function Home() {
                     className={[
                       'relative flex flex-col rounded-2xl border p-6 shadow-sm transition hover:shadow-md',
                       featured
-                        ? 'border-[#0B3D2E] bg-emerald-50/40 ring-1 ring-[#0B3D2E]/20'
+                        ? 'border-[#12544f] bg-emerald-50/40 ring-1 ring-[#12544f]/20'
                         : 'border-zinc-200 bg-white',
                     ].join(' ')}
                   >
                     {featured ? (
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0B3D2E] px-3 py-0.5 text-[11px] font-semibold text-white">
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#12544f] px-3 py-0.5 text-[11px] font-semibold text-white">
                         Popular
                       </span>
                     ) : null}
@@ -280,26 +279,26 @@ function Home() {
                     <ul className="mt-6 flex-1 space-y-2.5 text-sm text-zinc-600">
                       {plan.max_students != null ? (
                         <li className="flex items-start gap-2">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                           Up to {plan.max_students.toLocaleString()} students
                         </li>
                       ) : null}
                       {plan.max_staff != null ? (
                         <li className="flex items-start gap-2">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                           Up to {plan.max_staff.toLocaleString()} staff
                         </li>
                       ) : null}
                       {features.length > 0 ? (
                         features.map((f) => (
                           <li key={f} className="flex items-start gap-2">
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                             <span className="capitalize">{String(f).replaceAll('_', ' ')}</span>
                           </li>
                         ))
                       ) : (
                         <li className="flex items-start gap-2">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0B3D2E]" />
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#12544f]" />
                           Core school management modules
                         </li>
                       )}
@@ -309,7 +308,7 @@ function Home() {
                         className={[
                           'w-full font-semibold',
                           featured
-                            ? 'bg-[#0B3D2E] text-white'
+                            ? 'bg-[#12544f] text-white'
                             : 'border border-zinc-200 bg-white text-zinc-900',
                         ].join(' ')}
                         radius="full"
@@ -325,7 +324,7 @@ function Home() {
                       <Button
                         radius="full"
                         variant="light"
-                        className="w-full text-xs font-semibold text-[#0B3D2E]"
+                        className="w-full text-xs font-semibold text-[#12544f]"
                         onPress={() => navigate('/register-school?mode=trial')}
                       >
                         Or start 15-day trial
@@ -344,12 +343,12 @@ function Home() {
       {/* Contact — soft surface */}
       <section id="contact" className="bg-zinc-50 py-16">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D2E]">Contact</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#12544f]">Contact</p>
           <h2 className="mt-2 text-2xl font-bold text-zinc-900">Talk to the Shengena team</h2>
           <p className="mt-2 text-zinc-500">
             Questions about onboarding, TAMISEMI compliance, or enterprise pricing?
           </p>
-          <p className="mt-5 text-base font-semibold text-[#0B3D2E]">
+          <p className="mt-5 text-base font-semibold text-[#12544f]">
             {site.support_email || 'support@shengena.app'}
           </p>
           {site.phone ? <p className="mt-1 text-sm text-zinc-600">{site.phone}</p> : null}
@@ -368,7 +367,7 @@ function Home() {
           </p>
           <Button
             radius="full"
-            className="mt-6 bg-white font-semibold text-[#0B3D2E]"
+            className="mt-6 bg-white font-semibold text-[#12544f]"
             onPress={() => navigate('/login')}
           >
             Go to sign in

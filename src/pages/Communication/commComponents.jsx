@@ -68,7 +68,7 @@ export function ChannelPicker({ value = [], onChange, channels = {}, disabledRea
             onClick={() => toggle(c)}
             className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[12px] font-medium transition-colors ${
               checked
-                ? 'border-[#0B3D2E]/40 bg-[#0B3D2E]/[0.06] text-[#0B3D2E]'
+                ? 'border-[#12544f]/40 bg-[#12544f]/[0.06] text-[#12544f]'
                 : disabled
                   ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-400'
                   : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
@@ -76,7 +76,7 @@ export function ChannelPicker({ value = [], onChange, channels = {}, disabledRea
           >
             <span
               className={`flex h-3.5 w-3.5 items-center justify-center rounded-sm border ${
-                checked ? 'border-[#0B3D2E] bg-[#0B3D2E] text-white' : 'border-zinc-300 bg-white'
+                checked ? 'border-[#12544f] bg-[#12544f] text-white' : 'border-zinc-300 bg-white'
               }`}
               aria-hidden="true"
             >

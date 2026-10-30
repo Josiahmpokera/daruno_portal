@@ -68,13 +68,13 @@ function Settings() {
             onSelectionChange={onTabChange}
             color="primary"
             classNames={{
-              cursor: "bg-[#0B3D2E]",
+              cursor: "bg-[#12544f]",
               tabContent: "group-data-[selected=true]:text-white"
             }}
           >
             <Tab key="general" title="General & Institute">
               <div className="mt-4 flex flex-col gap-4">
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                   <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Institute Information</h3>
@@ -111,7 +111,7 @@ function Settings() {
                   </CardBody>
                 </Card>
 
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                     <CardHeader>
                         <div className="flex flex-col gap-1">
                             <h3 className="text-lg font-semibold">Language & Localization</h3>
@@ -164,7 +164,7 @@ function Settings() {
 
             <Tab key="users" title="User & Access">
               <div className="mt-4">
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                   <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Role-Based Access Control</h3>
@@ -182,7 +182,7 @@ function Settings() {
 
             <Tab key="academic" title="Academic Configuration">
               <div className="mt-4">
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                    <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Classes & Subjects</h3>
@@ -200,7 +200,7 @@ function Settings() {
 
             <Tab key="financial" title="Financial & Fee">
               <div className="mt-4">
-                 <Card className="border border-slate-200 shadow-none">
+                 <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                    <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Fee Structure</h3>
@@ -218,7 +218,7 @@ function Settings() {
 
             <Tab key="communication" title="Communication">
               <div className="mt-4">
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                    <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Notifications</h3>
@@ -236,7 +236,7 @@ function Settings() {
 
             <Tab key="system" title="System & Integration">
               <div className="mt-4">
-                <Card className="border border-slate-200 shadow-none">
+                <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                    <CardHeader>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-lg font-semibold">Integrations</h3>

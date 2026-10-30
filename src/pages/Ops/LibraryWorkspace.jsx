@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, CardHeader, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, useDisclosure } from '@heroui/react'
 import { Plus, RefreshCw } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -31,6 +31,7 @@ import {
   returnLibLoan,
   updateLibReservation,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const money = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })
 const studentLabel = (s) =>
@@ -74,7 +75,7 @@ function Overview() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((c) => (
-        <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+        <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
           <CardHeader className="pb-1"><h3 className="text-sm font-semibold">{c.t}</h3></CardHeader>
           <CardBody className="pt-0"><p className="text-xs text-slate-500">{c.d}</p></CardBody>
         </Card>
@@ -114,7 +115,7 @@ function CategoriesSection() {
           <FormField label="Name" required><FormInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></FormField>
           <FormField label="Code"><FormInput value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></FormField>
           <FormField label="Description"><FormTextarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} /></FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
         </div>
       </SideSheet>
     </Shell>
@@ -186,7 +187,7 @@ function CatalogueSection({ isbnMode = false }) {
         onRefresh={() => listQ.refetch()}
         isRefreshing={listQ.isFetching}
         toolbarActions={
-          <FormButton className="h-8 min-h-8 bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+          <FormButton className="h-8 min-h-8 bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
             Add book
           </FormButton>
         }
@@ -208,7 +209,7 @@ function CatalogueSection({ isbnMode = false }) {
           <FormField label="Shelf"><FormInput value={form.shelf_location} onChange={(e) => setForm((f) => ({ ...f, shelf_location: e.target.value }))} /></FormField>
           <FormField label="Publisher"><FormInput value={form.publisher} onChange={(e) => setForm((f) => ({ ...f, publisher: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -282,7 +283,7 @@ function BorrowSection() {
           </FormField>
           <FormField label="Loan days"><FormInput type="number" min="1" value={form.days} onChange={(e) => setForm((f) => ({ ...f, days: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -340,7 +341,7 @@ function ReturnSection() {
     [mut],
   )
   return listQ.isLoading ? (
-    <div className="flex justify-center py-12"><Spinner color="success" /></div>
+    <SectionSkeleton />
   ) : (
     <DataTable columns={columns} data={open} emptyMessage="No books out for return." />
   )
@@ -413,7 +414,7 @@ function ReservationsSection() {
           </FormField>
           <FormField label="Notes"><FormTextarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -448,7 +449,7 @@ function OverdueSection() {
     [],
   )
   return listQ.isLoading ? (
-    <div className="flex justify-center py-12"><Spinner color="success" /></div>
+    <SectionSkeleton />
   ) : (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">{listQ.data?.summary?.count ?? 0} overdue loan(s).</p>
@@ -469,10 +470,10 @@ function FinesSection() {
     [],
   )
   return listQ.isLoading ? (
-    <div className="flex justify-center py-12"><Spinner color="success" /></div>
+    <SectionSkeleton />
   ) : (
     <div className="space-y-3">
-      <Card className="border border-slate-200 shadow-none max-w-sm">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] max-w-sm">
         <CardBody className="py-3">
           <p className="text-xs text-slate-500">Total fines</p>
           <p className="text-xl font-semibold">TZS {money(listQ.data?.summary?.total_fines)}</p>
@@ -486,7 +487,7 @@ function FinesSection() {
 function ReportsSection() {
   const q = useQuery({ queryKey: ['library', 'reports'], queryFn: getLibReports })
   const s = q.data?.summary || {}
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const rows = [
     ['Titles', s.titles],
     ['Total copies', s.total_copies],
@@ -499,7 +500,7 @@ function ReportsSection() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {rows.map(([label, value]) => (
-        <Card key={label} className="border border-slate-200 shadow-none">
+        <Card key={label} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">{label}</p>
             <p className="text-lg font-semibold">{value ?? '—'}</p>
@@ -515,9 +516,9 @@ function Shell({ children, onAdd, addLabel, loading, onRefresh }) {
     <div className="space-y-4">
       <div className="flex justify-end gap-2">
         {onRefresh && <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={onRefresh}>Refresh</FormButton>}
-        {onAdd && <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
+        {onAdd && <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
       </div>
-      {loading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : children}
+      {loading ? <SectionSkeleton /> : children}
     </div>
   )
 }

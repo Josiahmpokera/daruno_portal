@@ -68,6 +68,7 @@ import {
   getFinancialReports,
   getFinanceOverview,
 } from '../../api/domain.js'
+import { SectionSkeleton, TableSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const money = (n) =>
   Number(n || 0).toLocaleString(undefined, {
@@ -151,7 +152,7 @@ function FinanceAnalyticsCard({ label, value, hint, icon: Icon, tone, onPress })
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-start gap-3 p-3.5">
@@ -196,7 +197,7 @@ function OverviewPanel({ academicYearId = '' }) {
   const analytics = [
     {
       label: 'Expected fees',
-      value: loading ? '…' : `TZS ${money(summary.expected_fees ?? summary.billed)}`,
+      value: loading ? <ValueSkeleton /> : `TZS ${money(summary.expected_fees ?? summary.billed)}`,
       hint: `${enrolled} enrolled · structure × students`,
       icon: FileSpreadsheet,
       tone: 'bg-amber-50 text-amber-800',
@@ -204,9 +205,9 @@ function OverviewPanel({ academicYearId = '' }) {
     },
     {
       label: 'Collected',
-      value: loading ? '…' : `TZS ${money(summary.collections)}`,
+      value: loading ? <ValueSkeleton /> : `TZS ${money(summary.collections)}`,
       hint: loading
-        ? '…'
+        ? <ValueSkeleton />
         : `${summary.students_paid ?? 0} students paid · ${rate}% of expected`,
       icon: Wallet,
       tone: 'bg-emerald-50 text-emerald-700',
@@ -214,7 +215,7 @@ function OverviewPanel({ academicYearId = '' }) {
     },
     {
       label: 'Outstanding',
-      value: loading ? '…' : `TZS ${money(summary.outstanding)}`,
+      value: loading ? <ValueSkeleton /> : `TZS ${money(summary.outstanding)}`,
       hint: 'Expected minus collected',
       icon: CircleAlert,
       tone: 'bg-rose-50 text-rose-700',
@@ -222,9 +223,9 @@ function OverviewPanel({ academicYearId = '' }) {
     },
     {
       label: 'Students',
-      value: loading ? '…' : String(enrolled),
+      value: loading ? <ValueSkeleton /> : String(enrolled),
       hint: loading
-        ? '…'
+        ? <ValueSkeleton />
         : `${withStructure} with fee structure · ${summary.structure_lines ?? 0} lines`,
       icon: Users,
       tone: 'bg-sky-50 text-sky-700',
@@ -356,11 +357,11 @@ function OverviewPanel({ academicYearId = '' }) {
               <Card
                 key={c.path}
                 isPressable
-                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                 onPress={() => navigate(c.path)}
               >
                 <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
@@ -710,10 +711,10 @@ function StructuresPanel({ onRegisterActions } = {}) {
   return (
     <div className="flex flex-col gap-5">
       {/* Categories overview */}
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="flex flex-row items-center justify-between gap-2 pb-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
               <Tags className="h-4 w-4" strokeWidth={2} />
             </div>
             <div>
@@ -730,7 +731,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
           <Button
             size="sm"
             variant="flat"
-            className="bg-[#0B3D2E]/8 text-[#0B3D2E]"
+            className="bg-[#12544f]/8 text-[#12544f]"
             startContent={<Plus className="h-3.5 w-3.5" />}
             onPress={openCategoryModal}
           >
@@ -754,7 +755,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
               </p>
               <Button
                 size="sm"
-                className="mt-4 bg-[#0B3D2E] text-white"
+                className="mt-4 bg-[#12544f] text-white"
                 startContent={<FolderPlus className="h-3.5 w-3.5" />}
                 onPress={openCategoryModal}
               >
@@ -785,7 +786,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
       </Card>
 
       {/* Active structure lines (full width) */}
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-1">
           <div>
             <p className="text-sm font-semibold text-slate-900">
@@ -801,7 +802,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
             <Button
               size="sm"
               color="primary"
-              className="bg-[#0B3D2E]"
+              className="bg-[#12544f]"
               startContent={<Plus className="h-3.5 w-3.5" />}
               onPress={openCreateStructure}
             >
@@ -823,9 +824,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
         </CardHeader>
         <CardBody className="pt-2">
           {structsQ.isLoading ? (
-            <div className="flex justify-center py-10">
-              <Spinner color="primary" />
-            </div>
+            <SectionSkeleton />
           ) : (
             <DataTable
               columns={columns}
@@ -1011,7 +1010,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
                 </Button>
                 <Button
                   color="primary"
-                  className="bg-[#0B3D2E]"
+                  className="bg-[#12544f]"
                   isLoading={structMut.isPending}
                   isDisabled={categories.length === 0}
                   startContent={
@@ -1111,7 +1110,7 @@ function StructuresPanel({ onRegisterActions } = {}) {
                 </Button>
                 <Button
                   color="primary"
-                  className="bg-[#0B3D2E]"
+                  className="bg-[#12544f]"
                   isLoading={catMut.isPending}
                   startContent={
                     catMut.isPending ? null : (
@@ -1236,7 +1235,7 @@ function BillingPanel() {
     <div className="flex flex-col gap-4">
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardHeader className="font-semibold">
             Generate invoices (billing run)
           </CardHeader>
@@ -1314,7 +1313,7 @@ function BillingPanel() {
           </CardBody>
         </Card>
 
-        <Card className="border border-slate-200 shadow-none lg:col-span-2">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-2">
           <CardHeader className="font-semibold">Recent invoices</CardHeader>
           <CardBody>
             <DataTable
@@ -1517,7 +1516,7 @@ function MethodsPanel() {
       </div>
 
       {methodsQ.isLoading ? (
-        <Spinner color="primary" />
+        <TableSkeleton columns={4} rows={4} label="Loading payment methods" />
       ) : methodsQ.error ? (
         <p className="text-sm text-red-600">{methodsQ.error.message}</p>
       ) : (
@@ -1743,7 +1742,7 @@ function StudentFeesPanel() {
         Cell: ({ row }) => (
           <button
             type="button"
-            className="text-xs font-medium text-[#0B3D2E] hover:underline"
+            className="text-xs font-medium text-[#12544f] hover:underline"
             onClick={() =>
               navigate(`/finance/student-fees/${row.original.student_id}`)
             }
@@ -1759,7 +1758,7 @@ function StudentFeesPanel() {
   return (
     <div className="flex flex-col gap-4">
       {/* Scope: year + term tabs */}
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="flex flex-col gap-3 py-3">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <FormField label="Academic year">
@@ -1802,7 +1801,7 @@ function StudentFeesPanel() {
               <div className="relative">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 <input
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#0B3D2E]"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#12544f]"
                   placeholder="Name or admission no."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
@@ -1821,7 +1820,7 @@ function StudentFeesPanel() {
                 onClick={() => setTermId('')}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                   termId === ''
-                    ? 'bg-[#0B3D2E] text-white'
+                    ? 'bg-[#12544f] text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -1834,7 +1833,7 @@ function StudentFeesPanel() {
                   onClick={() => setTermId(String(t.id))}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                     termId === String(t.id)
-                      ? 'bg-[#0B3D2E] text-white'
+                      ? 'bg-[#12544f] text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
@@ -1853,17 +1852,17 @@ function StudentFeesPanel() {
 
       {/* Summary cards */}
       <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-2.5 px-3">
             <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
               Students
             </p>
             <p className="text-lg font-semibold tabular-nums text-slate-900">
-              {listQ.isLoading ? '…' : summary.students ?? rows.length}
+              {listQ.isLoading ? <ValueSkeleton /> : summary.students ?? rows.length}
             </p>
           </CardBody>
         </Card>
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-2.5 px-3">
             <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
               Total fees
@@ -1905,7 +1904,7 @@ function StudentFeesPanel() {
               Partial
             </p>
             <p className="text-lg font-semibold tabular-nums text-amber-800">
-              {listQ.isLoading ? '…' : summary.partial_count ?? 0}
+              {listQ.isLoading ? <ValueSkeleton /> : summary.partial_count ?? 0}
             </p>
             <p className="text-[10px] text-amber-900/60">students</p>
           </CardBody>
@@ -1920,7 +1919,7 @@ function StudentFeesPanel() {
               key={t.term_id}
               type="button"
               onClick={() => setTermId(String(t.term_id))}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-[#0B3D2E]/40"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-[#12544f]/40"
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold text-slate-800">{t.term}</p>
@@ -1963,9 +1962,7 @@ function StudentFeesPanel() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-10">
-          <Spinner color="primary" />
-        </div>
+        <SectionSkeleton />
       ) : listQ.error ? (
         <p className="text-sm text-red-600">{listQ.error.message}</p>
       ) : (
@@ -2113,9 +2110,7 @@ function StudentFeeDetailPanel({ studentId }) {
 
   if (detailQ.isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <Spinner color="primary" />
-      </div>
+      <SectionSkeleton />
     )
   }
 
@@ -2136,7 +2131,7 @@ function StudentFeeDetailPanel({ studentId }) {
         <div>
           <button
             type="button"
-            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-[#0B3D2E]"
+            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-[#12544f]"
             onClick={() => navigate('/finance/student-fees')}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -2167,7 +2162,7 @@ function StudentFeeDetailPanel({ studentId }) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">
               Total fees (year)
@@ -2204,7 +2199,7 @@ function StudentFeeDetailPanel({ studentId }) {
       </div>
 
       {byTerm.length > 0 ? (
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardHeader className="pb-1">
             <div>
               <p className="text-sm font-semibold text-slate-900">By term</p>
@@ -2246,7 +2241,7 @@ function StudentFeeDetailPanel({ studentId }) {
         </Card>
       ) : null}
 
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="font-semibold">
           Invoices ({invoices.length})
         </CardHeader>
@@ -2260,7 +2255,7 @@ function StudentFeeDetailPanel({ studentId }) {
         </CardBody>
       </Card>
 
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="font-semibold">
           Payment history ({payments.length})
         </CardHeader>
@@ -2340,7 +2335,7 @@ function InvoicesPanel() {
         Cell: ({ row }) =>
           row.original.student_id ? (
             <Link
-              className="text-xs font-medium text-[#0B3D2E] hover:underline"
+              className="text-xs font-medium text-[#12544f] hover:underline"
               to={`/finance/student-fees/${row.original.student_id}`}
             >
               Student
@@ -2497,7 +2492,7 @@ function PaymentsPanel() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="font-semibold">Record payment</CardHeader>
         <CardBody className="flex flex-col gap-3">
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -2614,11 +2609,11 @@ function PaymentsPanel() {
         </CardBody>
       </Card>
 
-      <Card className="border border-slate-200 shadow-none lg:col-span-2">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-2">
         <CardHeader className="font-semibold">Recent payments</CardHeader>
         <CardBody>
           {payQ.isLoading ? (
-            <Spinner color="primary" />
+            <TableSkeleton columns={5} rows={6} label="Loading payments" />
           ) : (
             <DataTable
               columns={columns}
@@ -2730,7 +2725,7 @@ function FeeWorkspace() {
         <Button
           size="sm"
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<FolderPlus className="h-3.5 w-3.5" />}
           onPress={() => structureActionsRef.current?.openCategoryModal?.()}
         >

@@ -69,13 +69,13 @@ function Field({ id, label, icon, trailing, ...inputProps }) {
       </label>
       <div className="group relative">
         <FieldIcon
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#0B3D2E]"
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#12544f]"
           strokeWidth={1.75}
           aria-hidden="true"
         />
         <input
           id={id}
-          className={`block h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B3D2E] focus:ring-4 focus:ring-[#0B3D2E]/10 disabled:cursor-not-allowed disabled:bg-slate-50 ${
+          className={`block h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#12544f] focus:ring-4 focus:ring-[#12544f]/10 disabled:cursor-not-allowed disabled:bg-slate-50 ${
             trailing ? 'pr-10' : 'pr-3'
           }`}
           {...inputProps}
@@ -212,17 +212,21 @@ function Login() {
   if (handingOff && !loginMutation.isError && !blockedMessage) {
     return (
       <div
-        className="flex min-h-screen flex-col items-center justify-center gap-3 bg-zinc-50"
+        className="relative flex min-h-screen flex-col items-center justify-center gap-4 bg-white"
         role="status"
+        aria-live="polite"
       >
-        <Spinner color="primary" />
-        <p className="text-sm text-zinc-500">Signing you in with Shengena…</p>
+        <div className="absolute inset-x-0 top-0 h-0.5 overflow-hidden bg-[var(--sh-rule)]" aria-hidden="true">
+          <span className="block h-full w-1/4 bg-[var(--sh-brand)] motion-safe:animate-[tz-progress_1.1s_ease-in-out_infinite]" />
+        </div>
+        <ShengenaLogo variant="icon" iconClassName="h-10 w-10 object-contain" />
+        <p className="text-[14px] text-[var(--sh-text)]">Signing you in with Shengena…</p>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0B3D2E] via-[#0a3628] to-[#06271c]">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#12544f] via-[#0f4743] to-[#0a302d]">
       {/* Background texture + brand mark (decorative) */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -266,7 +270,7 @@ function Login() {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="-ml-0.5 inline-flex rounded-md transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/40"
+            className="-ml-0.5 inline-flex rounded-md transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12544f]/40"
             aria-label="Shengena home"
           >
             <ShengenaLogo iconClassName="h-8 w-auto object-contain" />
@@ -318,7 +322,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/40"
+                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12544f]/40"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     aria-pressed={showPassword}
                   >
@@ -336,7 +340,7 @@ function Login() {
                 </span>
                 <button
                   type="button"
-                  className="font-medium text-[#0B3D2E] hover:underline focus-visible:outline-none focus-visible:underline"
+                  className="font-medium text-[#12544f] hover:underline focus-visible:outline-none focus-visible:underline"
                   onClick={() => setShowResetHelp((v) => !v)}
                   aria-expanded={showResetHelp}
                 >
@@ -366,7 +370,7 @@ function Login() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0B3D2E] text-sm font-semibold text-white transition hover:bg-[#093326] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B3D2E]/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#12544f] text-sm font-semibold text-white transition hover:bg-[#0f4743] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#12544f]/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {pending ? (
                 <>
@@ -393,7 +397,7 @@ function Login() {
                 type="button"
                 disabled={pending}
                 onClick={() => window.location.assign(ssoStartUrl())}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-[#0B3D2E] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B3D2E]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-[#12544f] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#12544f]/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <KeyRound className="h-4 w-4" strokeWidth={2} />
                 Sign in with Shengena
@@ -405,7 +409,7 @@ function Login() {
             New to Shengena?{' '}
             <button
               type="button"
-              className="font-semibold text-[#0B3D2E] hover:underline"
+              className="font-semibold text-[#12544f] hover:underline"
               onClick={() => navigate('/register-school')}
             >
               Register your school

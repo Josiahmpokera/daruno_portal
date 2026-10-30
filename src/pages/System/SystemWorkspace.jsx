@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, Chip, Spinner, Switch, useDisclosure } from '@heroui/react'
+import { Card, CardBody, Chip, Switch, useDisclosure } from '@heroui/react'
 import {
   BarChart3,
   Download,
@@ -63,6 +63,7 @@ import {
   updateSchoolUser,
   updateTwoFactorSettings,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 function money(n) {
   return Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -93,7 +94,7 @@ function Stat({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -181,7 +182,7 @@ function ReportsOverview() {
   const navigate = useNavigate()
   const q = useQuery({ queryKey: ['school', 'reports', 'overview'], queryFn: getSchoolReportsOverview })
   const s = q.data?.summary || {}
-  if (q.isLoading) return <div className="flex justify-center py-16"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const cards = [
     { l: 'Active students', v: s.students_active ?? 0, p: '/reports/students', icon: Users, tone: 'bg-emerald-50 text-emerald-700' },
     { l: 'Staff', v: s.staff ?? 0, p: '/reports/teachers', icon: Users, tone: 'bg-sky-50 text-sky-700' },
@@ -207,7 +208,7 @@ function ReportsOverview() {
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {links.map((l) => (
-          <Card key={l.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(l.p)}>
+          <Card key={l.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(l.p)}>
             <CardBody className="p-3.5">
               <h3 className="text-sm font-semibold">{l.t}</h3>
               <p className="text-xs text-slate-500">Open live report</p>
@@ -239,7 +240,7 @@ function TableReport({ title, rows, columns }) {
 
 function ReportsStudents() {
   const q = useQuery({ queryKey: ['school', 'reports', 'students'], queryFn: getSchoolReportsStudents })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const byClass = q.data?.by_class || []
   return (
     <div className="space-y-4">
@@ -262,7 +263,7 @@ function ReportsStudents() {
 
 function ReportsAttendance() {
   const q = useQuery({ queryKey: ['school', 'reports', 'attendance'], queryFn: () => getSchoolReportsAttendance() })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return (
     <div className="space-y-4">
       <p className="text-xs text-slate-500">
@@ -282,7 +283,7 @@ function ReportsAttendance() {
 
 function ReportsFinance() {
   const q = useQuery({ queryKey: ['school', 'reports', 'finance'], queryFn: () => getSchoolReportsFinance() })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const s = q.data?.summary || {}
   return (
     <div className="grid gap-3 sm:grid-cols-3">
@@ -295,7 +296,7 @@ function ReportsFinance() {
 
 function ReportsTeachers() {
   const q = useQuery({ queryKey: ['school', 'reports', 'teachers'], queryFn: getSchoolReportsTeachers })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return (
     <div className="space-y-4">
       <Stat label="Total staff" value={q.data?.total ?? 0} tone="bg-sky-50 text-sky-700" />
@@ -313,7 +314,7 @@ function ReportsTeachers() {
 
 function ReportsInventory() {
   const q = useQuery({ queryKey: ['school', 'reports', 'inventory'], queryFn: getSchoolReportsInventory })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const s = q.data?.summary || {}
   return (
     <div className="grid gap-3 sm:grid-cols-3">
@@ -331,7 +332,7 @@ function ReportsExport() {
       <p className="text-sm text-slate-600">
         Export live datasets as CSV from any report screen, or pull ministry-ready files from Compliance → Government Data Export.
       </p>
-      <FormButton className="bg-[#0B3D2E]" color="primary" onPress={() => navigate('/compliance/export')}>
+      <FormButton className="bg-[#12544f]" color="primary" onPress={() => navigate('/compliance/export')}>
         Open government export
       </FormButton>
       <FormButton appearance="bordered" onPress={() => navigate('/reports/students')}>
@@ -419,7 +420,7 @@ function UsersList() {
         isRefreshing={listQ.isFetching}
         toolbarActions={
           <FormButton
-            className="h-8 min-h-8 bg-[#0B3D2E]"
+            className="h-8 min-h-8 bg-[#12544f]"
             color="primary"
             startContent={<Plus className="h-4 w-4" />}
             onPress={() => {
@@ -461,7 +462,7 @@ function UsersList() {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={saveMut.isPending}
             onPress={() =>
@@ -560,7 +561,7 @@ function RolesSection({ scope }) {
   return (
     <div className="space-y-4">
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={roles} emptyMessage="No roles." />
       )}
@@ -593,7 +594,7 @@ function RolesSection({ scope }) {
             })}
           </div>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={saveMut.isPending}
             onPress={() =>
@@ -614,12 +615,12 @@ function RolesSection({ scope }) {
 
 function PermissionsSection() {
   const q = useQuery({ queryKey: ['school', 'permissions'], queryFn: listSchoolPermissions })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const byModule = q.data?.by_module || {}
   return (
     <div className="space-y-4">
       {Object.entries(byModule).map(([mod, perms]) => (
-        <Card key={mod} className="border border-slate-200 shadow-none">
+        <Card key={mod} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="p-3">
             <h3 className="mb-2 text-sm font-semibold capitalize">{mod || 'general'}</h3>
             <div className="flex flex-wrap gap-2">
@@ -666,7 +667,7 @@ function AuditSection() {
     ],
     [],
   )
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return <DataTable columns={columns} data={q.data?.logs || []} emptyMessage="No audit events yet." />
 }
 
@@ -699,7 +700,7 @@ function LoginHistorySection() {
     ],
     [],
   )
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return <DataTable columns={columns} data={q.data?.history || []} emptyMessage="No login history yet." />
 }
 
@@ -717,10 +718,10 @@ function PasswordPolicySection() {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const f = form || policy
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <FormField label="Minimum length">
           <FormInput
@@ -760,7 +761,7 @@ function PasswordPolicySection() {
             onChange={(e) => setForm({ ...f, expiry_days: Number(e.target.value) })}
           />
         </FormField>
-        <FormButton className="bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(f)}>
+        <FormButton className="bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(f)}>
           Save policy
         </FormButton>
       </CardBody>
@@ -779,10 +780,10 @@ function TwoFactorSection() {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const t = q.data?.two_factor || {}
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <label className="flex items-center justify-between text-sm">
           Enable two-factor authentication
@@ -829,7 +830,7 @@ function UsersOverview() {
           { t: 'Login history', p: '/users/login-history' },
           { t: 'Audit logs', p: '/users/audit' },
         ].map((c) => (
-          <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+          <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
             <CardBody className="p-3.5">
               <h3 className="text-sm font-semibold">{c.t}</h3>
             </CardBody>
@@ -845,12 +846,12 @@ function UsersOverview() {
 function ComplianceOverview() {
   const navigate = useNavigate()
   const q = useQuery({ queryKey: ['school', 'compliance', 'overview'], queryFn: getComplianceOverview })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const school = q.data?.school || {}
   const s = q.data?.summary || {}
   return (
     <div className="space-y-5">
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="grid gap-2 p-4 sm:grid-cols-2">
           <div>
             <p className="text-xs text-slate-400">School</p>
@@ -873,7 +874,7 @@ function ComplianceOverview() {
           { t: 'NECTA / assessment', p: '/compliance/necta' },
           { t: 'Ministry reporting', p: '/compliance/ministry' },
         ].map((c) => (
-          <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+          <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
             <CardBody className="p-3.5">
               <h3 className="text-sm font-semibold">{c.t}</h3>
               <p className="text-xs text-slate-500">TAMISEMI-aligned dataset</p>
@@ -887,7 +888,7 @@ function ComplianceOverview() {
 
 function ComplianceEnrollment() {
   const q = useQuery({ queryKey: ['school', 'compliance', 'enrollment'], queryFn: getComplianceEnrollment })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const t = q.data?.totals || {}
   return (
     <div className="space-y-4">
@@ -912,7 +913,7 @@ function ComplianceEnrollment() {
 
 function ComplianceCensus() {
   const q = useQuery({ queryKey: ['school', 'compliance', 'census'], queryFn: getComplianceCensus })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">
@@ -933,7 +934,7 @@ function ComplianceCensus() {
 
 function ComplianceProfile() {
   const q = useQuery({ queryKey: ['school', 'compliance', 'profile'], queryFn: getComplianceProfile })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const p = q.data?.profile || {}
   return (
     <div className="space-y-3">
@@ -944,7 +945,7 @@ function ComplianceProfile() {
       >
         Export profile CSV
       </FormButton>
-      <Card className="border border-slate-200 shadow-none max-w-2xl">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] max-w-2xl">
         <CardBody className="grid gap-2 p-4 sm:grid-cols-2 text-sm">
           {Object.entries(p).map(([k, v]) => (
             <div key={k}>
@@ -990,7 +991,7 @@ function ComplianceExport() {
         </FormButton>
       </div>
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <p className="text-sm text-slate-600">
           {q.data?.count ?? 0} rows ready · exported at {String(q.data?.exported_at || '').slice(0, 19)}
@@ -1015,10 +1016,10 @@ function AdminSettings() {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const s = form || q.data?.settings || {}
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <FormField label="Display name">
           <FormInput value={s.school_display_name || ''} onChange={(e) => setForm({ ...s, school_display_name: e.target.value })} />
@@ -1047,7 +1048,7 @@ function AdminSettings() {
           Teacher portal
           <Switch size="sm" isSelected={Boolean(s.allow_teacher_portal)} onValueChange={(v) => setForm({ ...s, allow_teacher_portal: v })} />
         </label>
-        <FormButton className="bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(s)}>
+        <FormButton className="bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(s)}>
           Save settings
         </FormButton>
       </CardBody>
@@ -1071,10 +1072,10 @@ function GatewaySection({ channel }) {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const c = form || q.data?.config || {}
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <label className="flex items-center justify-between text-sm">
           Enabled
@@ -1097,7 +1098,7 @@ function GatewaySection({ channel }) {
         <FormField label="Notes">
           <FormTextarea value={c.notes || ''} onChange={(e) => setForm({ ...c, notes: e.target.value })} />
         </FormField>
-        <FormButton className="bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(c)}>
+        <FormButton className="bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(c)}>
           Save {channel} gateway
         </FormButton>
       </CardBody>
@@ -1137,12 +1138,12 @@ function TemplatesSection() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           Add template
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.templates || []} emptyMessage="No templates yet." />
       )}
@@ -1169,7 +1170,7 @@ function TemplatesSection() {
           <FormField label="Body" required>
             <FormTextarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} placeholder="Habari {{name}}, …" />
           </FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>
             Save
           </FormButton>
         </div>
@@ -1227,12 +1228,12 @@ function WebhooksSection() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           Add webhook
         </FormButton>
       </div>
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.webhooks || []} emptyMessage="No webhooks." />
       )}
@@ -1244,7 +1245,7 @@ function WebhooksSection() {
           <FormField label="URL" required>
             <FormInput value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://…" />
           </FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={createMut.isPending} onPress={() => createMut.mutate(form)}>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={createMut.isPending} onPress={() => createMut.mutate(form)}>
             Create
           </FormButton>
         </div>
@@ -1264,16 +1265,16 @@ function BackupSection() {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const b = q.data?.backup || {}
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <p className="text-sm"><strong>Schedule:</strong> {b.schedule}</p>
         <p className="text-sm"><strong>Last backup:</strong> {b.last_backup_at || 'Not recorded'}</p>
         <p className="text-sm"><strong>Retention:</strong> {b.retention_days} days</p>
         <p className="text-xs text-slate-500">{b.note}</p>
-        <FormButton className="bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate()}>
+        <FormButton className="bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate()}>
           Request backup
         </FormButton>
       </CardBody>
@@ -1294,10 +1295,10 @@ function ApiKeysSection() {
     },
     onError: (e) => toastError(e?.message || 'Failed'),
   })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const k = q.data?.api_keys || {}
   return (
-    <Card className="max-w-lg border border-slate-200 shadow-none">
+    <Card className="max-w-lg rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="space-y-3 p-4">
         <p className="text-sm font-mono break-all"><strong>Public:</strong> {k.public_key || '—'}</p>
         <p className="text-sm"><strong>Secret:</strong> {k.has_secret ? 'Set' : 'Not set'}</p>
@@ -1306,7 +1307,7 @@ function ApiKeysSection() {
             New secret (copy now): {secret}
           </p>
         ) : null}
-        <FormButton className="bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate()}>
+        <FormButton className="bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate()}>
           Rotate keys
         </FormButton>
       </CardBody>
@@ -1329,7 +1330,7 @@ function AdminOverview() {
         { t: 'Backup', p: '/admin/backup' },
         { t: 'System logs', p: '/admin/logs' },
       ].map((c) => (
-        <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+        <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
           <CardBody className="p-3.5">
             <h3 className="text-sm font-semibold">{c.t}</h3>
           </CardBody>
@@ -1360,7 +1361,7 @@ function LogsSection() {
     ],
     [],
   )
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   return <DataTable columns={columns} data={q.data?.logs || []} emptyMessage="No system logs." />
 }
 

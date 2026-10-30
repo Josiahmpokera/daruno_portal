@@ -28,19 +28,19 @@ function Accounting() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="chart" title="Chart of Accounts">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Chart of Accounts</h3>
                 <p className="text-sm text-slate-500">Categorize financial transactions</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Add Account
               </Button>
             </CardHeader>
@@ -62,13 +62,13 @@ function Accounting() {
         </Tab>
 
         <Tab key="vouchers" title="Vouchers">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Voucher Management</h3>
                 <p className="text-sm text-slate-500">Journal, contra, debit, and credit vouchers</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Create Voucher
               </Button>
             </CardHeader>
@@ -91,7 +91,7 @@ function Accounting() {
         </Tab>
 
         <Tab key="payables" title="Payables & Receivables">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Accounts Payable & Receivable</h3>
@@ -136,7 +136,7 @@ function Accounting() {
         </Tab>
 
         <Tab key="reconciliation" title="Bank Reconciliation">
-           <Card className="mt-4 border border-slate-200 shadow-none">
+           <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Bank Reconciliation</h3>

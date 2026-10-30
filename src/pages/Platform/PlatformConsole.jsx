@@ -8,7 +8,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Spinner,
   useDisclosure,
 } from '@heroui/react'
 import { AlertTriangle, Building2, Plus, Search } from 'lucide-react'
@@ -52,6 +51,7 @@ import {
   platformSettings,
   platformAuditLogs,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const emptyPlanForm = () => ({
   id: null,
@@ -711,7 +711,7 @@ function PlatformConsole() {
             className="text-left"
             onClick={() => openSchoolDetail(row.original)}
           >
-            <div className="font-medium text-zinc-900 hover:text-[#0B3D2E]">
+            <div className="font-medium text-zinc-900 hover:text-[#12544f]">
               {row.original.name}
             </div>
             <div className="text-[11px] text-zinc-400">
@@ -1406,9 +1406,7 @@ function PlatformConsole() {
         {section === 'schools' && (
           <div className="min-w-0">
             {schoolsQ.isLoading ? (
-              <div className="flex justify-center py-16">
-                <Spinner color="primary" />
-              </div>
+              <SectionSkeleton />
             ) : (
               <DataTable
                 columns={schoolColumns}
@@ -1451,7 +1449,7 @@ function PlatformConsole() {
                   <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
                     Active + trial
                   </p>
-                  <p className="text-lg font-semibold tabular-nums text-[#0B3D2E]">
+                  <p className="text-lg font-semibold tabular-nums text-[#12544f]">
                     {plansQ.data.summary.active_subscriptions}
                   </p>
                 </div>
@@ -1633,9 +1631,7 @@ function PlatformConsole() {
         {section === 'settings-auth' && (
           <div className="grid gap-3 sm:grid-cols-2">
             {settingsQ.isLoading ? (
-              <div className="col-span-full flex justify-center py-10">
-                <Spinner color="success" />
-              </div>
+              <SectionSkeleton />
             ) : (
               [
                 {
@@ -1667,7 +1663,7 @@ function PlatformConsole() {
                     {card.title}
                   </p>
                   <p className="mt-1 text-[12px] text-zinc-500">{card.body}</p>
-                  <p className="mt-3 text-[12px] font-medium text-[#0B3D2E]">
+                  <p className="mt-3 text-[12px] font-medium text-[#12544f]">
                     {card.value}
                   </p>
                 </div>
@@ -1706,7 +1702,7 @@ function PlatformConsole() {
               >
                 <p className="text-sm font-medium text-zinc-900">{card.title}</p>
                 <p className="mt-1 text-[12px] text-zinc-500">{card.body}</p>
-                <p className="mt-3 text-[12px] font-medium text-[#0B3D2E]">
+                <p className="mt-3 text-[12px] font-medium text-[#12544f]">
                   {card.value}
                 </p>
               </div>
@@ -1754,8 +1750,8 @@ function PlatformConsole() {
                   Primary color
                 </p>
                 <p className="mt-1 flex items-center gap-2 text-sm font-medium text-zinc-900">
-                  <span className="inline-block h-4 w-4 rounded bg-[#0B3D2E]" />
-                  #0B3D2E
+                  <span className="inline-block h-4 w-4 rounded bg-[#12544f]" />
+                  #12544f
                 </p>
               </div>
               <div className="rounded-lg border border-zinc-100 bg-zinc-50 p-3">
@@ -1786,7 +1782,7 @@ function PlatformConsole() {
               <p className="mt-1 text-[12px] text-zinc-500">
                 Billing renewals, trial expiry notices, and audit cleanup.
               </p>
-              <p className="mt-3 text-[12px] font-medium text-[#0B3D2E]">
+              <p className="mt-3 text-[12px] font-medium text-[#12544f]">
                 Healthy · last run 12 min ago
               </p>
             </div>
@@ -1833,7 +1829,7 @@ function PlatformConsole() {
               <>
                 <ModalHeader className="flex flex-col gap-1 border-b border-zinc-100 pb-3">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#0B3D2E]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#12544f]">
                       <Building2 className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">

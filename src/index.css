@@ -2,14 +2,34 @@
 @source "../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}";
 @plugin "./hero.ts";
 
+/*
+ * Shengena look, shared with the ERP and HR desk: Inter, a teal brand (#12544f), white work
+ * surfaces with #ededed rules, soft grey loading shapes. The tokens below are the desk's.
+ */
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sh-brand: #12544f;
+  --sh-brand-hover: #0f4743;
+  --sh-brand-pressed: #0c3b37;
+  --sh-ink: #171717;
+  --sh-text: #525252;
+  --sh-muted: #6b6b6b; /* the desk uses #7c7c7c; darkened to meet WCAG AA (4.5:1) for small text */
+  --sh-rule: #ededed;
+  --sh-stroke: #d1d1d1;
+  --sh-canvas: #f6f6f6;
+  --sh-hover: #f0f0f0;
+  --sh-selected: #e6e6e6;
+  --sh-dock: #0b0b0c;
+  --sh-skeleton: #f0f0f0;
+  --sh-skeleton-shine: #f8f8f8;
+
+  font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light;
-  color: #201f1e;
-  background-color: #f5f5f5;
+  color: var(--sh-ink);
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -17,14 +37,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #115ea3;
-  text-decoration: inherit;
-}
+/* In the base layer, so a link's own utility classes (text-white on a button) win */
+@layer base {
+  a {
+    font-weight: 500;
+    color: var(--sh-brand);
+    text-decoration: inherit;
+  }
 
-a:hover {
-  color: #0f6cbd;
+  a:hover {
+    color: var(--sh-brand-hover);
+  }
 }
 
 body {
@@ -68,10 +91,44 @@ body {
 [data-slot='trigger'][data-open='true'],
 [data-slot='trigger'][data-focus='true'] {
   box-shadow: none !important;
-  border-color: #0b3d2e;
+  border-color: #12544f;
 }
 
 button[data-slot='base'].h-9,
 button.h-9 {
   box-shadow: none !important;
+}
+
+/* ---- Cards and loading shapes (see components/Loading) ---- */
+
+.sh-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
+}
+
+.sh-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--sh-skeleton) 0%,
+    var(--sh-skeleton-shine) 50%,
+    var(--sh-skeleton) 100%
+  );
+  background-size: 200% 100%;
+  animation: sh-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes sh-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-skeleton {
+    animation: none;
+  }
 }

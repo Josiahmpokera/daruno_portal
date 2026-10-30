@@ -111,7 +111,7 @@ function SearchBox({ value, onChange, placeholder }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-7 text-[12px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[#0B3D2E] focus:ring-2 focus:ring-[#0B3D2E]/10 [&::-webkit-search-cancel-button]:hidden"
+        className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-7 text-[12px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[#12544f] focus:ring-2 focus:ring-[#12544f]/10 [&::-webkit-search-cancel-button]:hidden"
       />
       {value ? (
         <button
@@ -134,7 +134,7 @@ function FilterPill({ filter, value, onChange }) {
     <label
       className={`relative inline-flex h-8 shrink-0 items-center gap-1 rounded-md border pl-2.5 pr-6 text-[12px] transition-colors ${
         active
-          ? 'border-[#0B3D2E]/40 bg-[#0B3D2E]/[0.06] text-[#0B3D2E]'
+          ? 'border-[#12544f]/40 bg-[#12544f]/[0.06] text-[#12544f]'
           : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
       }`}
     >
@@ -322,7 +322,7 @@ function DataTable({
   const renderToolbar = () => {
     if (selectedCount > 0 && enableRowSelection) {
       return (
-        <div className="flex min-h-[48px] flex-wrap items-center gap-2 border-b border-zinc-200 bg-[#0B3D2E]/[0.04] px-3 py-2">
+        <div className="flex min-h-[48px] flex-wrap items-center gap-2 border-b border-zinc-200 bg-[#12544f]/[0.04] px-3 py-2">
           <span className="text-[12px] font-medium text-zinc-800">
             {selectedCount} selected
           </span>
@@ -448,7 +448,7 @@ function DataTable({
       withBorder: true,
       radius: 'md',
       style: {
-        borderColor: '#e4e4e7',
+        borderColor: 'var(--sh-rule)',
         overflow: 'hidden',
       },
     },
@@ -462,11 +462,12 @@ function DataTable({
     mantineTableProps: {
       highlightOnHover: true,
       withColumnBorders: false,
-      fontSize: 'xs',
-      verticalSpacing: 4,
-      horizontalSpacing: 8,
+      fontSize: 'sm',
+      verticalSpacing: 6,
+      horizontalSpacing: 10,
       style: {
-        fontSize: 11,
+        // The desk's list text size; 11px was below comfortable reading size
+        fontSize: 13,
       },
     },
     // Flat header: no drop shadow, no translucency — just a hairline divider
@@ -478,12 +479,10 @@ function DataTable({
     },
     mantineTableHeadCellProps: {
       style: {
-        backgroundColor: '#f8fafc',
-        color: '#64748b',
-        fontSize: 10,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '0.04em',
+        backgroundColor: '#f8f8f8',
+        color: 'var(--sh-muted)',
+        fontSize: 12,
+        fontWeight: 500,
         paddingTop: 8,
         paddingBottom: 8,
         paddingLeft: 10,
@@ -493,15 +492,15 @@ function DataTable({
         top: 0,
         zIndex: 2,
         boxShadow: 'none',
-        borderBottom: '1px solid #e4e4e7',
+        borderBottom: '1px solid var(--sh-rule)',
       },
     },
     mantineTableBodyCellProps: {
       style: {
-        fontSize: 11,
-        color: '#27272a',
-        paddingTop: 6,
-        paddingBottom: 6,
+        fontSize: 13,
+        color: 'var(--sh-ink)',
+        paddingTop: 8,
+        paddingBottom: 8,
         paddingLeft: 10,
         paddingRight: 10,
         lineHeight: 1.35,
@@ -517,15 +516,17 @@ function DataTable({
       sx: { boxShadow: 'none' },
       style: {
         backgroundColor: '#fff',
-        minHeight: 36,
-        fontSize: 11,
-        borderTop: '1px solid #f1f5f9',
+        minHeight: 40,
+        fontSize: 12,
+        borderTop: '1px solid var(--sh-rule)',
       },
     },
     mantinePaginationProps: {
       size: 'xs',
       radius: 'md',
     },
+    // Placeholder rows show the loading; no spinner on top of them
+    mantineLoadingOverlayProps: { visible: false },
     mantineProgressProps: {
       color: 'brand',
       size: 'xs',
@@ -544,7 +545,7 @@ function DataTable({
   })
 
   return (
-    <div className="mrt-compact text-[11px] [&_.mantine-Text-root]:text-[11px] [&_button]:text-[11px]">
+    <div className="mrt-compact text-[12px] [&_.mantine-Text-root]:text-[12px] [&_button]:text-[12px]">
       <MantineReactTable table={table} />
     </div>
   )

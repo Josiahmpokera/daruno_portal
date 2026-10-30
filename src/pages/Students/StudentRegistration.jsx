@@ -192,7 +192,7 @@ function RegistrationSuccess({ student, className, onAnother }) {
     ['Parents / guardians', s.guardians?.length ? `${s.guardians.length} recorded` : null],
   ]
   return (
-    <Card className="border border-slate-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
           <div className="lg:max-w-sm">
@@ -426,7 +426,7 @@ function StudentRegistration() {
               <input
                 type="radio"
                 name="primary_contact"
-                className="accent-[#0B3D2E]"
+                className="accent-[#12544f]"
                 checked={
                   form.primary_contact === prefix ||
                   (!guardianNames.includes(form.primary_contact) && guardianNames[0] === prefix)
@@ -700,7 +700,7 @@ function StudentRegistration() {
             </FormSection>
 
             {/* Actions for screens without the side panel */}
-            <Card className="border border-slate-200 shadow-none xl:hidden">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] xl:hidden">
               <CardBody className="flex flex-col-reverse gap-2 p-4 sm:flex-row sm:justify-end">
                 <FormButton appearance="light" onPress={() => navigate('/students/list')} isDisabled={createMut.isPending}>
                   Cancel
@@ -715,10 +715,10 @@ function StudentRegistration() {
           {/* Side panel */}
           <aside className="hidden space-y-4 xl:sticky xl:top-0 xl:block">
             <ProgressChecklist title="Registration checklist" items={checklist} onSelect={(k) => scrollToId(sectionId(k))} />
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="space-y-4 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] text-sm font-semibold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#12544f] text-sm font-semibold text-white">
                     {fullName ? fullName.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase() : <UserRound className="h-4 w-4" />}
                   </div>
                   <div className="min-w-0">

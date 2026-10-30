@@ -64,21 +64,21 @@ function ClassSubjectManagement() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="academic-setup" title="Academic Setup">
           <div className="flex flex-col gap-4 mt-4">
             {/* Academic Years */}
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">Academic Years</h3>
                   <p className="text-sm text-slate-500">Manage academic sessions</p>
                 </div>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('year')}>
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]" onPress={() => handleOpenModal('year')}>
                   Add Year
                 </Button>
               </CardHeader>
@@ -115,13 +115,13 @@ function ClassSubjectManagement() {
             </Card>
 
             {/* Terms / Quarters */}
-            <Card className="border border-slate-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">Terms & Quarters</h3>
                   <p className="text-sm text-slate-500">Define terms for the active academic year</p>
                 </div>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('term')}>
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]" onPress={() => handleOpenModal('term')}>
                   Add Term
                 </Button>
               </CardHeader>
@@ -156,13 +156,13 @@ function ClassSubjectManagement() {
         </Tab>
 
         <Tab key="classes" title="Class/Grade Allocation">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Class Allocation</h3>
                 <p className="text-sm text-slate-500">Manage classes and student allocation</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={() => handleOpenModal('class')}>
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]" onPress={() => handleOpenModal('class')}>
                 Add Class
               </Button>
             </CardHeader>
@@ -200,13 +200,13 @@ function ClassSubjectManagement() {
         </Tab>
 
         <Tab key="subjects" title="Subject Mapping">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Subject Mapping</h3>
                 <p className="text-sm text-slate-500">Assign subjects to classes</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Map Subject
               </Button>
             </CardHeader>
@@ -228,13 +228,13 @@ function ClassSubjectManagement() {
         </Tab>
 
         <Tab key="teachers" title="Teacher Assignment">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Teacher Assignment</h3>
                 <p className="text-sm text-slate-500">Link teachers to subjects and classes</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Assign Teacher
               </Button>
             </CardHeader>
@@ -302,7 +302,7 @@ function ClassSubjectManagement() {
                 <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
+                <Button color="primary" className="bg-[#12544f]" onPress={onClose}>
                   Save
                 </Button>
               </ModalFooter>

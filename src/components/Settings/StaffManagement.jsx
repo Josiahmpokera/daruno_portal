@@ -224,7 +224,7 @@ export default function StaffManagement() {
         <h2 className="text-xl font-semibold">Staff Management</h2>
         <Button 
           color="primary" 
-          className="bg-[#0B3D2E] text-white"
+          className="bg-[#12544f] text-white"
           startContent={<Plus className="h-4 w-4" />}
           onPress={selectedTab === 'teachers' ? onTeacherModalOpen : onStaffModalOpen}
         >
@@ -232,7 +232,7 @@ export default function StaffManagement() {
         </Button>
       </div>
 
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="p-0">
           <Tabs
             aria-label="Staff Options"
@@ -242,9 +242,9 @@ export default function StaffManagement() {
             variant="underlined"
             classNames={{
               tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider px-6',
-              cursor: 'w-full bg-[#0B3D2E]',
+              cursor: 'w-full bg-[#12544f]',
               tab: 'max-w-fit px-0 h-12',
-              tabContent: 'group-data-[selected=true]:text-[#0B3D2E] font-medium',
+              tabContent: 'group-data-[selected=true]:text-[#12544f] font-medium',
             }}
           >
             <Tab key="teachers" title="Teachers">
@@ -462,7 +462,7 @@ export default function StaffManagement() {
                   type="submit" 
                   form="teacher-form" 
                   color="primary" 
-                  className="bg-[#0B3D2E]"
+                  className="bg-[#12544f]"
                 >
                   Save Teacher
                 </Button>
@@ -524,7 +524,7 @@ export default function StaffManagement() {
                 <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#0B3D2E]" onPress={() => handleStaffSubmit(onClose)}>
+                <Button color="primary" className="bg-[#12544f]" onPress={() => handleStaffSubmit(onClose)}>
                   Save Staff
                 </Button>
               </ModalFooter>

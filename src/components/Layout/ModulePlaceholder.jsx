@@ -15,7 +15,7 @@ function ModulePlaceholder({
   showHeader = true,
 }) {
   const body = children || (
-    <Card className="border border-zinc-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-8">
         <p className="text-sm text-zinc-600">
           This section is ready in the navigation. Content and API wiring will

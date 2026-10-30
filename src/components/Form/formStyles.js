@@ -10,7 +10,7 @@ export const fieldClassNames = {
     'px-3 py-0',
     'shadow-none !shadow-none border border-zinc-200 bg-white rounded-md',
     'data-[hover=true]:border-zinc-300',
-    'group-data-[focus=true]:border-[#0B3D2E]',
+    'group-data-[focus=true]:border-[#12544f]',
     'group-data-[focus=true]:shadow-none group-data-[focus=true]:!shadow-none',
     'group-data-[invalid=true]:!border-rose-400',
   ].join(' '),
@@ -27,7 +27,7 @@ export const selectClassNames = {
     'px-3 py-0',
     'shadow-none !shadow-none border border-zinc-200 bg-white rounded-md',
     'data-[hover=true]:border-zinc-300',
-    'data-[focus=true]:border-[#0B3D2E] data-[open=true]:border-[#0B3D2E]',
+    'data-[focus=true]:border-[#12544f] data-[open=true]:border-[#12544f]',
     'group-data-[invalid=true]:!border-rose-400',
   ].join(' '),
   innerWrapper: 'gap-1',
@@ -43,13 +43,13 @@ export const textareaClassNames = {
   inputWrapper: [
     'shadow-none !shadow-none border border-zinc-200 bg-white rounded-md px-3 py-2',
     'data-[hover=true]:border-zinc-300',
-    'group-data-[focus=true]:border-[#0B3D2E] group-data-[focus=true]:shadow-none',
+    'group-data-[focus=true]:border-[#12544f] group-data-[focus=true]:shadow-none',
   ].join(' '),
   input: 'text-sm',
 }
 
 export const btnSolid =
-  'h-9 min-h-9 bg-[#0B3D2E] text-white shadow-none !shadow-none rounded-md'
+  'h-9 min-h-9 bg-[#12544f] text-white shadow-none !shadow-none rounded-md'
 export const btnBordered =
   'h-9 min-h-9 shadow-none !shadow-none rounded-md border border-zinc-200 bg-white'
 export const btnLight = 'h-9 min-h-9 shadow-none !shadow-none rounded-md'

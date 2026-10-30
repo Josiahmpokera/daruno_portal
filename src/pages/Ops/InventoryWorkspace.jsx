@@ -45,6 +45,7 @@ import {
   updatePurchaseOrder,
   updateStockItem,
 } from '../../api/domain.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const money = (n) =>
   Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })
@@ -65,7 +66,7 @@ function InvStatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -103,7 +104,7 @@ function Overview() {
   const stats = [
     {
       label: 'Stock items',
-      value: loading ? '…' : String(s.stock_items ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.stock_items ?? 0),
       hint: 'Active SKUs',
       icon: Package,
       tone: 'bg-emerald-50 text-emerald-700',
@@ -111,7 +112,7 @@ function Overview() {
     },
     {
       label: 'Assets',
-      value: loading ? '…' : String(s.assets ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.assets ?? 0),
       hint: 'Fixed assets',
       icon: Building2,
       tone: 'bg-sky-50 text-sky-700',
@@ -119,7 +120,7 @@ function Overview() {
     },
     {
       label: 'Stock value',
-      value: loading ? '…' : `TZS ${money(s.stock_value)}`,
+      value: loading ? <ValueSkeleton /> : `TZS ${money(s.stock_value)}`,
       hint: 'On-hand inventory',
       icon: Warehouse,
       tone: 'bg-violet-50 text-violet-700',
@@ -127,7 +128,7 @@ function Overview() {
     },
     {
       label: 'Low stock',
-      value: loading ? '…' : String(s.low_stock_count ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.low_stock_count ?? 0),
       hint: 'Below reorder level',
       icon: AlertTriangle,
       tone: 'bg-rose-50 text-rose-700',
@@ -135,7 +136,7 @@ function Overview() {
     },
     {
       label: 'Open POs',
-      value: loading ? '…' : String(s.open_purchase_orders ?? 0),
+      value: loading ? <ValueSkeleton /> : String(s.open_purchase_orders ?? 0),
       hint: 'Draft or ordered',
       icon: ShoppingCart,
       tone: 'bg-amber-50 text-amber-800',
@@ -200,11 +201,11 @@ function Overview() {
               <Card
                 key={c.p}
                 isPressable
-                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                 onPress={() => navigate(c.p)}
               >
                 <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
@@ -250,7 +251,7 @@ function CategoriesSection() {
         <div className="space-y-3">
           <FormField label="Name" required><FormInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></FormField>
           <FormField label="Code"><FormInput value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
         </div>
       </SideSheet>
     </SectionShell>
@@ -290,7 +291,7 @@ function SuppliersSection() {
           <FormField label="Phone"><FormInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></FormField>
           <FormField label="Email"><FormInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></FormField>
           <FormField label="Address"><FormTextarea value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} /></FormField>
-          <FormButton className="w-full bg-[#0B3D2E]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
+          <FormButton className="w-full bg-[#12544f]" color="primary" isLoading={mut.isPending} onPress={() => mut.mutate(form)}>Save</FormButton>
         </div>
       </SideSheet>
     </SectionShell>
@@ -359,7 +360,7 @@ function AssetsSection() {
           <FormField label="Purchase price"><FormInput type="number" value={form.purchase_price} onChange={(e) => setForm((f) => ({ ...f, purchase_price: e.target.value }))} /></FormField>
           <FormField label="Location"><FormInput value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -431,12 +432,12 @@ function StockMovementSection({ type }) {
       <div className="flex flex-wrap justify-end gap-2">
         <FormButton appearance="bordered" onPress={() => itemSheet.onOpen()}>New stock item</FormButton>
         <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>Refresh</FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           {type === 'in' ? 'Record stock in' : 'Record stock out'}
         </FormButton>
       </div>
       {itemsQ.data?.stock_items?.length > 0 && (
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardHeader className="pb-1"><h3 className="text-sm font-semibold">Stock levels</h3></CardHeader>
           <CardBody className="pt-0 overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -462,7 +463,7 @@ function StockMovementSection({ type }) {
           </CardBody>
         </Card>
       )}
-      {listQ.isLoading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : (
+      {listQ.isLoading ? <SectionSkeleton /> : (
         <DataTable columns={columns} data={listQ.data?.movements || []} emptyMessage="No movements yet." />
       )}
       <SideSheet isOpen={sheet.isOpen} onOpenChange={sheet.onOpenChange} title={type === 'in' ? 'Stock in' : 'Stock out'} size="md">
@@ -486,7 +487,7 @@ function StockMovementSection({ type }) {
           <FormField label="Reference"><FormInput value={form.reference} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))} /></FormField>
           <FormField label="Notes"><FormTextarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={moveMut.isPending}
             onPress={() =>
@@ -513,7 +514,7 @@ function StockMovementSection({ type }) {
           <FormField label="Reorder level"><FormInput type="number" value={itemForm.reorder_level} onChange={(e) => setItemForm((f) => ({ ...f, reorder_level: e.target.value }))} /></FormField>
           <FormField label="Unit cost"><FormInput type="number" value={itemForm.unit_cost} onChange={(e) => setItemForm((f) => ({ ...f, unit_cost: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={itemMut.isPending}
             onPress={() =>
@@ -659,7 +660,7 @@ function POSection() {
             ))}
           </div>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={createMut.isPending}
             isDisabled={lines.length === 0}
@@ -696,7 +697,7 @@ function AlertsSection() {
     [],
   )
   return listQ.isLoading ? (
-    <div className="flex justify-center py-12"><Spinner color="success" /></div>
+    <SectionSkeleton />
   ) : (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">{listQ.data?.summary?.low_stock_count ?? 0} item(s) at or below reorder level.</p>
@@ -708,7 +709,7 @@ function AlertsSection() {
 function ReportsSection() {
   const q = useQuery({ queryKey: ['inventory', 'reports'], queryFn: getInvReports })
   const s = q.data?.summary || {}
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const rows = [
     ['Stock items', s.stock_items],
     ['Assets', s.assets],
@@ -723,7 +724,7 @@ function ReportsSection() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {rows.map(([label, value]) => (
-        <Card key={label} className="border border-slate-200 shadow-none">
+        <Card key={label} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">{label}</p>
             <p className="text-lg font-semibold text-slate-900">{value ?? '—'}</p>
@@ -742,10 +743,10 @@ function SectionShell({ children, onAdd, addLabel, onRefresh, loading }) {
           <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={onRefresh}>Refresh</FormButton>
         )}
         {onAdd && (
-          <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>
+          <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>
         )}
       </div>
-      {loading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : children}
+      {loading ? <SectionSkeleton /> : children}
     </div>
   )
 }

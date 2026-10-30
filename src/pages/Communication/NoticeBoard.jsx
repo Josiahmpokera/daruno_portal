@@ -45,7 +45,7 @@ function NoticeCard({ n, canWrite, onOpen, onPin, onEdit, onArchive }) {
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            {n.is_pinned ? <Pin className="h-3.5 w-3.5 text-[#0B3D2E]" aria-label="Pinned" /> : null}
+            {n.is_pinned ? <Pin className="h-3.5 w-3.5 text-[#12544f]" aria-label="Pinned" /> : null}
             {canWrite ? (
               <RowActionsMenu
                 label=""
@@ -60,7 +60,7 @@ function NoticeCard({ n, canWrite, onOpen, onPin, onEdit, onArchive }) {
           </div>
         </div>
         <button type="button" onClick={() => onOpen(n)} className="text-left">
-          <h3 className="text-[14px] font-semibold leading-snug text-zinc-900 group-hover:text-[#0B3D2E]">{n.title}</h3>
+          <h3 className="text-[14px] font-semibold leading-snug text-zinc-900 group-hover:text-[#12544f]">{n.title}</h3>
           <p className="mt-1.5 line-clamp-5 whitespace-pre-line text-[13px] leading-relaxed text-zinc-600">{n.body}</p>
         </button>
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] text-zinc-400">
@@ -107,7 +107,7 @@ function Board({ canWrite, onCompose, onEdit }) {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-zinc-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center">
           <div className="relative w-full lg:w-72">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
@@ -117,7 +117,7 @@ function Board({ canWrite, onCompose, onEdit }) {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notices…"
               aria-label="Search notices"
-              className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-3 text-[12px] outline-none focus:border-[#0B3D2E] focus:ring-2 focus:ring-[#0B3D2E]/10"
+              className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-8 pr-3 text-[12px] outline-none focus:border-[#12544f] focus:ring-2 focus:ring-[#12544f]/10"
             />
           </div>
           <div className="flex flex-1 flex-wrap gap-1.5" role="tablist" aria-label="Category">
@@ -129,7 +129,7 @@ function Board({ canWrite, onCompose, onEdit }) {
                 aria-selected={category === c.value}
                 onClick={() => setCategory(c.value)}
                 className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-                  category === c.value ? 'bg-[#0B3D2E] text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  category === c.value ? 'bg-[#12544f] text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
                 }`}
               >
                 {c.label}

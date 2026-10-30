@@ -49,6 +49,7 @@ import {
   updateCourse,
   updateLearningResource,
 } from '../../api/domain.js'
+import { SectionSkeleton, ValueSkeleton } from '../../components/Loading'
 
 const TYPE_META = {
   note: { label: 'Notes', path: '/learning/notes', icon: FileText, tone: 'bg-sky-50 text-sky-700' },
@@ -78,7 +79,7 @@ function StatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -117,11 +118,11 @@ function OverviewSection() {
   const loading = q.isLoading
 
   const stats = [
-    { label: 'Notes', value: loading ? '…' : String(s.notes ?? 0), hint: 'Teacher notes', icon: FileText, tone: TYPE_META.note.tone, path: '/learning/notes' },
-    { label: 'Past papers', value: loading ? '…' : String(s.past_papers ?? 0), hint: 'NECTA / mock', icon: ScrollText, tone: TYPE_META.past_paper.tone, path: '/learning/past-papers' },
-    { label: 'Videos', value: loading ? '…' : String(s.videos ?? 0), hint: 'Media lessons', icon: Video, tone: TYPE_META.video.tone, path: '/learning/videos' },
-    { label: 'Digital books', value: loading ? '…' : String(s.digital_books ?? 0), hint: 'E-books', icon: BookOpen, tone: TYPE_META.digital_book.tone, path: '/learning/books' },
-    { label: 'Courses', value: loading ? '…' : String(s.courses ?? 0), hint: `${s.lessons ?? 0} lessons`, icon: LayoutGrid, tone: 'bg-indigo-50 text-indigo-700', path: '/learning/classroom' },
+    { label: 'Notes', value: loading ? <ValueSkeleton /> : String(s.notes ?? 0), hint: 'Teacher notes', icon: FileText, tone: TYPE_META.note.tone, path: '/learning/notes' },
+    { label: 'Past papers', value: loading ? <ValueSkeleton /> : String(s.past_papers ?? 0), hint: 'NECTA / mock', icon: ScrollText, tone: TYPE_META.past_paper.tone, path: '/learning/past-papers' },
+    { label: 'Videos', value: loading ? <ValueSkeleton /> : String(s.videos ?? 0), hint: 'Media lessons', icon: Video, tone: TYPE_META.video.tone, path: '/learning/videos' },
+    { label: 'Digital books', value: loading ? <ValueSkeleton /> : String(s.digital_books ?? 0), hint: 'E-books', icon: BookOpen, tone: TYPE_META.digital_book.tone, path: '/learning/books' },
+    { label: 'Courses', value: loading ? <ValueSkeleton /> : String(s.courses ?? 0), hint: `${s.lessons ?? 0} lessons`, icon: LayoutGrid, tone: 'bg-indigo-50 text-indigo-700', path: '/learning/classroom' },
   ]
 
   const modules = [
@@ -155,9 +156,9 @@ function OverviewSection() {
           {modules.map((c) => {
             const Icon = c.icon
             return (
-              <Card key={c.p} isPressable className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40" onPress={() => navigate(c.p)}>
+              <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40" onPress={() => navigate(c.p)}>
                 <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
@@ -292,7 +293,7 @@ function ResourcesSection({ type }) {
         onRefresh={() => listQ.refetch()}
         isRefreshing={listQ.isFetching}
         toolbarActions={
-          <FormButton className="h-8 min-h-8 bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+          <FormButton className="h-8 min-h-8 bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
             Add {meta.label.slice(0, -1).toLowerCase()}
           </FormButton>
         }
@@ -360,7 +361,7 @@ function ResourcesSection({ type }) {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -444,16 +445,16 @@ function ClassroomSection() {
         <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => listQ.refetch()}>
           Refresh
         </FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => courseSheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => courseSheet.onOpen()}>
           New course
         </FormButton>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-5">
-        <Card className="border border-slate-200 shadow-none lg:col-span-2">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-2">
           <CardBody className="p-0">
             {listQ.isLoading ? (
-              <div className="flex justify-center py-12"><Spinner color="success" /></div>
+              <SectionSkeleton />
             ) : courses.length === 0 ? (
               <p className="p-4 text-sm text-slate-500">No courses yet. Create a smart classroom course for a class and subject.</p>
             ) : (
@@ -462,7 +463,7 @@ function ClassroomSection() {
                   <li key={c.id}>
                     <button
                       type="button"
-                      className={`w-full px-3 py-3 text-left transition-colors hover:bg-slate-50 ${selectedId === c.id ? 'bg-[#0B3D2E]/5' : ''}`}
+                      className={`w-full px-3 py-3 text-left transition-colors hover:bg-slate-50 ${selectedId === c.id ? 'bg-[#12544f]/5' : ''}`}
                       onClick={() => setSelectedId(c.id)}
                     >
                       <p className="text-sm font-semibold text-slate-900">{c.title}</p>
@@ -479,12 +480,12 @@ function ClassroomSection() {
           </CardBody>
         </Card>
 
-        <Card className="border border-slate-200 shadow-none lg:col-span-3">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-3">
           <CardBody className="space-y-3 p-4">
             {!selectedId ? (
               <p className="text-sm text-slate-500">Select a course to view lessons.</p>
             ) : detailQ.isLoading ? (
-              <div className="flex justify-center py-12"><Spinner color="success" /></div>
+              <SectionSkeleton />
             ) : (
               <>
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -495,7 +496,7 @@ function ClassroomSection() {
                     </p>
                     {course?.description ? <p className="mt-1 text-sm text-slate-600">{course.description}</p> : null}
                   </div>
-                  <FormButton size="sm" className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => lessonSheet.onOpen()}>
+                  <FormButton size="sm" className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => lessonSheet.onOpen()}>
                     Add lesson
                   </FormButton>
                 </div>
@@ -549,7 +550,7 @@ function ClassroomSection() {
             <FormTextarea value={courseForm.description} onChange={(e) => setCourseForm((f) => ({ ...f, description: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={courseMut.isPending}
             onPress={() =>
@@ -586,7 +587,7 @@ function ClassroomSection() {
             <FormInput type="number" value={lessonForm.duration_minutes} onChange={(e) => setLessonForm((f) => ({ ...f, duration_minutes: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={lessonMut.isPending}
             isDisabled={!selectedId}
@@ -746,13 +747,13 @@ function AssignmentsSection() {
         <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={() => { listQ.refetch(); subsQ.refetch() }}>
           Refresh
         </FormButton>
-        <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
+        <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={() => sheet.onOpen()}>
           New assignment
         </FormButton>
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner color="success" /></div>
+        <SectionSkeleton />
       ) : (
         <DataTable columns={columns} data={listQ.data?.assignments || []} emptyMessage="No assignments yet." />
       )}
@@ -804,7 +805,7 @@ function AssignmentsSection() {
             <FormTextarea value={form.instructions} onChange={(e) => setForm((f) => ({ ...f, instructions: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={createMut.isPending}
             onPress={() =>
@@ -839,7 +840,7 @@ function AssignmentsSection() {
             <FormTextarea value={submitForm.content} onChange={(e) => setSubmitForm((f) => ({ ...f, content: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={submitMut.isPending}
             onPress={() =>
@@ -867,7 +868,7 @@ function AssignmentsSection() {
             <FormTextarea value={gradeForm.feedback} onChange={(e) => setGradeForm((f) => ({ ...f, feedback: e.target.value }))} />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={gradeMut.isPending}
             onPress={() =>

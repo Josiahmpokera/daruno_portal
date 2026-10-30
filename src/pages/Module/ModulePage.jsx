@@ -84,7 +84,7 @@ function ModulePage() {
               <Card
                 key={f.path}
                 isPressable
-                className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                 onPress={() => navigate(f.path)}
               >
                 <CardHeader className="flex flex-row items-start justify-between gap-2 pb-1">
@@ -107,9 +107,9 @@ function ModulePage() {
             ))}
           </div>
         ) : (
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="flex flex-col gap-4 p-6 sm:flex-row sm:items-start">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/10 text-[#0B3D2E]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/10 text-[#12544f]">
                 <LayoutGrid className="h-5 w-5" />
               </div>
               <div className="flex-1 space-y-2">

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Button, Spinner } from '@heroui/react'
+import { Button } from '@heroui/react'
 import { CheckCircle2, School } from 'lucide-react'
 import ShengenaLogo from '../../components/Brand/ShengenaLogo.jsx'
 import {
@@ -15,6 +15,7 @@ import {
   publicSchoolInfo,
   publicSubmitApplication,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const emptyForm = () => ({
   first_name: '',
@@ -139,7 +140,7 @@ export default function JoinApplication() {
 
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6 text-center sm:text-left">
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#0B3D2E]">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#12544f]">
             School join application
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-900">
@@ -174,9 +175,7 @@ export default function JoinApplication() {
         ) : null}
 
         {activeCode && schoolQ.isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner color="success" label="Loading school…" />
-          </div>
+          <SectionSkeleton label="Loading school" />
         ) : null}
 
         {activeCode && schoolQ.isError ? (
@@ -210,7 +209,7 @@ export default function JoinApplication() {
               {submitted.school?.name || school?.name} has received your
               application.
             </p>
-            <p className="mt-4 font-mono text-sm font-semibold text-[#0B3D2E]">
+            <p className="mt-4 font-mono text-sm font-semibold text-[#12544f]">
               {submitted.application_number}
             </p>
             <p className="mt-1 text-[12px] text-zinc-400">
@@ -236,7 +235,7 @@ export default function JoinApplication() {
         {school && !submitted && !schoolQ.isLoading ? (
           <div className="space-y-4">
             <div className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#0B3D2E]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#12544f]">
                 <School className="h-5 w-5" />
               </div>
               <div className="min-w-0">

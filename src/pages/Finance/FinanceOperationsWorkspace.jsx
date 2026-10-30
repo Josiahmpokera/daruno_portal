@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, CardHeader, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, useDisclosure } from '@heroui/react'
 import { Plus, RefreshCw, Search } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -29,6 +29,7 @@ import {
   listStudents,
   voidAdjustment,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const money = (n) =>
   Number(n || 0).toLocaleString(undefined, {
@@ -163,13 +164,13 @@ function ReceiptsSection() {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">Receipts issued</p>
             <p className="text-xl font-semibold text-slate-900">{summary.count ?? rows.length}</p>
           </CardBody>
         </Card>
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">Total collected (TZS)</p>
             <p className="text-xl font-semibold text-slate-900">{money(summary.total_amount)}</p>
@@ -313,7 +314,7 @@ function RefundsSection() {
       <div className="flex justify-end">
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={() => sheet.onOpen()}
         >
@@ -322,9 +323,7 @@ function RefundsSection() {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -409,7 +408,7 @@ function RefundsSection() {
           </FormField>
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={mut.isPending}
             onPress={() =>
               mut.mutate({
@@ -577,7 +576,7 @@ function AdjustmentsSection({ type }) {
       <div className="flex justify-end">
         <FormButton
           color="primary"
-          className="bg-[#0B3D2E]"
+          className="bg-[#12544f]"
           startContent={<Plus className="h-4 w-4" />}
           onPress={() => sheet.onOpen()}
         >
@@ -586,9 +585,7 @@ function AdjustmentsSection({ type }) {
       </div>
 
       {listQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : (
         <DataTable
           columns={columns}
@@ -660,7 +657,7 @@ function AdjustmentsSection({ type }) {
           </FormField>
           <FormButton
             color="primary"
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             isLoading={createMut.isPending}
             onPress={() =>
               createMut.mutate({
@@ -748,7 +745,7 @@ function OutstandingSection({ mode = 'outstanding' }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="py-3">
             <p className="text-xs text-slate-500">Open invoices</p>
             <p className="text-xl font-semibold text-slate-900">
@@ -835,16 +832,14 @@ function ReportsSection() {
       </div>
 
       {reportQ.isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="success" />
-        </div>
+        <SectionSkeleton />
       ) : reportQ.isError ? (
         <p className="text-sm text-rose-600">{reportQ.error?.message || 'Failed to load report'}</p>
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {cards.map((c) => (
-              <Card key={c.label} className="border border-slate-200 shadow-none">
+              <Card key={c.label} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardBody className="py-3">
                   <p className="text-xs text-slate-500">{c.label}</p>
                   <p className="text-lg font-semibold text-slate-900">TZS {money(c.value)}</p>
@@ -853,7 +848,7 @@ function ReportsSection() {
             ))}
           </div>
 
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="pb-1">
               <h3 className="text-sm font-semibold text-slate-900">Collections by method</h3>
             </CardHeader>

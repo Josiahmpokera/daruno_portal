@@ -37,7 +37,7 @@ function FormMultiSelect({
       renderValue={(items) => (
         <div className="flex flex-wrap gap-1 py-0.5">
           {items.map((it) => (
-            <span key={it.key} className="rounded bg-[#0B3D2E]/[0.08] px-1.5 py-0.5 text-[11px] font-medium text-[#0B3D2E]">
+            <span key={it.key} className="rounded bg-[#12544f]/[0.08] px-1.5 py-0.5 text-[11px] font-medium text-[#12544f]">
               {it.textValue}
             </span>
           ))}

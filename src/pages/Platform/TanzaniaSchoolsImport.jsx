@@ -228,7 +228,7 @@ function TableSkeleton({ rows = 8 }) {
         ))}
       </div>
       <div className="flex items-center justify-center gap-2 border-t border-zinc-100 bg-zinc-50/80 py-3 text-[12px] text-zinc-500">
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#0B3D2E]" />
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#12544f]" />
         Loading schools…
       </div>
     </div>
@@ -652,7 +652,7 @@ export default function TanzaniaSchoolsImport() {
         {/* Thin progress bar while fetching (pending or soft refresh) */}
         {(isListPending || isListRefreshing) && (
           <div className="h-0.5 w-full overflow-hidden bg-zinc-100">
-            <div className="h-full w-1/3 animate-[tz-progress_1.1s_ease-in-out_infinite] rounded-full bg-[#0B3D2E]" />
+            <div className="h-full w-1/3 animate-[tz-progress_1.1s_ease-in-out_infinite] rounded-full bg-[#12544f]" />
           </div>
         )}
 
@@ -715,7 +715,7 @@ export default function TanzaniaSchoolsImport() {
           {isListRefreshing && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
               <div className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1.5 shadow-sm">
-                <Loader2 className="h-4 w-4 animate-spin text-[#0B3D2E]" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#12544f]" />
                 <span className="text-[12px] font-medium text-zinc-700">
                   Updating…
                 </span>
@@ -838,7 +838,7 @@ export default function TanzaniaSchoolsImport() {
           className={[
             'mt-5 rounded-xl border-2 border-dashed px-4 py-10 text-center transition-colors',
             dragging
-              ? 'border-[#0B3D2E] bg-emerald-50/60'
+              ? 'border-[#12544f] bg-emerald-50/60'
               : 'border-zinc-200 bg-zinc-50/50 hover:border-zinc-300',
           ].join(' ')}
           onDragOver={(e) => {
@@ -850,9 +850,9 @@ export default function TanzaniaSchoolsImport() {
         >
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-zinc-200">
             {parsing ? (
-              <Loader2 className="h-5 w-5 animate-spin text-[#0B3D2E]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[#12544f]" />
             ) : (
-              <FileSpreadsheet className="h-5 w-5 text-[#0B3D2E]" />
+              <FileSpreadsheet className="h-5 w-5 text-[#12544f]" />
             )}
           </div>
           <p className="mt-3 text-sm font-medium text-zinc-800">
@@ -992,7 +992,7 @@ export default function TanzaniaSchoolsImport() {
                     <div className="relative mb-4 flex h-16 w-16 items-center justify-center">
                       <div className="absolute inset-0 animate-ping rounded-full bg-emerald-200/50" />
                       <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 ring-2 ring-emerald-200">
-                        <Loader2 className="h-7 w-7 animate-spin text-[#0B3D2E]" />
+                        <Loader2 className="h-7 w-7 animate-spin text-[#12544f]" />
                       </div>
                     </div>
                   )}
@@ -1023,7 +1023,7 @@ export default function TanzaniaSchoolsImport() {
                         indicator:
                           phase === 'error'
                             ? 'bg-red-500 transition-all duration-500 ease-out'
-                            : 'bg-gradient-to-r from-[#0B3D2E] to-emerald-500 transition-all duration-500 ease-out',
+                            : 'bg-gradient-to-r from-[#12544f] to-emerald-500 transition-all duration-500 ease-out',
                       }}
                     />
                   </div>

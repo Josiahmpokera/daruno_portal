@@ -40,7 +40,7 @@ function AdmissionNumbers() {
         Cell: ({ cell, row }) => (
           <button
             type="button"
-            className="font-mono text-[12px] font-semibold text-[#0B3D2E] hover:underline"
+            className="font-mono text-[12px] font-semibold text-[#12544f] hover:underline"
             onClick={() => navigate(`/students/${row.original.id}`)}
           >
             {cell.getValue() || '—'}
@@ -54,7 +54,7 @@ function AdmissionNumbers() {
         Cell: ({ row }) => (
           <button
             type="button"
-            className="text-left text-[12px] font-medium text-zinc-900 hover:text-[#0B3D2E]"
+            className="text-left text-[12px] font-medium text-zinc-900 hover:text-[#12544f]"
             onClick={() => navigate(`/students/${row.original.id}`)}
           >
             {row.original.full_name}

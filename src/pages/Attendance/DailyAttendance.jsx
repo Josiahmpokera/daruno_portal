@@ -11,7 +11,6 @@ import {
   TableRow,
   TableCell,
   Chip,
-  Spinner,
 } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -28,6 +27,7 @@ import {
   getAttendanceRoster,
   markAttendance,
 } from '../../api/domain.js'
+import { TableSkeleton } from '../../components/Loading'
 
 const STATUSES = ['present', 'absent', 'late', 'excused']
 
@@ -120,7 +120,7 @@ function DailyAttendance() {
           description="Mark morning / afternoon sessions by class"
         />
 
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <FormField label="Class" className="min-w-[160px]">
               <FormSelect
@@ -169,7 +169,7 @@ function DailyAttendance() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         {message && <p className="text-sm text-green-700">{message}</p>}
 
-        <Card className="border border-slate-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardHeader className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-semibold">Class roster</span>
             <div className="flex flex-wrap gap-2">
@@ -194,7 +194,7 @@ function DailyAttendance() {
             {!classroomId ? (
               <p className="text-sm text-slate-500">Select a class to load students.</p>
             ) : rosterQ.isLoading ? (
-              <Spinner color="primary" />
+              <TableSkeleton columns={4} rows={8} label="Loading students" />
             ) : rosterQ.isError ? (
               <p className="text-sm text-red-600">{rosterQ.error?.message}</p>
             ) : (
@@ -218,7 +218,7 @@ function DailyAttendance() {
                               onClick={() => setMarks((m) => ({ ...m, [r.student_id]: s }))}
                               className={`rounded-full px-2 py-0.5 text-xs capitalize ${
                                 marks[r.student_id] === s
-                                  ? 'bg-[#0B3D2E] text-white'
+                                  ? 'bg-[#12544f] text-white'
                                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                               }`}
                             >

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Spinner } from '@heroui/react'
 import { Download, RefreshCw } from 'lucide-react'
 import EChart from '../../components/Charts/EChart.jsx'
 import DataTable from '../../components/Tables/DataTable.jsx'
@@ -27,6 +26,7 @@ import {
   sparkLineOption,
 } from './reportChartOptions.js'
 import { toastSuccess, toastError } from '../../components/Toast'
+import { SectionSkeleton } from '../../components/Loading'
 
 /** Compact metric tile — no chart (Subscriptions & dense KPIs). */
 function StatCard({ label, value, hint, accent }) {
@@ -166,9 +166,7 @@ function TablePanel({ title, children, count }) {
 
 function LoadingBlock() {
   return (
-    <div className="flex justify-center py-14">
-      <Spinner color="success" label="Loading report…" />
-    </div>
+    <SectionSkeleton label="Loading report" />
   )
 }
 

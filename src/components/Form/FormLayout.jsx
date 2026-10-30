@@ -10,12 +10,12 @@ import { CheckCircle2, Circle } from 'lucide-react'
 export function FormSection({ id, index, title, description, icon, optional = false, children }) {
   const Icon = icon
   return (
-    <Card id={id} className="scroll-mt-4 border border-slate-200 shadow-none">
+    <Card id={id} className="scroll-mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="grid gap-5 p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             {Icon ? (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/[0.08] text-[#0B3D2E]">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/[0.08] text-[#12544f]">
                 <Icon className="h-4 w-4" strokeWidth={1.75} />
               </span>
             ) : null}
@@ -72,7 +72,7 @@ export function ToggleRow({ checked, onChange, disabled, label, description }) {
       </span>
       <span
         className={`relative mt-0.5 inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
-          checked ? 'bg-[#0B3D2E]' : 'bg-slate-300'
+          checked ? 'bg-[#12544f]' : 'bg-slate-300'
         }`}
         aria-hidden="true"
       >
@@ -93,7 +93,7 @@ export function ToggleRow({ checked, onChange, disabled, label, description }) {
 export function ProgressChecklist({ title = 'Checklist', items, onSelect }) {
   const done = items.filter((i) => i.done && !i.hasError).length
   return (
-    <Card className="border border-slate-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-0">
         <div className="border-b border-slate-100 px-4 py-3">
           <div className="flex items-center justify-between">
@@ -104,7 +104,7 @@ export function ProgressChecklist({ title = 'Checklist', items, onSelect }) {
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-[#0B3D2E] transition-all"
+              className="h-full rounded-full bg-[#12544f] transition-all"
               style={{ width: `${(done / Math.max(items.length, 1)) * 100}%` }}
             />
           </div>

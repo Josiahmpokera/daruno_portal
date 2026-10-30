@@ -94,7 +94,7 @@ function Reports() {
             {overviewCards.map((card) => {
               const Icon = card.icon
               return (
-                <Card key={card.title} className="border border-slate-200 shadow-none">
+                <Card key={card.title} className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                   <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900">

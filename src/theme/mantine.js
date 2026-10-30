@@ -1,22 +1,22 @@
-/** Mantine v6 theme aligned with Shengena primary #0B3D2E */
+/** Mantine v6 theme aligned with the Shengena teal #12544f (shared with the ERP and HR desk) */
 
 export const shengenaMantineTheme = {
   primaryColor: 'brand',
   fontFamily:
-    'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    '"Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   defaultRadius: 'md',
   colors: {
     brand: [
-      '#e8f2ee',
-      '#c5ddd3',
-      '#9fc7b6',
-      '#78b099',
-      '#549c80',
-      '#3a8568',
-      '#266a52',
-      '#0B3D2E',
-      '#093326',
-      '#06271c',
+      '#e7f1f0',
+      '#c4dcd9',
+      '#9dc4c0',
+      '#74aca6',
+      '#4f938c',
+      '#2f7a72',
+      '#1b635c',
+      '#12544f',
+      '#0f4743',
+      '#0c3b37',
     ],
   },
   primaryShade: 7,

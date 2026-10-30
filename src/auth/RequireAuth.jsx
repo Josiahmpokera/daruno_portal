@@ -1,15 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import { Spinner } from '@heroui/react'
+import { AppShellSkeleton } from '../components/Loading'
 import { useAuth } from './AuthProvider.jsx'
 import { AUDIENCE } from './sessionStorage.js'
 
+/** While the session is checked: the app frame with placeholders, not a blank spinner page. */
 function AuthLoading() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-zinc-50">
-      <Spinner color="primary" />
-      <p className="text-sm text-zinc-500">Verifying your session…</p>
-    </div>
-  )
+  return <AppShellSkeleton label="Checking your session" />
 }
 
 /**

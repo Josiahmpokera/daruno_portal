@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Input,
   Avatar,
   Dropdown,
   DropdownTrigger,
@@ -95,7 +94,7 @@ const iconMap = {
 }
 
 /** Compact secondary panel width (px) */
-const PANEL_WIDTH = 196
+const PANEL_WIDTH = 224
 const PANEL_COLLAPSED_WIDTH = 28
 const PANEL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
@@ -181,10 +180,8 @@ function categoryMatchesPath(category, pathname, search) {
 
 /** Leaf / nested link styles — regular weight, darker text */
 function linkClass(active) {
-  return `flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-normal leading-5 transition-colors ${
-    active
-      ? 'bg-[#0B3D2E]/[0.08] text-[#072A20]'
-      : 'text-zinc-800 hover:bg-zinc-100 hover:text-zinc-950'
+  return `flex min-h-[34px] w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-[14px] font-normal leading-5 text-[var(--sh-ink)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sh-brand)]/40 ${
+    active ? 'bg-[var(--sh-selected)] font-medium' : 'hover:bg-[var(--sh-hover)]'
   }`
 }
 
@@ -207,7 +204,7 @@ function FeatureItems({ items, openKeys, toggleKey, onNavigate, keyPrefix }) {
     []
 
   return (
-    <div className="space-y-0.5 py-0.5 pb-1 pl-3">
+    <div className="space-y-px py-0.5 pb-1">
       {items.map((item, index) => {
         const itemKey = `${keyPrefix}-item-${index}`
 
@@ -231,15 +228,13 @@ function FeatureItems({ items, openKeys, toggleKey, onNavigate, keyPrefix }) {
               <button
                 type="button"
                 onClick={() => toggleKey(itemKey)}
-                className={`flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-normal leading-5 transition-colors ${
-                  groupActive
-                    ? 'text-zinc-950'
-                    : 'text-zinc-800 hover:bg-zinc-100 hover:text-zinc-950'
+                className={`flex min-h-[34px] w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-[14px] leading-5 text-[var(--sh-ink)] transition-colors hover:bg-[var(--sh-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sh-brand)]/40 ${
+                  groupActive ? 'font-medium' : 'font-normal'
                 }`}
               >
                 <GroupIcon
-                  className={`h-3.5 w-3.5 shrink-0 ${
-                    groupActive ? 'text-zinc-700' : 'text-zinc-400'
+                  className={`h-4 w-4 shrink-0 ${
+                    groupActive ? 'text-[var(--sh-ink)]' : 'text-[var(--sh-text)]'
                   }`}
                   strokeWidth={1.75}
                 />
@@ -256,7 +251,7 @@ function FeatureItems({ items, openKeys, toggleKey, onNavigate, keyPrefix }) {
                 }`}
               >
                 <div className="overflow-hidden">
-                  <div className="ml-3 space-y-0.5 border-l border-zinc-200 pl-2">
+                  <div className="ml-4 space-y-px border-l border-[var(--sh-rule)] pl-2">
                     {visibleChildren.map((child) => {
                       const active = isPathActive(
                         location.pathname,
@@ -272,8 +267,8 @@ function FeatureItems({ items, openKeys, toggleKey, onNavigate, keyPrefix }) {
                           className={linkClass(active)}
                         >
                           <ChildIcon
-                            className={`h-3.5 w-3.5 shrink-0 ${
-                              active ? 'text-[#072A20]' : 'text-zinc-400'
+                            className={`h-4 w-4 shrink-0 ${
+                              active ? 'text-[var(--sh-ink)]' : 'text-[var(--sh-text)]'
                             }`}
                             strokeWidth={1.75}
                           />
@@ -306,8 +301,8 @@ function FeatureItems({ items, openKeys, toggleKey, onNavigate, keyPrefix }) {
             className={linkClass(active)}
           >
             <ItemIcon
-              className={`h-3.5 w-3.5 shrink-0 ${
-                active ? 'text-[#072A20]' : 'text-zinc-400'
+              className={`h-4 w-4 shrink-0 ${
+                active ? 'text-[var(--sh-ink)]' : 'text-[var(--sh-text)]'
               }`}
               strokeWidth={1.75}
             />
@@ -371,7 +366,7 @@ function ModulePanel({ moduleKey, onNavigate, menus }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <nav className="flex-1 overflow-y-auto px-2 py-2">
+      <nav className="flex-1 overflow-y-auto px-2 pb-10 pt-2">
         {categories.map((category, catIndex) => {
           const catKey = `cat-${catIndex}`
 
@@ -381,14 +376,14 @@ function ModulePanel({ moduleKey, onNavigate, menus }) {
               className={catIndex > 0 ? 'mt-2' : ''}
             >
               {/* Category title — left-aligned, no icon; line ABOVE the title */}
-              <div className="px-2">
+              <div>
                 {catIndex > 0 && (
                   <div
-                    className="mb-1.5 h-px w-full bg-zinc-200"
+                    className="mb-2 h-px w-full bg-[var(--sh-rule)]"
                     role="separator"
                   />
                 )}
-                <p className="mb-1 text-[11px] font-normal uppercase tracking-[0.06em] text-zinc-500">
+                <p className="mb-1 px-2 text-[12px] font-medium text-[var(--sh-muted)]">
                   {category.title}
                 </p>
               </div>
@@ -407,19 +402,6 @@ function ModulePanel({ moduleKey, onNavigate, menus }) {
       </nav>
     </div>
   )
-}
-
-function formatRunningTime(date) {
-  return date.toLocaleString(undefined, {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
 }
 
 /**
@@ -477,13 +459,7 @@ function DashboardLayout({ children }) {
   const [panelWidth, setPanelWidth] = useState(0)
   const [contentReady, setContentReady] = useState(false)
   const [animatePanel, setAnimatePanel] = useState(false)
-  const [now, setNow] = useState(() => new Date())
   const closeTimerRef = useRef(0)
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
 
   const {
     session,
@@ -626,22 +602,25 @@ function DashboardLayout({ children }) {
 
   const showBorder = panelWidth > 0
 
+  // The logo: back to the Shengena desk when this person has one, else this portal's home
+  const goHome = () => {
+    if (deskUrl) {
+      window.location.assign(deskUrl)
+      return
+    }
+    closePanelAnimated()
+    navigate(isSuperAdmin ? '/platform' : '/dashboard')
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-50">
+    <div className="flex h-screen overflow-hidden bg-white text-[var(--sh-text)]">
       {/* ── Module rail: full height from top, logo here ── */}
-      <aside className="hidden w-[4.75rem] shrink-0 flex-col bg-[#0f172a] text-white md:flex">
-        <div className="flex h-14 shrink-0 items-center justify-center border-b border-white/10 px-2">
+      <aside className="hidden w-[81px] shrink-0 flex-col bg-[var(--sh-dock)] text-white md:flex">
+        <div className="flex h-[60px] shrink-0 items-center justify-center px-2">
           <button
             type="button"
-            onClick={() => {
-              if (deskUrl) {
-                window.location.assign(deskUrl)
-                return
-              }
-              closePanelAnimated()
-              navigate(isSuperAdmin ? '/platform' : '/dashboard')
-            }}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white p-1.5 transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            onClick={goHome}
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-white p-1.5 transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             title={deskUrl ? 'Shengena desk' : 'Shengena home'}
             aria-label={deskUrl ? 'Shengena desk' : 'Shengena home'}
           >
@@ -653,7 +632,7 @@ function DashboardLayout({ children }) {
         </div>
 
         <nav
-          className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1.5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1.5 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Main navigation"
         >
           {primaryNav.map((item) => {
@@ -666,23 +645,18 @@ function DashboardLayout({ children }) {
                 title={item.label}
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => handlePrimaryClick(item)}
-                className={`relative flex w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
+                className={`flex min-h-[58px] w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
                   isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/65 hover:bg-white/5 hover:text-white'
+                    ? 'bg-white/[0.14] text-white'
+                    : 'text-white/[0.68] hover:bg-white/[0.08] hover:text-white'
                 }`}
               >
-                {isActive && (
-                  <span
-                    className="absolute -left-1.5 top-2 bottom-2 w-[3px] rounded-r-full bg-emerald-400"
-                    aria-hidden="true"
-                  />
-                )}
-                <Icon
-                  className="h-[18px] w-[18px] shrink-0"
-                  strokeWidth={isActive ? 2.25 : 1.75}
-                />
-                <span className="w-full truncate text-center text-[10px] font-medium leading-tight">
+                <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={1.5} />
+                <span
+                  className={`w-full truncate text-center text-[11px] leading-tight ${
+                    isActive ? 'font-semibold' : 'font-normal'
+                  }`}
+                >
                   {item.label}
                 </span>
               </button>
@@ -693,7 +667,7 @@ function DashboardLayout({ children }) {
 
       {/* ── White children panel: full height from top ── */}
       <aside
-        className={`relative hidden shrink-0 overflow-hidden border-zinc-200 bg-white md:block ${
+        className={`relative hidden shrink-0 overflow-hidden border-[var(--sh-rule)] bg-white md:block ${
           showBorder ? 'border-r' : 'border-r-0'
         }`}
         style={{
@@ -715,8 +689,8 @@ function DashboardLayout({ children }) {
             }}
           >
             {/* Top bar aligned with logo / main header height */}
-            <div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 px-3">
-              <span className="truncate text-[13px] font-normal text-zinc-900">
+            <div className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--sh-rule)] pl-4 pr-3">
+              <span className="truncate text-[15px] font-semibold text-[var(--sh-ink)]">
                 {activePrimary?.label && activePrimary.key !== 'overview'
                   ? activePrimary.label
                   : 'Menu'}
@@ -724,10 +698,11 @@ function DashboardLayout({ children }) {
               <button
                 type="button"
                 onClick={collapsePanelInstant}
-                className="inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-1 text-[11px] font-normal text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800"
+                className="inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-1 text-[var(--sh-text)] transition-colors hover:bg-[var(--sh-hover)] hover:text-[var(--sh-ink)]"
                 title="Collapse menu"
+                aria-label="Collapse menu"
               >
-                <PanelLeftClose className="h-3.5 w-3.5" />
+                <PanelLeftClose className="h-4 w-4" />
               </button>
             </div>
             {panelAvailable && (
@@ -758,42 +733,35 @@ function DashboardLayout({ children }) {
 
       {/* ── Main column: header starts after sidebars ── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4">
-          <div className="hidden max-w-xl flex-1 items-center md:flex">
-            <Input
-              radius="md"
-              size="sm"
-              variant="bordered"
-              placeholder="Search classes, students, teachers..."
-              classNames={{
-                base: 'w-full',
-                inputWrapper:
-                  'bg-zinc-50 border-zinc-200 rounded-md group-data-[focus=true]:border-[#0B3D2E]',
-              }}
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[var(--sh-rule)] bg-white px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={goHome}
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sh-brand)]/40"
+            title={deskUrl ? 'Shengena desk' : 'Shengena home'}
+            aria-label={deskUrl ? 'Shengena desk' : 'Shengena home'}
+          >
+            <ShengenaLogo variant="icon" iconClassName="h-7 w-7 object-contain" />
+          </button>
+
+          <label className="hidden h-[38px] w-full max-w-[330px] items-center gap-2 rounded-md border border-[var(--sh-stroke)] bg-white pl-3 pr-2 text-[14px] text-[var(--sh-muted)] transition-colors focus-within:border-[var(--sh-brand)] hover:border-[#c7c7c7] md:flex">
+            <Search className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="sr-only">Search</span>
+            <input
+              type="search"
+              placeholder="Search classes, students, teachers…"
+              className="min-w-0 flex-1 bg-transparent text-[var(--sh-ink)] outline-none placeholder:text-[var(--sh-muted)]"
             />
-          </div>
+          </label>
 
-          <div className="ml-auto flex items-center gap-3">
-            <div
-              className="hidden items-center sm:flex"
-              title="Current date and time"
-            >
-              <time
-                dateTime={now.toISOString()}
-                className="tabular-nums text-[12px] font-medium tracking-tight text-zinc-600"
-              >
-                {formatRunningTime(now)}
-              </time>
-            </div>
-
-            <div className="hidden h-5 w-px bg-zinc-200 sm:block" aria-hidden />
+          <div className="ml-auto flex items-center gap-2">
 
             {ssoApps.length > 0 ? (
               <Dropdown placement="bottom-end" motionProps={POPOVER_MOTION}>
                 <DropdownTrigger>
                   <button
                     type="button"
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/30"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-[var(--sh-text)] transition-colors hover:bg-[var(--sh-hover)] hover:text-[var(--sh-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sh-brand)]/40"
                     aria-label="Shengena apps"
                     title="Shengena apps"
                   >
@@ -814,7 +782,7 @@ function DashboardLayout({ children }) {
                       key="current"
                       isReadOnly
                       className="cursor-default opacity-100"
-                      startContent={<School className="h-4 w-4 text-[#0B3D2E]" />}
+                      startContent={<School className="h-4 w-4 text-[#12544f]" />}
                       textValue="School management"
                     >
                       <span className="text-[13px] font-medium text-zinc-900">School management</span>
@@ -841,25 +809,25 @@ function DashboardLayout({ children }) {
               <DropdownTrigger>
                 <button
                   type="button"
-                  className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 transition-colors hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/30"
+                  className="flex cursor-pointer items-center gap-2 rounded-md py-1 pl-1 pr-2 transition-colors hover:bg-[var(--sh-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sh-brand)]/40"
                   aria-label="Open profile menu"
                 >
                   <Avatar
                     name={displayName}
                     getInitials={() => avatarLetter}
                     showFallback
-                    className="h-8 w-8 bg-[#0B3D2E] text-sm font-semibold text-white"
+                    className="h-8 w-8 bg-[#12544f] text-sm font-semibold text-white"
                     classNames={{
                       name: 'text-[13px] font-semibold leading-none',
                     }}
                   />
                   <span
-                    className="hidden max-w-[9rem] truncate text-left text-[12px] font-normal text-zinc-800 sm:block lg:max-w-[15rem]"
+                    className="hidden max-w-[9rem] truncate text-left text-[14px] font-medium text-[var(--sh-ink)] sm:block lg:max-w-[15rem]"
                     title={displayName}
                   >
                     {displayName}
                   </span>
-                  <ChevronDown className="hidden h-3.5 w-3.5 text-zinc-400 sm:block" />
+                  <ChevronDown className="hidden h-4 w-4 text-[var(--sh-text)] sm:block" aria-hidden />
                 </button>
               </DropdownTrigger>
               <DropdownMenu
@@ -948,7 +916,7 @@ function DashboardLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-zinc-50 p-3 pb-20 sm:p-4 md:pb-4">
+        <main className="flex-1 overflow-y-auto bg-white px-4 pb-20 pt-4 sm:px-6 md:pb-6">
           {children}
         </main>
       </div>
@@ -968,12 +936,12 @@ function DashboardLayout({ children }) {
               aria-current={isActive ? 'page' : undefined}
               onClick={() => handlePrimaryClick(item)}
               className={`relative flex min-w-[4.25rem] flex-1 shrink-0 cursor-pointer flex-col items-center gap-1 px-1 py-2 text-[10px] font-medium ${
-                isActive ? 'text-[#0B3D2E]' : 'text-zinc-500'
+                isActive ? 'text-[#12544f]' : 'text-zinc-500'
               }`}
             >
               {isActive && (
                 <span
-                  className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-[#0B3D2E]"
+                  className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-[#12544f]"
                   aria-hidden="true"
                 />
               )}

@@ -28,19 +28,19 @@ function Payroll() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="processing" title="Salary Processing">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Salary Processing</h3>
                 <p className="text-sm text-slate-500">Calculate gross and net pay based on attendance</p>
               </div>
-              <Button color="primary" startContent={<Calculator className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Calculator className="h-4 w-4" />} className="bg-[#12544f]">
                 Process Payroll
               </Button>
             </CardHeader>
@@ -64,7 +64,7 @@ function Payroll() {
         </Tab>
 
         <Tab key="deductions" title="Deductions & Compliance">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Tax & Compliance</h3>
@@ -90,7 +90,7 @@ function Payroll() {
         </Tab>
 
         <Tab key="payslips" title="Payslips">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Payslip Generation</h3>

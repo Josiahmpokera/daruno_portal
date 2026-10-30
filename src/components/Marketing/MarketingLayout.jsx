@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { key: 'support', label: 'Support', path: '/#support', homeHash: 'support' },
 ]
 
-const PRIMARY = '#0B3D2E'
+const PRIMARY = '#12544f'
 
 function isNavActive(item, pathname, hash) {
   if (item.path === '/features') {
@@ -126,8 +126,8 @@ export default function MarketingLayout({ children, activeKey = null }) {
                   className={[
                     'rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors',
                     active
-                      ? 'bg-[#0B3D2E] text-white shadow-sm'
-                      : 'text-[#0B3D2E]/85 hover:bg-[#0B3D2E]/10 hover:text-[#0B3D2E]',
+                      ? 'bg-[#12544f] text-white shadow-sm'
+                      : 'text-[#12544f]/85 hover:bg-[#12544f]/10 hover:text-[#12544f]',
                   ].join(' ')}
                 >
                   {item.label}
@@ -150,7 +150,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
                   size="sm"
                   variant="flat"
                   radius="full"
-                  className="font-medium text-[#0B3D2E]"
+                  className="font-medium text-[#12544f]"
                   onPress={() => navigate(isPlatform ? '/platform' : '/dashboard')}
                 >
                   Open portal
@@ -162,7 +162,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  className="bg-[#0B3D2E] px-5 font-semibold"
+                  className="bg-[#12544f] px-5 font-semibold"
                   onPress={() => logoutMutation.mutate()}
                 >
                   Sign Out
@@ -175,7 +175,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
                 <Button
                   size="sm"
                   variant="light"
-                  className="font-semibold text-[#0B3D2E]"
+                  className="font-semibold text-[#12544f]"
                   onPress={() => navigate('/login')}
                 >
                   Sign In
@@ -187,7 +187,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  className="bg-[#0B3D2E] px-5 font-semibold shadow-sm"
+                  className="bg-[#12544f] px-5 font-semibold shadow-sm"
                   onPress={() => navigate('/register-school')}
                 >
                   Register School
@@ -206,7 +206,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
                   type="button"
                   className={[
                     'w-full rounded-lg px-3 py-2.5 text-left text-base font-semibold',
-                    active ? 'bg-[#0B3D2E] text-white' : 'text-[#0B3D2E]',
+                    active ? 'bg-[#12544f] text-white' : 'text-[#12544f]',
                   ].join(' ')}
                   onClick={() => goNav(item)}
                 >
@@ -232,7 +232,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
               <NavbarMenuItem>
                 <button
                   type="button"
-                  className="w-full rounded-lg bg-[#0B3D2E] px-3 py-2.5 text-left text-base font-semibold text-white"
+                  className="w-full rounded-lg bg-[#12544f] px-3 py-2.5 text-left text-base font-semibold text-white"
                   onClick={() => {
                     setMenuOpen(false)
                     navigate('/register-school')
@@ -249,7 +249,7 @@ export default function MarketingLayout({ children, activeKey = null }) {
       <main className="w-full">{children}</main>
 
       {/* Footer — multi-column, super-admin managed */}
-      <footer className="border-t border-[#0B3D2E]/20 bg-[#0B3D2E] text-emerald-50">
+      <footer className="border-t border-[#12544f]/20 bg-[#12544f] text-emerald-50">
         <div className="mx-auto max-w-6xl px-6 py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
             <div className="lg:col-span-4">

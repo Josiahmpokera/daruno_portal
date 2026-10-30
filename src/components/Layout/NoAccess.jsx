@@ -16,8 +16,8 @@ function NoAccess({ portal = false }) {
   const body = (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
-        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#0B3D2E]/[0.08]">
-          <Lock className="h-5 w-5 text-[#0B3D2E]" strokeWidth={1.75} />
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#12544f]/[0.08]">
+          <Lock className="h-5 w-5 text-[#12544f]" strokeWidth={1.75} />
         </div>
         <h1 className="text-lg font-semibold text-slate-900">
           {portal ? 'Your portal is not ready yet' : 'You don’t have access to this page'}
@@ -30,7 +30,7 @@ function NoAccess({ portal = false }) {
         <div className="mt-6 flex justify-center gap-2">
           {portal ? (
             <Button
-              className="bg-[#0B3D2E] font-semibold text-white"
+              className="bg-[#12544f] font-semibold text-white"
               onPress={async () => {
                 await logout()
                 navigate('/login', { replace: true })
@@ -40,7 +40,7 @@ function NoAccess({ portal = false }) {
             </Button>
           ) : (
             <Button
-              className="bg-[#0B3D2E] font-semibold text-white"
+              className="bg-[#12544f] font-semibold text-white"
               onPress={() => navigate('/dashboard')}
             >
               Back to dashboard

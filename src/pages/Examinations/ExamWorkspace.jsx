@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardBody,
   Chip,
-  Spinner,
   Table,
   TableHeader,
   TableColumn,
@@ -75,6 +74,7 @@ import {
   classSelectLabel,
   formatStagesSummary,
 } from '../../config/educationStages.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const emptyForm = () => ({
   name: '',
@@ -618,7 +618,7 @@ function ExamWorkspace() {
 
   const typeValue = forcedType || form.type
   const assessmentCreateForm = (
-      <Card className="border border-zinc-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardHeader className="flex flex-col items-start gap-0.5 px-4 py-3">
           <span className="text-sm font-semibold">Schedule assessment</span>
           <span className="text-[11px] font-normal text-zinc-500">
@@ -764,12 +764,10 @@ function ExamWorkspace() {
     const showMarks = mode === 'full' || mode === 'marks'
 
     return (
-      <Card className="border border-zinc-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <CardBody className="p-2 sm:p-3">
           {assessmentsQ.isLoading ? (
-            <div className="flex justify-center py-10">
-              <Spinner color="primary" />
-            </div>
+            <SectionSkeleton />
           ) : assessments.length === 0 ? (
             <EmptyHint title={empty}>
               Use the schedule form or go to Exam scheduling.
@@ -949,9 +947,9 @@ function ExamWorkspace() {
             <button
               type="button"
               onClick={() => navigate(step.path)}
-              className="rounded-md border border-zinc-100 px-2.5 py-1.5 text-left transition-colors hover:border-[#0B3D2E]/40 hover:bg-emerald-50/50"
+              className="rounded-md border border-zinc-100 px-2.5 py-1.5 text-left transition-colors hover:border-[#12544f]/40 hover:bg-emerald-50/50"
             >
-              <div className="text-[11px] font-semibold text-[#0B3D2E]">
+              <div className="text-[11px] font-semibold text-[#12544f]">
                 {step.label}
               </div>
               <div className="text-[10px] text-zinc-400">{step.hint}</div>
@@ -979,7 +977,7 @@ function ExamWorkspace() {
                 key={s.label}
                 type="button"
                 onClick={() => navigate(s.href)}
-                className="rounded-md border border-zinc-200 bg-white px-3 py-3 text-left transition-colors hover:border-[#0B3D2E]/40"
+                className="rounded-md border border-zinc-200 bg-white px-3 py-3 text-left transition-colors hover:border-[#12544f]/40"
               >
                 <div className="flex items-center gap-2 text-zinc-400">
                   <Icon className="h-3.5 w-3.5" />
@@ -1001,9 +999,9 @@ function ExamWorkspace() {
               <Link
                 key={l.path}
                 to={l.path}
-                className="flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 text-[13px] font-medium text-zinc-800 transition-colors hover:border-[#0B3D2E]/40"
+                className="flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 text-[13px] font-medium text-zinc-800 transition-colors hover:border-[#12544f]/40"
               >
-                <Icon className="h-4 w-4 text-[#0B3D2E]" />
+                <Icon className="h-4 w-4 text-[#12544f]" />
                 {l.label}
               </Link>
             )
@@ -1016,7 +1014,7 @@ function ExamWorkspace() {
             </h3>
             <Link
               to="/examinations/scheduling"
-              className="text-[11px] font-medium text-[#0B3D2E] hover:underline"
+              className="text-[11px] font-medium text-[#12544f] hover:underline"
             >
               Manage all
             </Link>
@@ -1047,7 +1045,7 @@ function ExamWorkspace() {
     const summative = typeCatalog.filter((t) => t.group === 'summative')
     body = (
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="border border-zinc-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardHeader className="px-4 py-3 text-sm font-semibold">
             Formative assessments
           </CardHeader>
@@ -1080,7 +1078,7 @@ function ExamWorkspace() {
           </CardBody>
         </Card>
         <div className="flex flex-col gap-4">
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-4 py-3 text-sm font-semibold">
               Summative examinations
             </CardHeader>
@@ -1112,7 +1110,7 @@ function ExamWorkspace() {
               </ul>
             </CardBody>
           </Card>
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-4 py-3 text-sm font-semibold">
               NECTA-oriented grade bands
             </CardHeader>
@@ -1196,12 +1194,10 @@ function ExamWorkspace() {
             {assessment.is_locked ? ' · LOCKED (unlock to edit)' : ''}
           </p>
         ) : null}
-        <Card className="border border-zinc-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="p-2">
             {resultsQ.isLoading ? (
-              <div className="flex justify-center py-10">
-                <Spinner color="primary" />
-              </div>
+              <SectionSkeleton />
             ) : !selectedAssessment ? (
               <EmptyHint title="Select an assessment">
                 Choose an assessment above to enter or review marks.
@@ -1246,7 +1242,7 @@ function ExamWorkspace() {
                         <TableCell className="tabular-nums text-[12px]">
                           {pct != null ? `${pct}%` : '—'}
                         </TableCell>
-                        <TableCell className="font-semibold text-[#0B3D2E]">
+                        <TableCell className="font-semibold text-[#12544f]">
                           {live.grade}
                         </TableCell>
                         <TableCell className="tabular-nums text-[12px]">
@@ -1308,7 +1304,7 @@ function ExamWorkspace() {
                     size="sm"
                     value={(n / total) * 100}
                     className="mt-1"
-                    classNames={{ indicator: 'bg-[#0B3D2E]' }}
+                    classNames={{ indicator: 'bg-[#12544f]' }}
                     aria-label={`Division ${div}`}
                   />
                 </div>
@@ -1334,7 +1330,7 @@ function ExamWorkspace() {
             </Chip>
           </div>
         ) : null}
-        <Card className="border border-zinc-200 shadow-none">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
           <CardBody className="p-2">
             <Table shadow="none" aria-label="Ranking">
               <TableHeader>
@@ -1443,7 +1439,7 @@ function ExamWorkspace() {
               Pass rate uses ≥ 30% (grade D or better). Only published
               assessments are included.
             </p>
-            <Card className="border border-zinc-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardBody className="p-2">
                 <Table shadow="none" aria-label="Subject analysis">
                   <TableHeader>
@@ -1474,7 +1470,7 @@ function ExamWorkspace() {
                         <TableCell className="tabular-nums">
                           {s.pass_rate}%
                         </TableCell>
-                        <TableCell className="font-semibold text-[#0B3D2E]">
+                        <TableCell className="font-semibold text-[#12544f]">
                           {s.mean_grade}
                         </TableCell>
                         <TableCell className="text-[10px] text-zinc-500">
@@ -1493,7 +1489,7 @@ function ExamWorkspace() {
           </>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="border border-zinc-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="px-4 py-3 text-sm font-semibold">
                 Assessments by type
               </CardHeader>
@@ -1522,7 +1518,7 @@ function ExamWorkspace() {
                           <Progress
                             size="sm"
                             value={(t.count / max) * 100}
-                            classNames={{ indicator: 'bg-[#0B3D2E]' }}
+                            classNames={{ indicator: 'bg-[#12544f]' }}
                             aria-label={t.label}
                           />
                         </div>
@@ -1532,7 +1528,7 @@ function ExamWorkspace() {
                 )}
               </CardBody>
             </Card>
-            <Card className="border border-zinc-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="px-4 py-3 text-sm font-semibold">
                 Publication status
               </CardHeader>
@@ -1728,7 +1724,7 @@ function ExamWorkspace() {
 
     body = (
       <div className="grid gap-4 lg:grid-cols-12">
-        <Card className="border border-zinc-200 shadow-none lg:col-span-4">
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] lg:col-span-4">
           <CardHeader className="flex flex-col items-start gap-0.5 px-4 py-3">
             <span className="text-sm font-semibold">Generate report card</span>
             <span className="text-[11px] font-normal text-zinc-500">
@@ -1894,7 +1890,7 @@ function ExamWorkspace() {
 
         <div className="flex flex-col gap-4 lg:col-span-8">
           {reportBatch.length > 1 ? (
-            <Card className="border border-zinc-200 shadow-none">
+            <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 py-3">
                 <span className="text-sm font-semibold">
                   Class batch · {reportBatch.length} report(s)
@@ -1950,7 +1946,7 @@ function ExamWorkspace() {
             </Card>
           ) : null}
 
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="px-4 py-3 text-sm font-semibold">
               Preview
               {reportParams.report_kind ? (

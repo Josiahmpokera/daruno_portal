@@ -5,19 +5,19 @@ export default heroui({
     light: {
       colors: {
         primary: {
-          DEFAULT: '#0B3D2E',
+          DEFAULT: '#12544f',
           foreground: '#ffffff',
         },
-        focus: '#0B3D2E',
+        focus: '#12544f',
       },
     },
     dark: {
       colors: {
         primary: {
-          DEFAULT: '#0B3D2E',
+          DEFAULT: '#12544f',
           foreground: '#ffffff',
         },
-        focus: '#0B3D2E',
+        focus: '#12544f',
       },
     },
   },

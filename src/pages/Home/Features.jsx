@@ -108,7 +108,7 @@ function Features() {
     <MarketingLayout activeKey="features">
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#0B3D2E]">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#12544f]">
             Features
           </p>
           <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-zinc-900 md:text-5xl">
@@ -121,7 +121,7 @@ function Features() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
               radius="full"
-              className="bg-[#0B3D2E] px-7 font-semibold text-white"
+              className="bg-[#12544f] px-7 font-semibold text-white"
               onPress={() => navigate('/register-school')}
             >
               Start free trial
@@ -129,7 +129,7 @@ function Features() {
             <Button
               radius="full"
               variant="bordered"
-              className="border-[#0B3D2E]/30 font-semibold text-[#0B3D2E]"
+              className="border-[#12544f]/30 font-semibold text-[#12544f]"
               onPress={() => navigate('/#pricing')}
             >
               View pricing
@@ -145,7 +145,7 @@ function Features() {
       {FEATURE_GROUPS.map((group, gi) => (
         <section
           key={group.title}
-          className={gi % 2 === 1 ? 'bg-[#0B3D2E] py-16 text-emerald-50' : 'bg-white py-16'}
+          className={gi % 2 === 1 ? 'bg-[#12544f] py-16 text-emerald-50' : 'bg-white py-16'}
         >
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-8 max-w-2xl">
@@ -180,7 +180,7 @@ function Features() {
                       className={
                         gi % 2 === 1
                           ? 'mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white'
-                          : 'mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#0B3D2E]/10 text-[#0B3D2E]'
+                          : 'mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#12544f]/10 text-[#12544f]'
                       }
                     >
                       <Icon className="h-5 w-5" strokeWidth={2} />
@@ -226,7 +226,7 @@ function Features() {
           </p>
           <Button
             radius="full"
-            className="mt-6 bg-[#0B3D2E] px-8 font-semibold text-white"
+            className="mt-6 bg-[#12544f] px-8 font-semibold text-white"
             onPress={() => navigate('/register-school')}
           >
             Register school

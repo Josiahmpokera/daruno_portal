@@ -8,7 +8,6 @@ import {
   Checkbox,
   CheckboxGroup,
   Chip,
-  Spinner,
 } from '@heroui/react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -24,6 +23,7 @@ import { toastSuccess, toastError } from '../../components/Toast'
 import EducationStagesPicker from '../../components/School/EducationStagesPicker.jsx'
 import { formatStagesSummary } from '../../config/educationStages.js'
 import { getSchoolProfile, updateSchoolProfile } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const WEEKDAYS = [
   'Monday',
@@ -125,7 +125,7 @@ function sectionFromPath(pathname) {
 
 function SectionCard({ title, description, children }) {
   return (
-    <Card className="h-full border border-zinc-200 shadow-none">
+    <Card className="h-full rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardHeader className="flex flex-col items-start gap-0.5 px-4 py-3 sm:px-5">
         <span className="text-[13px] font-semibold text-zinc-900">{title}</span>
         {description ? (
@@ -807,11 +807,9 @@ function SchoolProfile() {
         ) : null}
 
         {profileQ.isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner color="primary" />
-          </div>
+          <SectionSkeleton />
         ) : profileQ.isError ? (
-          <Card className="border border-zinc-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-6 text-sm text-red-600">
               {profileQ.error?.message ||
                 'Unable to load school profile. Ensure you are logged in as a school user.'}

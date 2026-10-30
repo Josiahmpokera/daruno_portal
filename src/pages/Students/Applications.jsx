@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Chip, useDisclosure } from '@heroui/react'
 import { Check, Copy, Plus, Search, X } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -25,6 +25,7 @@ import {
   listYears,
   rejectAdmission,
 } from '../../api/domain.js'
+import { FormSkeleton } from '../../components/Loading'
 
 const statusColor = {
   pending: 'warning',
@@ -649,7 +650,7 @@ export default function Applications() {
               )}
             </div>
           ) : (
-            <Spinner />
+            <FormSkeleton fields={5} label="Loading application" />
           )}
         </SideSheet>
       </div>

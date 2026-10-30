@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardBody, CardHeader, Chip, Spinner, useDisclosure } from '@heroui/react'
+import { Card, CardBody, CardHeader, Chip, useDisclosure } from '@heroui/react'
 import { Plus, RefreshCw } from 'lucide-react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import PageHeader from '../../components/Layout/PageHeader.jsx'
@@ -31,6 +31,7 @@ import {
   listHostels,
   listStudents,
 } from '../../api/domain.js'
+import { SectionSkeleton } from '../../components/Loading'
 
 const money = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })
 const studentLabel = (s) =>
@@ -63,7 +64,7 @@ function Overview() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((c) => (
-        <Card key={c.p} isPressable className="border border-slate-200 shadow-none" onPress={() => navigate(c.p)}>
+        <Card key={c.p} isPressable className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]" onPress={() => navigate(c.p)}>
           <CardHeader className="pb-1"><h3 className="text-sm font-semibold">{c.t}</h3></CardHeader>
           <CardBody className="pt-0"><p className="text-xs text-slate-500">{c.d}</p></CardBody>
         </Card>
@@ -127,7 +128,7 @@ function HostelsSection() {
           <FormField label="Capacity"><FormInput type="number" value={form.capacity} onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} /></FormField>
           <FormField label="Notes"><FormTextarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -193,7 +194,7 @@ function RoomsSection() {
           <FormField label="Floor"><FormInput value={form.floor} onChange={(e) => setForm((f) => ({ ...f, floor: e.target.value }))} /></FormField>
           <FormField label="Capacity (beds)"><FormInput type="number" min="1" value={form.capacity} onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -273,7 +274,7 @@ function BedsSection() {
           </FormField>
           <FormField label="Label" required><FormInput value={form.label} onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))} placeholder="Bed 1" /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() => mut.mutate({ room_id: Number(form.room_id), label: form.label })}
@@ -385,7 +386,7 @@ function CheckInSection() {
           <FormField label="Fee amount"><FormInput type="number" value={form.fee_amount} onChange={(e) => setForm((f) => ({ ...f, fee_amount: e.target.value }))} /></FormField>
           <FormField label="Notes"><FormTextarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={inMut.isPending}
             onPress={() =>
@@ -465,7 +466,7 @@ function FeesSection() {
             />
           </FormField>
           <FormButton
-            className="w-full bg-[#0B3D2E]"
+            className="w-full bg-[#12544f]"
             color="primary"
             isLoading={mut.isPending}
             onPress={() =>
@@ -487,7 +488,7 @@ function FeesSection() {
 
 function OccupancySection() {
   const q = useQuery({ queryKey: ['hostel', 'occupancy'], queryFn: getHostelOccupancy })
-  if (q.isLoading) return <div className="flex justify-center py-12"><Spinner color="success" /></div>
+  if (q.isLoading) return <SectionSkeleton />
   const s = q.data?.summary || {}
   const columns = useMemo(
     () => [
@@ -508,9 +509,9 @@ function OccupancySection() {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="border border-slate-200 shadow-none"><CardBody className="py-3"><p className="text-xs text-slate-500">Total beds</p><p className="text-xl font-semibold">{s.beds ?? 0}</p></CardBody></Card>
-        <Card className="border border-slate-200 shadow-none"><CardBody className="py-3"><p className="text-xs text-slate-500">Occupied</p><p className="text-xl font-semibold text-amber-700">{s.occupied ?? 0}</p></CardBody></Card>
-        <Card className="border border-slate-200 shadow-none"><CardBody className="py-3"><p className="text-xs text-slate-500">Available</p><p className="text-xl font-semibold text-emerald-700">{s.available ?? 0}</p></CardBody></Card>
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"><CardBody className="py-3"><p className="text-xs text-slate-500">Total beds</p><p className="text-xl font-semibold">{s.beds ?? 0}</p></CardBody></Card>
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"><CardBody className="py-3"><p className="text-xs text-slate-500">Occupied</p><p className="text-xl font-semibold text-amber-700">{s.occupied ?? 0}</p></CardBody></Card>
+        <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]"><CardBody className="py-3"><p className="text-xs text-slate-500">Available</p><p className="text-xl font-semibold text-emerald-700">{s.available ?? 0}</p></CardBody></Card>
       </div>
       <DataTable columns={columns} data={q.data?.hostels || []} emptyMessage="No occupancy data." />
     </div>
@@ -522,9 +523,9 @@ function Shell({ children, onAdd, addLabel, loading, onRefresh }) {
     <div className="space-y-4">
       <div className="flex justify-end gap-2">
         {onRefresh && <FormButton appearance="bordered" startContent={<RefreshCw className="h-4 w-4" />} onPress={onRefresh}>Refresh</FormButton>}
-        {onAdd && <FormButton className="bg-[#0B3D2E]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
+        {onAdd && <FormButton className="bg-[#12544f]" color="primary" startContent={<Plus className="h-4 w-4" />} onPress={onAdd}>{addLabel}</FormButton>}
       </div>
-      {loading ? <div className="flex justify-center py-12"><Spinner color="success" /></div> : children}
+      {loading ? <SectionSkeleton /> : children}
     </div>
   )
 }

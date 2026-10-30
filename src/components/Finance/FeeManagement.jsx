@@ -40,19 +40,19 @@ function FeeManagement() {
         variant="underlined"
         classNames={{
           tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-[#0B3D2E]',
+          cursor: 'w-full bg-[#12544f]',
           tab: 'max-w-fit px-0 h-12',
-          tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+          tabContent: 'group-data-[selected=true]:text-[#12544f]',
         }}
       >
         <Tab key="structures" title="Fee Structures">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Fee Structures</h3>
                 <p className="text-sm text-slate-500">Define fees for different grades and categories</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]" onPress={onOpen}>
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]" onPress={onOpen}>
                 Add Fee Structure
               </Button>
             </CardHeader>
@@ -75,7 +75,7 @@ function FeeManagement() {
         </Tab>
 
         <Tab key="invoices" title="Invoices">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Invoices</h3>
@@ -85,7 +85,7 @@ function FeeManagement() {
                 <Button variant="bordered" startContent={<Filter className="h-4 w-4" />}>
                   Filter
                 </Button>
-                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+                <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                   Generate Invoices
                 </Button>
               </div>
@@ -110,7 +110,7 @@ function FeeManagement() {
         </Tab>
 
         <Tab key="payments" title="Payments">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Payment History</h3>
@@ -139,13 +139,13 @@ function FeeManagement() {
         </Tab>
 
         <Tab key="scholarships" title="Scholarships & Discounts">
-          <Card className="mt-4 border border-slate-200 shadow-none">
+          <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Scholarships & Discounts</h3>
                 <p className="text-sm text-slate-500">Manage financial aid and fee waivers</p>
               </div>
-              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Plus className="h-4 w-4" />} className="bg-[#12544f]">
                 Add Scholarship
               </Button>
             </CardHeader>
@@ -167,13 +167,13 @@ function FeeManagement() {
         </Tab>
 
         <Tab key="reminders" title="Reminders">
-           <Card className="mt-4 border border-slate-200 shadow-none">
+           <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardHeader className="flex justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Debt Collection & Reminders</h3>
                 <p className="text-sm text-slate-500">Automate reminders for overdue fees</p>
               </div>
-              <Button color="primary" startContent={<Mail className="h-4 w-4" />} className="bg-[#0B3D2E]">
+              <Button color="primary" startContent={<Mail className="h-4 w-4" />} className="bg-[#12544f]">
                 Send Reminders
               </Button>
             </CardHeader>
@@ -241,7 +241,7 @@ function FeeManagement() {
                 <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
+                <Button color="primary" className="bg-[#12544f]" onPress={onClose}>
                   Save Structure
                 </Button>
               </ModalFooter>

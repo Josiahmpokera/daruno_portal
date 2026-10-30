@@ -1,7 +1,7 @@
 /** Small line-chart options for Super Admin report cards */
 
 export const BRAND = {
-  primary: '#0B3D2E',
+  primary: '#12544f',
   accent: '#2d8a68',
   amber: '#d97706',
   sky: '#0ea5e9',

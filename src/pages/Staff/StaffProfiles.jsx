@@ -105,7 +105,7 @@ function Avatar({ name, size = 'md' }) {
         : 'h-10 w-10 text-sm'
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full bg-[#0B3D2E] font-semibold text-white ${cls}`}
+      className={`flex shrink-0 items-center justify-center rounded-full bg-[#12544f] font-semibold text-white ${cls}`}
       aria-hidden="true"
     >
       {initials(name)}
@@ -116,7 +116,7 @@ function Avatar({ name, size = 'md' }) {
 function SectionCard({ title, icon, children, action = null }) {
   const Icon = icon
   return (
-    <Card className="h-full border border-slate-200 shadow-none">
+    <Card className="h-full rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-0">
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ function EmptyState({ icon, title, hint, actionLabel, onAction }) {
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-[#0B3D2E]/40 hover:text-[#0B3D2E]"
+          className="mt-4 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-[#12544f]/40 hover:text-[#12544f]"
         >
           {actionLabel}
         </button>
@@ -254,7 +254,7 @@ function StaffList({ selectedId, onSelect, className = '' }) {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, code, email…"
             aria-label="Search staff"
-            className="h-9 w-full rounded-md border border-slate-200 bg-white pl-8 pr-3 text-[13px] text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B3D2E] focus:ring-2 focus:ring-[#0B3D2E]/10"
+            className="h-9 w-full rounded-md border border-slate-200 bg-white pl-8 pr-3 text-[13px] text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#12544f] focus:ring-2 focus:ring-[#12544f]/10"
           />
         </div>
         <p className="mt-2 px-0.5 text-[11px] text-slate-500">
@@ -301,8 +301,8 @@ function StaffList({ selectedId, onSelect, className = '' }) {
                     role="option"
                     aria-selected={active}
                     onClick={() => onSelect(String(s.id))}
-                    className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/30 ${
-                      active ? 'bg-[#0B3D2E]/[0.07]' : 'hover:bg-slate-50'
+                    className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#12544f]/30 ${
+                      active ? 'bg-[#12544f]/[0.07]' : 'hover:bg-slate-50'
                     }`}
                   >
                     <div className="relative">
@@ -317,7 +317,7 @@ function StaffList({ selectedId, onSelect, className = '' }) {
                     <div className="min-w-0 flex-1">
                       <p
                         className={`truncate text-[13px] font-medium ${
-                          active ? 'text-[#0B3D2E]' : 'text-slate-900'
+                          active ? 'text-[#12544f]' : 'text-slate-900'
                         }`}
                       >
                         {s.full_name}
@@ -366,7 +366,7 @@ function ProfileHeader({ s, onBack }) {
   ]
 
   return (
-    <Card className="border border-slate-200 shadow-none">
+    <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
       <CardBody className="p-0">
         <div className="flex flex-col gap-4 p-4 @xl:flex-row @xl:items-center @xl:justify-between">
           <div className="flex min-w-0 items-center gap-3.5">
@@ -400,7 +400,7 @@ function ProfileHeader({ s, onBack }) {
             <button
               type="button"
               onClick={() => navigate('/staff/contracts')}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 px-3 text-xs font-medium text-slate-700 transition-colors hover:border-[#0B3D2E]/40 hover:text-[#0B3D2E]"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 px-3 text-xs font-medium text-slate-700 transition-colors hover:border-[#12544f]/40 hover:text-[#12544f]"
             >
               <FileSignature className="h-3.5 w-3.5" />
               Contracts
@@ -408,7 +408,7 @@ function ProfileHeader({ s, onBack }) {
             <button
               type="button"
               onClick={() => navigate('/staff/documents')}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[#0B3D2E] px-3 text-xs font-medium text-white transition-colors hover:bg-[#093326]"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[#12544f] px-3 text-xs font-medium text-white transition-colors hover:bg-[#0f4743]"
             >
               <FileText className="h-3.5 w-3.5" />
               Documents
@@ -468,7 +468,7 @@ function OverviewTab({ s }) {
             [
               'Email',
               s.email ? (
-                <a href={`mailto:${s.email}`} className="text-[#0B3D2E] hover:underline">
+                <a href={`mailto:${s.email}`} className="text-[#12544f] hover:underline">
                   {s.email}
                 </a>
               ) : null,
@@ -476,7 +476,7 @@ function OverviewTab({ s }) {
             [
               'Phone',
               s.phone ? (
-                <a href={`tel:${s.phone}`} className="tabular-nums text-[#0B3D2E] hover:underline">
+                <a href={`tel:${s.phone}`} className="tabular-nums text-[#12544f] hover:underline">
                   {s.phone}
                 </a>
               ) : null,
@@ -654,7 +654,7 @@ function DocumentsTab({ documents }) {
                 href={d.external_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#0B3D2E] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#12544f] hover:underline"
               >
                 Open <ExternalLink className="h-3 w-3" />
               </a>
@@ -740,7 +740,7 @@ function ProfileDetail({ staffId, onBack }) {
 
   if (detailQ.isError || !s) {
     return (
-      <Card className="border border-slate-200 shadow-none">
+      <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
         <EmptyState
           icon={AlertTriangle}
           title="Couldn’t load this profile"
@@ -779,7 +779,7 @@ function ProfileDetail({ staffId, onBack }) {
                 onClick={() => setTab(t.key)}
                 className={`inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-[13px] font-medium transition-colors ${
                   active
-                    ? 'border-[#0B3D2E] text-[#0B3D2E]'
+                    ? 'border-[#12544f] text-[#12544f]'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -787,7 +787,7 @@ function ProfileDetail({ staffId, onBack }) {
                 {t.countKey ? (
                   <span
                     className={`rounded-full px-1.5 py-px text-[10px] tabular-nums ${
-                      active ? 'bg-[#0B3D2E]/10 text-[#0B3D2E]' : 'bg-slate-100 text-slate-500'
+                      active ? 'bg-[#12544f]/10 text-[#12544f]' : 'bg-slate-100 text-slate-500'
                     }`}
                   >
                     {counts[t.countKey]}
@@ -812,7 +812,7 @@ function ProfileDetail({ staffId, onBack }) {
         {tab === 'overview' ? (
           <OverviewTab s={s} />
         ) : (
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
             <CardBody className="p-0">
               {tab === 'contracts' ? <ContractsTab contracts={s.contracts || []} /> : null}
               {tab === 'documents' ? <DocumentsTab documents={s.documents || []} /> : null}

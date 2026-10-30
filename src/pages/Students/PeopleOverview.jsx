@@ -25,12 +25,13 @@ import {
   listStudents,
   studentStatusSummary,
 } from '../../api/domain.js'
+import { ValueSkeleton } from '../../components/Loading'
 
 function StatCard({ label, value, hint, icon: Icon, tone, onPress }) {
   return (
     <Card
       isPressable={Boolean(onPress)}
-      className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/30"
+      className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/30"
       onPress={onPress}
     >
       <CardBody className="flex flex-row items-center gap-2.5 p-2.5">
@@ -125,7 +126,7 @@ function PeopleOverview() {
   const stats = [
     {
       label: 'Students',
-      value: loading ? '…' : String(totalStudents),
+      value: loading ? <ValueSkeleton /> : String(totalStudents),
       hint: `${activeStudents} active`,
       icon: Users,
       tone: 'bg-emerald-50 text-emerald-700',
@@ -133,7 +134,7 @@ function PeopleOverview() {
     },
     {
       label: 'Active',
-      value: loading ? '…' : String(activeStudents),
+      value: loading ? <ValueSkeleton /> : String(activeStudents),
       hint: 'Currently enrolled',
       icon: School,
       tone: 'bg-sky-50 text-sky-700',
@@ -141,7 +142,7 @@ function PeopleOverview() {
     },
     {
       label: 'Parents',
-      value: guardiansQ.isLoading ? '…' : String(parentsCount),
+      value: guardiansQ.isLoading ? <ValueSkeleton /> : String(parentsCount),
       hint: 'Guardians on file',
       icon: UsersRound,
       tone: 'bg-violet-50 text-violet-700',
@@ -149,7 +150,7 @@ function PeopleOverview() {
     },
     {
       label: 'Applications',
-      value: admissionsQ.isLoading ? '…' : String(pendingApps),
+      value: admissionsQ.isLoading ? <ValueSkeleton /> : String(pendingApps),
       hint: 'Pending join requests',
       icon: ClipboardList,
       tone: 'bg-amber-50 text-amber-800',
@@ -157,7 +158,7 @@ function PeopleOverview() {
     },
     {
       label: 'Staff',
-      value: staffQ.isLoading ? '…' : String(staffCount),
+      value: staffQ.isLoading ? <ValueSkeleton /> : String(staffCount),
       hint: `${alumniCount} alumni on record`,
       icon: UserRound,
       tone: 'bg-rose-50 text-rose-700',
@@ -304,11 +305,11 @@ function PeopleOverview() {
                   <Card
                     key={c.p}
                     isPressable
-                    className="border border-slate-200 shadow-none transition-colors hover:border-[#0B3D2E]/40"
+                    className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)] transition-colors hover:border-[#12544f]/40"
                     onPress={() => navigate(c.p)}
                   >
                     <CardBody className="flex flex-row items-start gap-3 p-3.5">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B3D2E]/8 text-[#0B3D2E]">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12544f]/8 text-[#12544f]">
                         <Icon className="h-4 w-4" strokeWidth={2} />
                       </div>
                       <div className="min-w-0">

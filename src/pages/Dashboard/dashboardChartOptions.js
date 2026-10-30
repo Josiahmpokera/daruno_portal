@@ -1,6 +1,6 @@
 /** Brand palette */
 export const BRAND = {
-  primary: '#0B3D2E',
+  primary: '#12544f',
   primarySoft: '#1a5c45',
   accent: '#2d8a68',
   muted: '#94a3b8',

@@ -164,7 +164,7 @@ export default function Announcements() {
             <button type="button" onClick={() => setDetailId(a.id)} className="block w-full min-w-0 max-w-[20rem] text-left" title={a.title}>
               <span className="flex min-w-0 items-center gap-1.5">
                 {a.is_pinned ? <Pin className="h-3 w-3 shrink-0 text-zinc-400" /> : null}
-                <span className="truncate font-medium text-zinc-900 hover:text-[#0B3D2E] hover:underline">{a.title}</span>
+                <span className="truncate font-medium text-zinc-900 hover:text-[#12544f] hover:underline">{a.title}</span>
                 <PriorityPill priority={a.priority} />
               </span>
               <span className="block truncate text-[11px] text-zinc-500">{a.body}</span>

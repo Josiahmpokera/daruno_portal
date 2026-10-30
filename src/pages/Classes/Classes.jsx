@@ -165,7 +165,7 @@ function Classes() {
                 radius="md"
                 color="primary"
                 startContent={<Plus className="h-4 w-4" />}
-                className="bg-[#0B3D2E]"
+                className="bg-[#12544f]"
                 onPress={() => handleOpenModal('create')}
               >
                 Create class
@@ -181,13 +181,13 @@ function Classes() {
           variant="underlined"
           classNames={{
             tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-            cursor: 'w-full bg-[#0B3D2E]',
+            cursor: 'w-full bg-[#12544f]',
             tab: 'max-w-fit px-0 h-12',
-            tabContent: 'group-data-[selected=true]:text-[#0B3D2E]',
+            tabContent: 'group-data-[selected=true]:text-[#12544f]',
           }}
         >
           <Tab key="directory" title="Class Directory">
-            <Card className="mt-4 border border-slate-200 shadow-none">
+            <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
               <CardHeader className="flex justify-between gap-3 p-4">
                 <Input
                   classNames={{
@@ -274,7 +274,7 @@ function Classes() {
 
           <Tab key="enrollments" title="Enrollments & Transfers">
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border border-slate-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader>
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
@@ -296,7 +296,7 @@ function Classes() {
                 </CardBody>
               </Card>
 
-              <Card className="border border-slate-200 shadow-none">
+              <Card className="rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader>
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
@@ -321,7 +321,7 @@ function Classes() {
           </Tab>
 
           <Tab key="promotions" title="Promotions">
-             <Card className="mt-4 border border-slate-200 shadow-none">
+             <Card className="mt-4 rounded-lg border-0 shadow-[0_0_2px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.14)]">
                 <CardHeader>
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-100 rounded-lg text-green-600">
@@ -336,7 +336,7 @@ function Classes() {
                 <CardBody>
                   <div className="text-center py-8 text-slate-500">
                     <p>Select an academic year to begin promotion processing.</p>
-                    <Button color="primary" className="mt-4 bg-[#0B3D2E]">
+                    <Button color="primary" className="mt-4 bg-[#12544f]">
                       Start Promotion Wizard
                     </Button>
                   </div>
@@ -399,7 +399,7 @@ function Classes() {
                            <SelectItem key="t1">Mrs. Sarah Jones</SelectItem>
                            <SelectItem key="t2">Mr. David Smith</SelectItem>
                          </Select>
-                         <Button isIconOnly color="primary" className="bg-[#0B3D2E]" size="sm">
+                         <Button isIconOnly color="primary" className="bg-[#12544f]" size="sm">
                            <Plus className="h-4 w-4" />
                          </Button>
                       </div>
@@ -467,7 +467,7 @@ function Classes() {
                   <Button color="primary" variant="light" onPress={onClose}>
                     Cancel
                   </Button>
-                  <Button color="primary" className="bg-[#0B3D2E]" onPress={onClose}>
+                  <Button color="primary" className="bg-[#12544f]" onPress={onClose}>
                     {modalType === 'create' && 'Create Class'}
                     {modalType === 'enroll' && 'Confirm Enrollment'}
                     {modalType === 'transfer' && 'Process Transfer'}
