@@ -152,10 +152,11 @@ function Login() {
     fetchSsoConfig().then(({ enabled }) => {
       if (!active) return
       setSsoEnabled(enabled)
-      // /login?sso=1 (from the Shengena apps menu or the demo email) signs in with
-      // Shengena straight away, unless we are just back from it with an error.
-      const autoStart = new URLSearchParams(window.location.search).get('sso') === '1'
-      if (enabled && autoStart && !ssoReturn.code && !ssoReturn.error) {
+      // One sign-in for every Shengena system: with Shengena sign-in on, this page hands
+      // over to it straight away, unless we are just back from it (a code or an error).
+      // /login?local=1 keeps the school's own form, for accounts outside Shengena.
+      const local = new URLSearchParams(window.location.search).get('local') === '1'
+      if (enabled && !local && !ssoReturn.code && !ssoReturn.error) {
         window.location.assign(ssoStartUrl())
       }
     })
