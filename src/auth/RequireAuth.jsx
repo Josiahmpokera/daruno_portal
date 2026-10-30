@@ -82,16 +82,24 @@ export function RequireSchool({ children }) {
 }
 
 /**
- * Guest-only pages (login / register). Authenticated users bounce home.
+ * Guest-only pages (login / register). Authenticated users bounce home, except while signing
+ * in with Shengena (/login?sso=1 to start, #sso_code or #sso_error on return): a browser still
+ * signed in as somebody else must not keep that account, the identity service decides.
  */
 export function RedirectIfAuthenticated({ children }) {
   const { isAuthenticated, isHydrating, isPlatform, status } = useAuth()
+  const location = useLocation()
+  const back = new URLSearchParams(location.hash.slice(1))
+  const ssoHandoff =
+    new URLSearchParams(location.search).get('sso') === '1' ||
+    back.has('sso_code') ||
+    back.has('sso_error')
 
   if (isHydrating || status === 'hydrating') {
     return <AuthLoading />
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && !ssoHandoff) {
     return (
       <Navigate
         to={isPlatform ? '/platform' : '/dashboard'}
