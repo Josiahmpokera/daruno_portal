@@ -11,8 +11,11 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useAuth } from '../../auth'
+import { getSsoApps } from '../../api/auth.js'
 import {
   LayoutDashboard,
+  LayoutGrid,
+  ExternalLink,
   Users,
   Banknote,
   GraduationCap,
@@ -520,6 +523,9 @@ function DashboardLayout({ children }) {
     return filterSchoolNav(schoolPrimaryNav, schoolModuleMenus, canPath)
   }, [isSuperAdmin, canPath])
 
+  // Other Shengena systems this person may open (from Sign in with Shengena).
+  const [ssoApps] = useState(getSsoApps)
+
   const logoutMutation = useMutation({
     mutationFn: () => authLogout(),
     onSettled: () => {
@@ -771,6 +777,55 @@ function DashboardLayout({ children }) {
             </div>
 
             <div className="hidden h-5 w-px bg-zinc-200 sm:block" aria-hidden />
+
+            {ssoApps.length > 0 ? (
+              <Dropdown placement="bottom-end" motionProps={POPOVER_MOTION}>
+                <DropdownTrigger>
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D2E]/30"
+                    aria-label="Shengena apps"
+                    title="Shengena apps"
+                  >
+                    <LayoutGrid className="h-[18px] w-[18px]" />
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Shengena apps"
+                  variant="flat"
+                  className="min-w-[220px]"
+                  onAction={(key) => {
+                    const app = ssoApps.find((a) => a.key === key)
+                    if (app) window.open(app.url, '_blank', 'noopener')
+                  }}
+                >
+                  <DropdownSection title="Shengena apps" showDivider>
+                    <DropdownItem
+                      key="current"
+                      isReadOnly
+                      className="cursor-default opacity-100"
+                      startContent={<School className="h-4 w-4 text-[#0B3D2E]" />}
+                      textValue="School management"
+                    >
+                      <span className="text-[13px] font-medium text-zinc-900">School management</span>
+                      <span className="ml-2 text-[11px] text-zinc-400">You are here</span>
+                    </DropdownItem>
+                  </DropdownSection>
+                  <DropdownSection>
+                    {ssoApps.map((app) => (
+                      <DropdownItem
+                        key={app.key}
+                        textValue={app.name}
+                        startContent={<LayoutGrid className="h-4 w-4 text-zinc-500" />}
+                        endContent={<ExternalLink className="h-3.5 w-3.5 text-zinc-400" />}
+                      >
+                        {app.name}
+                      </DropdownItem>
+                    ))}
+                  </DropdownSection>
+                </DropdownMenu>
+              </Dropdown>
+            ) : null}
 
             <Dropdown placement="bottom-end" motionProps={POPOVER_MOTION}>
               <DropdownTrigger>

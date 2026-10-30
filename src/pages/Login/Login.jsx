@@ -149,11 +149,20 @@ function Login() {
 
   useEffect(() => {
     let active = true
-    fetchSsoConfig().then(({ enabled }) => active && setSsoEnabled(enabled))
+    fetchSsoConfig().then(({ enabled }) => {
+      if (!active) return
+      setSsoEnabled(enabled)
+      // /login?sso=1 (from the Shengena apps menu or the demo email) signs in with
+      // Shengena straight away, unless we are just back from it with an error.
+      const autoStart = new URLSearchParams(window.location.search).get('sso') === '1'
+      if (enabled && autoStart && !ssoReturn.code && !ssoReturn.error) {
+        window.location.assign(ssoStartUrl())
+      }
+    })
     return () => {
       active = false
     }
-  }, [])
+  }, [ssoReturn])
 
   // Back from Sign in with Shengena: the API put a one-time code (or an error) in the
   // fragment. Drop it from the address bar, then finish signing in with the code.

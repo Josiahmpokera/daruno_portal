@@ -174,6 +174,7 @@ export const login = async (payload) => {
 // ---- Sign in with Shengena (single sign-on) ----
 
 const SSO_LOGOUT_KEY = 'shengena.sso_logout_url'
+const SSO_APPS_KEY = 'shengena.sso_apps'
 
 /** Whether the API offers Sign in with Shengena. */
 export const fetchSsoConfig = async () => {
@@ -197,17 +198,32 @@ export const loginWithSso = async (code) => {
   // Remember where to end the Shengena session on logout (only for SSO sessions).
   try {
     if (data?.sso?.logout_url) localStorage.setItem(SSO_LOGOUT_KEY, data.sso.logout_url)
+    // The other Shengena systems this person may open (for the header's apps menu).
+    localStorage.setItem(SSO_APPS_KEY, JSON.stringify(Array.isArray(data?.sso?.apps) ? data.sso.apps : []))
   } catch {
     // Storage blocked: logout still ends the portal session
   }
   return data
 }
 
-/** Read and forget the Shengena logout URL saved at SSO sign-in. */
+/** The other Shengena systems saved at SSO sign-in: [{ key, name, url }]. */
+export const getSsoApps = () => {
+  try {
+    const apps = JSON.parse(localStorage.getItem(SSO_APPS_KEY) || '[]')
+    return Array.isArray(apps)
+      ? apps.filter((a) => typeof a?.name === 'string' && /^https:\/\//.test(a?.url || ''))
+      : []
+  } catch {
+    return []
+  }
+}
+
+/** Read and forget the Shengena logout URL (and apps) saved at SSO sign-in. */
 export const takeSsoLogoutUrl = () => {
   try {
     const url = localStorage.getItem(SSO_LOGOUT_KEY)
     localStorage.removeItem(SSO_LOGOUT_KEY)
+    localStorage.removeItem(SSO_APPS_KEY)
     return url
   } catch {
     return null
