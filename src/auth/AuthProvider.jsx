@@ -14,9 +14,11 @@ import {
   getStoredAuth,
   hydrateSessionFromServer,
   login as apiLogin,
+  loginWithSso as apiLoginWithSso,
   logout as apiLogout,
   registerSchool as apiRegisterSchool,
   saveAuth,
+  takeSsoLogoutUrl,
 } from '../api/auth.js'
 import {
   AUDIENCE,
@@ -119,7 +121,10 @@ export function AuthProvider({ children }) {
       // Always leave the previous identity completely
       wipeEverything()
 
-      const data = await apiLogin(credentials)
+      // { ssoCode } comes back from Sign in with Shengena; otherwise email + password
+      const data = credentials?.ssoCode
+        ? await apiLoginWithSso(credentials.ssoCode)
+        : await apiLogin(credentials)
       const saved = saveAuth(data)
       if (!saved?.access_token) {
         throw new Error('Login succeeded but no access token was returned')
@@ -172,11 +177,15 @@ export function AuthProvider({ children }) {
   )
 
   const logout = useCallback(async () => {
+    const ssoLogoutUrl = takeSsoLogoutUrl()
     try {
       await apiLogout()
     } finally {
       wipeEverything()
     }
+    // Signed in with Shengena: end that session too, so the next person on this
+    // device has to sign in again.
+    if (ssoLogoutUrl) window.location.assign(ssoLogoutUrl)
   }, [wipeEverything])
 
   const refreshIdentity = useCallback(async () => {

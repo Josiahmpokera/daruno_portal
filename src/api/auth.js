@@ -171,6 +171,49 @@ export const login = async (payload) => {
   return data
 }
 
+// ---- Sign in with Shengena (single sign-on) ----
+
+const SSO_LOGOUT_KEY = 'shengena.sso_logout_url'
+
+/** Whether the API offers Sign in with Shengena. */
+export const fetchSsoConfig = async () => {
+  try {
+    const data = await request('/api/v1/auth/oidc/config', { method: 'GET' })
+    return { enabled: data?.enabled === true }
+  } catch {
+    return { enabled: false }
+  }
+}
+
+/** Full-page URL that starts Sign in with Shengena. */
+export const ssoStartUrl = () => buildUrl('/api/v1/auth/oidc/redirect')
+
+/** Swap the one-time code from the SSO callback for a portal session. */
+export const loginWithSso = async (code) => {
+  const data = await request('/api/v1/auth/oidc/exchange', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  })
+  // Remember where to end the Shengena session on logout (only for SSO sessions).
+  try {
+    if (data?.sso?.logout_url) localStorage.setItem(SSO_LOGOUT_KEY, data.sso.logout_url)
+  } catch {
+    // Storage blocked: logout still ends the portal session
+  }
+  return data
+}
+
+/** Read and forget the Shengena logout URL saved at SSO sign-in. */
+export const takeSsoLogoutUrl = () => {
+  try {
+    const url = localStorage.getItem(SSO_LOGOUT_KEY)
+    localStorage.removeItem(SSO_LOGOUT_KEY)
+    return url
+  } catch {
+    return null
+  }
+}
+
 /**
  * Server source of truth for the current identity.
  * Pass token explicitly during hydrate so we never race with storage.

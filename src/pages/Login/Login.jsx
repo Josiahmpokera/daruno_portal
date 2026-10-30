@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Spinner } from '@heroui/react'
@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
+  KeyRound,
   GraduationCap,
   Lock,
   Mail,
@@ -16,6 +17,7 @@ import {
 import ShengenaLogo from '../../components/Brand/ShengenaLogo.jsx'
 import { useAuth } from '../../auth'
 import { toastSuccess } from '../../components/Toast'
+import { fetchSsoConfig, ssoStartUrl } from '../../api/auth.js'
 
 const BLOCKED_SCHOOL_STATUSES = ['suspended', 'rejected']
 
@@ -84,6 +86,14 @@ function Field({ id, label, icon, trailing, ...inputProps }) {
   )
 }
 
+const SSO_ERRORS = {
+  expired: 'Sign-in took too long. Please try again.',
+  cancelled: 'Sign-in with Shengena was cancelled.',
+  no_account:
+    'Your Shengena account is not linked to a portal account yet. Ask your school administrator to add you.',
+  failed: 'We could not complete sign-in with Shengena. Please try again.',
+}
+
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -94,7 +104,13 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [capsLock, setCapsLock] = useState(false)
   const [showResetHelp, setShowResetHelp] = useState(false)
-  const [blockedMessage, setBlockedMessage] = useState('')
+  const [ssoReturn] = useState(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1))
+    return { code: params.get('sso_code'), error: params.get('sso_error') }
+  })
+  const [blockedMessage, setBlockedMessage] = useState(() =>
+    ssoReturn.error ? SSO_ERRORS[ssoReturn.error] || SSO_ERRORS.failed : '',
+  )
 
   const loginMutation = useMutation({
     mutationFn: (credentials) => login(credentials),
@@ -127,6 +143,26 @@ function Login() {
       navigate(fromOk ? from : isPlatform ? '/platform' : '/dashboard', { replace: true })
     },
   })
+
+  const [ssoEnabled, setSsoEnabled] = useState(false)
+  const handledSsoReturn = useRef(false)
+
+  useEffect(() => {
+    let active = true
+    fetchSsoConfig().then(({ enabled }) => active && setSsoEnabled(enabled))
+    return () => {
+      active = false
+    }
+  }, [])
+
+  // Back from Sign in with Shengena: the API put a one-time code (or an error) in the
+  // fragment. Drop it from the address bar, then finish signing in with the code.
+  useEffect(() => {
+    if (handledSsoReturn.current || !(ssoReturn.code || ssoReturn.error)) return
+    handledSsoReturn.current = true
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    if (ssoReturn.code) loginMutation.mutate({ ssoCode: ssoReturn.code })
+  }, [ssoReturn, loginMutation])
 
   const pending = loginMutation.isPending
   const errorMessage =
@@ -313,6 +349,25 @@ function Login() {
               )}
             </button>
           </form>
+
+          {ssoEnabled ? (
+            <>
+              <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-wider text-slate-400">
+                <span className="h-px flex-1 bg-slate-200" />
+                or
+                <span className="h-px flex-1 bg-slate-200" />
+              </div>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => window.location.assign(ssoStartUrl())}
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-[#0B3D2E] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B3D2E]/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <KeyRound className="h-4 w-4" strokeWidth={2} />
+                Sign in with Shengena
+              </button>
+            </>
+          ) : null}
 
           <p className="mt-5 border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
             New to Shengena?{' '}
